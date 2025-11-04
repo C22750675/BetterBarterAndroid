@@ -5,8 +5,11 @@ plugins {
 
 android {
     namespace = "com.hugogarry.betterbarter"
-    compileSdk {
-        version = release(36)
+    compileSdk = 36
+
+    // ADD THIS BLOCK to enable the BuildConfig feature
+    buildFeatures {
+        buildConfig = true
     }
 
     defaultConfig {
@@ -20,12 +23,22 @@ android {
     }
 
     buildTypes {
+        // This is the configuration for your development builds
+        getByName("debug") {
+            // Generates: public static final String BASE_URL = "http://localhost:3000/";
+            buildConfigField("String", "BASE_URL", "\"http://localhost:3000/\"")
+        }
+
+        // This is the configuration for your production/release builds
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Generates: public static final String BASE_URL = "http://localhost:3000/";
+            // TODO: REPLACE with actual production URL
+            buildConfigField("String", "BASE_URL", "\"http://localhost:3000/\"")
         }
     }
     compileOptions {
@@ -43,6 +56,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.retrofit)
+    implementation(libs.converter.moshi)
+    implementation(libs.moshi.kotlin)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
