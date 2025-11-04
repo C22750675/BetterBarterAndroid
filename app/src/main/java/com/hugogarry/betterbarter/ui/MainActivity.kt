@@ -1,21 +1,33 @@
-package com.hugogarry.betterbarter.ui
+package com.hugogarry.betterbarter
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.hugogarry.betterbarter.R
+import androidx.navigation.fragment.NavHostFragment
+import com.hugogarry.betterbarter.util.SessionManager
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+
+        // The NavHostFragment is already set up via XML.
+        // Now, we add the logic to decide where to go on startup.
+
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHostFragment.navController
+
+        // Check if the user is already logged in
+        if (SessionManager.getToken().isNullOrBlank()) {
+            // User is not logged in, the graph will start at welcomeFragment (default)
+            // No action needed.
+        } else {
+            // User IS logged in. Navigate to the main app screen and clear the back stack.
+            navController.navigate(R.id.itemListFragment, null,
+                androidx.navigation.NavOptions.Builder()
+                    .setPopUpTo(R.id.nav_graph, true)
+                    .build()
+            )
         }
     }
 }

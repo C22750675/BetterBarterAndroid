@@ -1,20 +1,25 @@
-// In: data/remote/ApiService.kt
 package com.hugogarry.betterbarter.data.remote
 
 import com.hugogarry.betterbarter.data.model.Item
 import com.hugogarry.betterbarter.data.model.Trade
+import com.hugogarry.betterbarter.data.model.LoginRequest
+import com.hugogarry.betterbarter.data.model.LoginResponse
+import com.hugogarry.betterbarter.data.model.RegisterRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-interface APIService {
+interface ApiService {
 
-    /**
-     * Fetches a list of items for a specific circle.
-     * Example URL: https://your-api.com/api/circles/uuid-of-circle/items
-     */
+    @POST("auth/register")
+    suspend fun registerUser(@Body registerRequest: RegisterRequest): LoginResponse
+
+    @POST("auth/login")
+    suspend fun loginUser(@Body loginRequest: LoginRequest): LoginResponse
+
+    // Fetches a list of items for a specific circle.
     @GET("circles/{circleId}/items")
     suspend fun getItemsForCircle(@Path("circleId") circleId: String): List<Item>
 
@@ -31,9 +36,4 @@ interface APIService {
      */
     @POST("trades")
     suspend fun createTrade(@Body trade: Trade): Response<Trade>
-
-    // ... Add other endpoints here for users, messages, ratings, etc.
-    // For example:
-    // @POST("auth/login")
-    // suspend fun loginUser(@Body loginRequest: LoginRequest): LoginResponse
 }

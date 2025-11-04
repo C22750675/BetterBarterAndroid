@@ -7,7 +7,6 @@ android {
     namespace = "com.hugogarry.betterbarter"
     compileSdk = 36
 
-    // ADD THIS BLOCK to enable the BuildConfig feature
     buildFeatures {
         buildConfig = true
     }
@@ -25,8 +24,8 @@ android {
     buildTypes {
         // This is the configuration for your development builds
         getByName("debug") {
-            // Generates: public static final String BASE_URL = "http://localhost:3000/";
-            buildConfigField("String", "BASE_URL", "\"http://localhost:3000/\"")
+            // Generates: public static final String BASE_URL = "http://10.0.2.2:3000/api/";
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/api/\"")
         }
 
         // This is the configuration for your production/release builds
@@ -36,9 +35,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Generates: public static final String BASE_URL = "http://localhost:3000/";
+            // Generates: public static final String BASE_URL = "http://10.0.2.2:3000/api/";
             // TODO: REPLACE with actual production URL
-            buildConfigField("String", "BASE_URL", "\"http://localhost:3000/\"")
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/api/\"")
         }
     }
     compileOptions {
@@ -59,7 +58,12 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.moshi)
     implementation(libs.moshi.kotlin)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.fragment.ktx)
 }
