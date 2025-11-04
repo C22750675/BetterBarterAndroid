@@ -75,8 +75,7 @@ class RegisterFragment : Fragment() {
                 when (resource) {
                     is Resource.Success -> {
                         Toast.makeText(context, "Registration Successful!", Toast.LENGTH_LONG).show()
-                        // Navigate to the main app screen and clear the auth flow from the back stack
-                        findNavController().navigate(R.id.action_registerFragment_to_itemListFragment)
+                        findNavController().navigate(R.id.action_auth_to_main)
                     }
                     is Resource.Error -> {
                         errorTextView.text = resource.message

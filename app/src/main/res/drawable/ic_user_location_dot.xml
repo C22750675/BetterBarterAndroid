@@ -1,0 +1,14 @@
+<!-- In: res/drawable/ic_user_location_dot.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <solid android:color="#C2D967" /> <!-- A nice blue color -->
+
+    <stroke
+        android:width="2dp"
+        android:color="@android:color/white" />
+
+    <size
+        android:width="16dp"
+        android:height="16dp" />
+</shape>

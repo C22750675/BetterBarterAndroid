@@ -10,6 +10,18 @@ android {
     buildFeatures {
         buildConfig = true
     }
+    flavorDimensions += "targetDevice"
+
+    productFlavors {
+        register("emulator") {
+            dimension = "targetDevice"
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/api/\"")
+        }
+        register("physical") {
+            dimension = "targetDevice"
+            buildConfigField("String", "BASE_URL", "\"http://192.168.0.192:3000/api/\"")
+        }
+    }
 
     defaultConfig {
         applicationId = "com.hugogarry.betterbarter"
@@ -22,24 +34,22 @@ android {
     }
 
     buildTypes {
-        // This is the configuration for your development builds
+        // Now that flavors handle the debug URL, this block can be simpler.
         getByName("debug") {
-            // Generates: public static final String BASE_URL = "http://10.0.2.2:3000/api/";
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/api/\"")
         }
-
-        // This is the configuration for your production/release builds
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Generates: public static final String BASE_URL = "http://10.0.2.2:3000/api/";
-            // TODO: REPLACE with actual production URL
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/api/\"")
+            // This is a global setting for all 'release' builds.
+            // If you needed different release URLs per flavor, you would define them
+            // inside the flavor block instead.
+            buildConfigField("String", "BASE_URL", "\"https://api.yourproduction.com/api/\"")
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -66,4 +76,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.fragment.ktx)
+    implementation(libs.osmdroid.android)
+    implementation(libs.play.services.location)
+    implementation(libs.androidx.preference.ktx)
 }

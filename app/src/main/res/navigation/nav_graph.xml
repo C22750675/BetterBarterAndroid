@@ -1,53 +1,65 @@
-<?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/welcomeFragment"> <!-- The default start for logged-out users -->
+    app:startDestination="@id/auth_flow">
 
-    <!-- Auth Flow -->
-    <fragment
-        android:id="@+id/welcomeFragment"
-        android:name="com.hugogarry.betterbarter.ui.auth.WelcomeFragment"
-        android:label="WelcomeFragment"
-        tools:layout="@layout/fragment_welcome">
-        <action
-            android:id="@+id/action_welcomeFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
-        <action
-            android:id="@+id/action_welcomeFragment_to_registerFragment"
-            app:destination="@id/registerFragment" />
-    </fragment>
+    <!-- Nested Graph for Authentication -->
+    <navigation android:id="@+id/auth_flow" app:startDestination="@id/welcomeFragment">
+        <fragment
+            android:id="@+id/welcomeFragment"
+            android:name="com.hugogarry.betterbarter.ui.auth.WelcomeFragment"
+            android:label="WelcomeFragment">
+            <action
+                android:id="@+id/action_welcomeFragment_to_loginFragment"
+                app:destination="@id/loginFragment" />
+            <action
+                android:id="@+id/action_welcomeFragment_to_registerFragment"
+                app:destination="@id/registerFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/loginFragment"
+            android:name="com.hugogarry.betterbarter.ui.auth.LoginFragment"
+            android:label="LoginFragment">
+            <!-- Action now goes to the main flow graph -->
+            <action
+                android:id="@+id/action_auth_to_main"
+                app:destination="@id/main_flow"
+                app:popUpTo="@id/auth_flow"
+                app:popUpToInclusive="true" />
+        </fragment>
+        <fragment
+            android:id="@+id/registerFragment"
+            android:name="com.hugogarry.betterbarter.ui.auth.RegisterFragment"
+            android:label="RegisterFragment">
+            <!-- Action now goes to the main flow graph -->
+            <action
+                android:id="@+id/action_auth_to_main"
+                app:destination="@id/main_flow"
+                app:popUpTo="@id/auth_flow"
+                app:popUpToInclusive="true" />
+        </fragment>
+    </navigation>
 
-    <fragment
-        android:id="@+id/loginFragment"
-        android:name="com.hugogarry.betterbarter.ui.auth.LoginFragment"
-        android:label="LoginFragment"
-        tools:layout="@layout/fragment_login">
-        <action
-            android:id="@+id/action_loginFragment_to_itemListFragment"
-            app:destination="@id/itemListFragment"
-            app:popUpTo="@id/welcomeFragment"
-            app:popUpToInclusive="true" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/registerFragment"
-        android:name="com.hugogarry.betterbarter.ui.auth.RegisterFragment"
-        android:label="RegisterFragment"
-        tools:layout="@layout/fragment_register">
-        <action
-            android:id="@+id/action_registerFragment_to_itemListFragment"
-            app:destination="@id/itemListFragment"
-            app:popUpTo="@id/welcomeFragment"
-            app:popUpToInclusive="true" />
-    </fragment>
-
-    <!-- Main App Flow -->
-    <fragment
-        android:id="@+id/itemListFragment"
-        android:name="com.hugogarry.betterbarter.ui.item.ItemListFragment"
-        android:label="ItemListFragment"
-        tools:layout="@layout/fragment_item_list"/>
+    <!-- Nested Graph for Main App Content -->
+    <navigation android:id="@+id/main_flow" app:startDestination="@id/mapFragment">
+        <fragment
+            android:id="@+id/mapFragment"
+            android:name="com.hugogarry.betterbarter.ui.map.MapFragment"
+            android:label="MapFragment"
+            tools:layout="@layout/fragment_map" />
+        <fragment
+            android:id="@+id/circlesFragment"
+            android:name="com.hugogarry.betterbarter.ui.circles.CirclesFragment"
+            android:label="CirclesFragment" />
+        <fragment
+            android:id="@+id/tradesFragment"
+            android:name="com.hugogarry.betterbarter.ui.trades.TradesFragment"
+            android:label="TradesFragment" />
+        <fragment
+            android:id="@+id/profileFragment"
+            android:name="com.hugogarry.betterbarter.ui.profile.ProfileFragment"
+            android:label="ProfileFragment" />
+    </navigation>
 
 </navigation>

@@ -1,4 +1,3 @@
-// In: ui/auth/LoginFragment.kt
 package com.hugogarry.betterbarter.ui.auth
 
 import android.os.Bundle
@@ -18,6 +17,7 @@ import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import androidx.navigation.fragment.findNavController
 
 class LoginFragment : Fragment() {
 
@@ -50,8 +50,6 @@ class LoginFragment : Fragment() {
         observeLoginState(progressBar, errorTextView)
     }
 
-    // In: ui/auth/LoginFragment.kt
-
     private fun observeLoginState(progressBar: ProgressBar, errorTextView: TextView) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.loginState.collectLatest { resource ->
@@ -63,8 +61,7 @@ class LoginFragment : Fragment() {
                     is Resource.Success -> {
                         if (resource.data != null) {
                             Toast.makeText(context, "Login Successful!", Toast.LENGTH_LONG).show()
-                            // TODO: Navigate to the main part of the app
-                            // e.g., (activity as MainActivity).navigateToMainScreen()
+                            findNavController().navigate(R.id.action_auth_to_main)
                         }
                     }
                     is Resource.Error -> {
