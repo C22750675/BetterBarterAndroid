@@ -1,10 +1,12 @@
 package com.hugogarry.betterbarter.data.remote
 
+import com.hugogarry.betterbarter.data.model.CreateItemRequest
 import com.hugogarry.betterbarter.data.model.Item
 import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.model.LoginRequest
 import com.hugogarry.betterbarter.data.model.LoginResponse
 import com.hugogarry.betterbarter.data.model.RegisterRequest
+import com.hugogarry.betterbarter.data.model.User
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -36,4 +38,13 @@ interface ApiService {
      */
     @POST("trades")
     suspend fun createTrade(@Body trade: Trade): Response<Trade>
+
+    @GET("auth/profile") // We'll use this to get the user's profile data
+    suspend fun getProfile(): User // Assuming this returns a User object
+
+    @GET("items/my-items")
+    suspend fun getMyItems(): List<Item>
+
+    @POST("items")
+    suspend fun createItem(@Body createItemRequest: CreateItemRequest): Item
 }

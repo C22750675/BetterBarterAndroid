@@ -42,10 +42,11 @@ class ItemRepository(private val apiService: ApiService = ApiClient.apiService) 
         }
     }
 
-    // You would add other item-related functions here, for example:
-    /*
-    suspend fun getItemDetails(itemId: String): Resource<Item> {
-        // ... implementation with try-catch block ...
+    suspend fun getMyItems(): Resource<List<Item>> {
+        return try {
+            Resource.Success(apiService.getMyItems())
+        } catch (e: Exception) {
+            Resource.Error("Failed to fetch your items: ${e.message}")
+        }
     }
-    */
 }

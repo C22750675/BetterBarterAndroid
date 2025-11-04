@@ -49,17 +49,19 @@
             android:label="MapFragment"
             tools:layout="@layout/fragment_map" />
         <fragment
-            android:id="@+id/circlesFragment"
-            android:name="com.hugogarry.betterbarter.ui.circles.CirclesFragment"
-            android:label="CirclesFragment" />
-        <fragment
-            android:id="@+id/tradesFragment"
-            android:name="com.hugogarry.betterbarter.ui.trades.TradesFragment"
-            android:label="TradesFragment" />
-        <fragment
             android:id="@+id/profileFragment"
             android:name="com.hugogarry.betterbarter.ui.profile.ProfileFragment"
-            android:label="ProfileFragment" />
+            android:label="ProfileFragment">
+            <action
+                android:id="@+id/action_profileFragment_to_addItemFragment"
+                app:destination="@id/addItemFragment" /> </fragment>
+
+        <fragment
+            android:id="@+id/addItemFragment"
+            android:name="com.hugogarry.betterbarter.ui.item.AddItemFragment"
+            android:label="AddItemFragment"
+            tools:layout="@layout/fragment_add_item" />
+
     </navigation>
 
 </navigation>

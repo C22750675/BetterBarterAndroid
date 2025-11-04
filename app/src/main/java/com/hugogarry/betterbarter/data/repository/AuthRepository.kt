@@ -3,6 +3,7 @@ package com.hugogarry.betterbarter.data.repository
 import com.hugogarry.betterbarter.data.model.LoginRequest
 import com.hugogarry.betterbarter.data.model.LoginResponse
 import com.hugogarry.betterbarter.data.model.RegisterRequest
+import com.hugogarry.betterbarter.data.model.User
 import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.remote.ApiService
 import com.hugogarry.betterbarter.util.Resource
@@ -44,6 +45,14 @@ class AuthRepository(private val apiService: ApiService = ApiClient.apiService) 
             } else {
                 Resource.Error("An unexpected error occurred: ${e.message()}")
             }
+        }
+    }
+
+    suspend fun getProfile(): Resource<User> {
+        return try {
+            Resource.Success(apiService.getProfile())
+        } catch (e: Exception) {
+            Resource.Error("Failed to fetch profile: ${e.message}")
         }
     }
 
