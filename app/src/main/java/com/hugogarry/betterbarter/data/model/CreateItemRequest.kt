@@ -1,4 +1,3 @@
-// In: data/model/CreateItemRequest.kt
 package com.hugogarry.betterbarter.data.model
 
 import com.squareup.moshi.JsonClass
@@ -8,5 +7,7 @@ data class CreateItemRequest(
     val name: String,
     val description: String,
     val estimatedValue: Double,
-    // Add any other fields your backend requires
+    val categoryId: String,
+    val bestBeforeDate: String?,
+    val useByDate: String?
 )

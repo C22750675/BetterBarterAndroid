@@ -1,5 +1,7 @@
 package com.hugogarry.betterbarter.data.repository
 
+import com.hugogarry.betterbarter.data.model.Category
+import com.hugogarry.betterbarter.data.model.CreateItemRequest // Import CreateItemRequest
 import com.hugogarry.betterbarter.data.model.Item
 import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.remote.ApiService
@@ -20,7 +22,7 @@ class ItemRepository(private val apiService: ApiService = ApiClient.apiService) 
      *
      * @param circleId The UUID of the circle.
      * @return A Resource wrapper containing either the list of items on success
-     *         or an error message on failure.
+     * or an error message on failure.
      */
     suspend fun getItemsForCircle(circleId: String): Resource<List<Item>> {
         return try {
@@ -47,6 +49,36 @@ class ItemRepository(private val apiService: ApiService = ApiClient.apiService) 
             Resource.Success(apiService.getMyItems())
         } catch (e: Exception) {
             Resource.Error("Failed to fetch your items: ${e.message}")
+        }
+    }
+
+    /**
+     * Creates a new item on the backend via the API.
+     */
+    suspend fun createItem(request: CreateItemRequest): Resource<Item> {
+        return try {
+            val item = apiService.createItem(request)
+            Resource.Success(item)
+        } catch (e: IOException) {
+            Resource.Error("Network error: Please check your internet connection.")
+        } catch (e: HttpException) {
+            val errorMessage = when (e.code()) {
+                400 -> "Invalid item data provided. Please check your inputs."
+                401 -> "Authentication failed. Please log in again."
+                else -> "Failed to create item: ${e.message()}"
+            }
+            Resource.Error(errorMessage)
+        }
+    }
+
+    suspend fun getCategories(): Resource<List<Category>> {
+        return try {
+            val categories = apiService.getCategories()
+            Resource.Success(categories)
+        } catch (e: IOException) {
+            Resource.Error("Network error: Could not fetch categories. Please check your connection.")
+        } catch (e: HttpException) {
+            Resource.Error("Failed to fetch categories: ${e.message()}")
         }
     }
 }

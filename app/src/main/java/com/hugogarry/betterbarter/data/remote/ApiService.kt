@@ -1,5 +1,6 @@
 package com.hugogarry.betterbarter.data.remote
 
+import com.hugogarry.betterbarter.data.model.Category
 import com.hugogarry.betterbarter.data.model.CreateItemRequest
 import com.hugogarry.betterbarter.data.model.Item
 import com.hugogarry.betterbarter.data.model.Trade
@@ -47,4 +48,7 @@ interface ApiService {
 
     @POST("items")
     suspend fun createItem(@Body createItemRequest: CreateItemRequest): Item
+
+    @GET("items/categories")
+    suspend fun getCategories(): List<Category>
 }
