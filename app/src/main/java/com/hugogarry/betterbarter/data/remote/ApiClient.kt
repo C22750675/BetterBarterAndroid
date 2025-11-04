@@ -4,6 +4,7 @@ import com.hugogarry.betterbarter.BuildConfig
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor // REQUIRED IMPORT
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
@@ -15,8 +16,14 @@ object ApiClient {
         .add(KotlinJsonAdapterFactory())
         .build()
 
+    private val loggingInterceptor = HttpLoggingInterceptor().apply {
+        // Set the log level to BODY to see headers and the complete request/response JSON.
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(AuthInterceptor())
+        .addInterceptor(loggingInterceptor)
         .build()
 
     private val retrofit: Retrofit by lazy {

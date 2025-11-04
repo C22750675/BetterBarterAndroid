@@ -79,4 +79,5 @@ dependencies {
     implementation(libs.osmdroid.android)
     implementation(libs.play.services.location)
     implementation(libs.androidx.preference.ktx)
+    implementation(libs.logging.interceptor.v4120)
 }

@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.textfield.TextInputLayout
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Category
 import com.hugogarry.betterbarter.util.Resource
@@ -26,15 +27,21 @@ class AddItemFragment : Fragment() {
 
     private val viewModel: AddItemViewModel by viewModels()
 
-    // Store the fetched categories and the ID of the selection
-    private var categories: List<Category> = emptyList()
+    // Store all fetched categories
+    private var allCategories: List<Category> = emptyList()
+    // The final ID used for the CreateItemRequest
     private var selectedCategoryId: String? = null
 
-    private lateinit var categoryAutoCompleteTextView: AutoCompleteTextView
+    // UI elements for the dropdowns
+    private lateinit var parentCategoryAutoCompleteTextView: AutoCompleteTextView
+    private lateinit var subCategoryAutoCompleteTextView: AutoCompleteTextView
+    private lateinit var subCategoryInputLayout: TextInputLayout // For visibility control
 
-    // NEW: Declare date EditTexts
     private lateinit var bestBeforeDateEditText: EditText
     private lateinit var useByDateEditText: EditText
+
+    private lateinit var stockEditText: EditText
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,9 +57,17 @@ class AddItemFragment : Fragment() {
         val itemNameEditText = view.findViewById<EditText>(R.id.editTextItemName)
         val itemDescriptionEditText = view.findViewById<EditText>(R.id.editTextItemDescription)
         val estimatedValueEditText = view.findViewById<EditText>(R.id.editTextEstimatedValue)
-        categoryAutoCompleteTextView = view.findViewById(R.id.autoCompleteTextViewCategory)
-        bestBeforeDateEditText = view.findViewById(R.id.editTextBestBeforeDate) // NEW
-        useByDateEditText = view.findViewById(R.id.editTextUseByDate)         // NEW
+        stockEditText = view.findViewById(R.id.editTextStock)
+
+
+
+        // Dropdown Initialization
+        parentCategoryAutoCompleteTextView = view.findViewById(R.id.autoCompleteTextViewParentCategory)
+        subCategoryAutoCompleteTextView = view.findViewById(R.id.autoCompleteTextViewSubCategory)
+        subCategoryInputLayout = view.findViewById(R.id.textInputLayoutSubCategory)
+
+        bestBeforeDateEditText = view.findViewById(R.id.editTextBestBeforeDate)
+        useByDateEditText = view.findViewById(R.id.editTextUseByDate)
 
         val addButton = view.findViewById<Button>(R.id.buttonAddItem)
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBarAddItem)
@@ -63,10 +78,9 @@ class AddItemFragment : Fragment() {
             val name = itemNameEditText.text.toString().trim()
             val description = itemDescriptionEditText.text.toString().trim()
             val estimatedValueText = estimatedValueEditText.text.toString().trim()
-
-            // NEW: Get values from optional date fields
             val bestBeforeDateText = bestBeforeDateEditText.text.toString()
             val useByDateText = useByDateEditText.text.toString()
+            val stockText = stockEditText.text.toString().trim()
 
             // Pass all required and optional data to the ViewModel
             viewModel.createItem(
@@ -74,54 +88,94 @@ class AddItemFragment : Fragment() {
                 description = description,
                 estimatedValueText = estimatedValueText,
                 categoryId = selectedCategoryId,
-                bestBeforeDateText = bestBeforeDateText, // NEW
-                useByDateText = useByDateText             // NEW
+                bestBeforeDateText = bestBeforeDateText,
+                useByDateText = useByDateText,
+                stockText = stockText,
+                imageUrl = null
             )
         }
 
         observeCategoryState(progressBar)
-        // Observe the item creation state
         observeAddItemState(progressBar, errorTextView)
     }
 
     private fun observeCategoryState(progressBar: ProgressBar) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.categoryState.collectLatest { state ->
-                // Disable the dropdown until categories are loaded
-                categoryAutoCompleteTextView.isEnabled = state is CategoryState.Success
+                // Enable the parent dropdown only when data is ready
+                parentCategoryAutoCompleteTextView.isEnabled = state is CategoryState.Success
 
                 when (state) {
                     is CategoryState.Success -> {
-                        categories = state.categories
-                        setupCategoryDropdown(state.categories)
+                        allCategories = state.categories
+                        setupParentCategoryDropdown(allCategories)
                     }
                     is CategoryState.Error -> {
                         Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
                     }
                     is CategoryState.Loading, CategoryState.Idle -> {
-                        // Handled by isEnabled state, no further action needed
+                        // Handled by isEnabled state.
                     }
                 }
             }
         }
     }
 
-    // Setup dropdown adapter
-    private fun setupCategoryDropdown(categories: List<Category>) {
-        // Map Category objects to a list of just their names for the adapter
-        val categoryNames = categories.map { it.name }
+    private fun setupParentCategoryDropdown(categories: List<Category>) {
+        // Filter for top-level categories (parentCategoryId is null)
+        val parentCategories = categories.filter { it.parentCategoryId == null }
+        val parentCategoryNames = parentCategories.map { it.name }
+
         val adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_dropdown_item_1line,
-            categoryNames
+            parentCategoryNames
         )
-        categoryAutoCompleteTextView.setAdapter(adapter)
+        parentCategoryAutoCompleteTextView.setAdapter(adapter)
 
-        // Listener to capture the selected category's ID
-        categoryAutoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
-            val selectedCategoryName = parent.getItemAtPosition(position) as String
-            // Find the corresponding Category object and store its ID
-            selectedCategoryId = categories.find { it.name == selectedCategoryName }?.id
+        // Listener for parent selection to drive cascading logic
+        parentCategoryAutoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
+            val selectedName = parent.getItemAtPosition(position) as String
+            val selectedParent = parentCategories.find { it.name == selectedName }
+            val parentId = selectedParent?.id // Get the ID of the selected parent
+
+            // Filter all categories to find the children of the selected parent
+            val subcategories = allCategories.filter { it.parentCategoryId == parentId }
+
+            subCategoryAutoCompleteTextView.setText("") // Clear old subcategory selection
+            subCategoryAutoCompleteTextView.clearFocus()
+
+            if (subcategories.isNotEmpty()) {
+                // REQUIRED REVERSION: If subcategories exist, force selectedCategoryId to null.
+                // This makes the form INVALID until the user selects a specific subcategory.
+                selectedCategoryId = null
+
+                subCategoryInputLayout.visibility = View.VISIBLE
+                setupSubCategoryDropdown(subcategories)
+            } else {
+                // If NO subcategories exist:
+                // Set the final ID to the parent's ID. This is a final selection.
+                selectedCategoryId = parentId
+                subCategoryInputLayout.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun setupSubCategoryDropdown(subcategories: List<Category>) {
+        val subcategoryNames = subcategories.map { it.name }
+
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            subcategoryNames
+        )
+        subCategoryAutoCompleteTextView.setAdapter(adapter)
+
+        // Listener for subcategory selection to set the final ID
+        subCategoryAutoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
+            val selectedName = parent.getItemAtPosition(position) as String
+            // Overwrite selectedCategoryId with the subcategory's ID
+            selectedCategoryId = subcategories.find { it.name == selectedName }?.id
         }
     }
 
@@ -134,7 +188,6 @@ class AddItemFragment : Fragment() {
                 when (resource) {
                     is Resource.Success -> {
                         Toast.makeText(context, "Item Listed: ${resource.data?.name}", Toast.LENGTH_LONG).show()
-                        // Navigate back to the Profile screen after successful creation
                         findNavController().popBackStack()
                     }
                     is Resource.Error -> {

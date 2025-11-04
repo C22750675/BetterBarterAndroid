@@ -9,5 +9,7 @@ data class CreateItemRequest(
     val estimatedValue: Double,
     val categoryId: String,
     val bestBeforeDate: String?,
-    val useByDate: String?
+    val useByDate: String?,
+    val imageUrl: String?,
+    val stock: Int
 )

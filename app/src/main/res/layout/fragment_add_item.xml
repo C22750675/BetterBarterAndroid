@@ -87,18 +87,38 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayoutCategory"
+            android:id="@+id/textInputLayoutParentCategory"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="Category"
+            android:hint="Main Category"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textInputLayoutDescription">
 
             <AutoCompleteTextView
-                android:id="@+id/autoCompleteTextViewCategory"
+                android:id="@+id/autoCompleteTextViewParentCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@null"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputLayoutSubCategory"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Subcategory"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textInputLayoutParentCategory">
+
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteTextViewSubCategory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:drawableStart="@null"
@@ -114,13 +134,32 @@
             android:hint="Estimated Value (€)"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayoutCategory">
+            app:layout_constraintTop_toBottomOf="@id/textInputLayoutSubCategory">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editTextEstimatedValue"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputLayoutStock"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Stock (Quantity)"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textInputLayoutValue">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextStock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -132,7 +171,7 @@
             android:hint="Best Before Date (YYYY-MM-DD, Optional)"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayoutValue">
+            app:layout_constraintTop_toBottomOf="@id/textInputLayoutStock">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editTextBestBeforeDate"
@@ -164,7 +203,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:text="List Item for Trade"
+            android:text="Add Item to Profile"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

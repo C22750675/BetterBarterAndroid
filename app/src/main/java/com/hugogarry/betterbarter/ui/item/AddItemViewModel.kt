@@ -52,8 +52,10 @@ class AddItemViewModel(
         description: String,
         estimatedValueText: String,
         categoryId: String?,
-        bestBeforeDateText: String?, // NEW PARAMETER
-        useByDateText: String? // NEW PARAMETER
+        bestBeforeDateText: String?,
+        useByDateText: String?,
+        stockText: String,
+        imageUrl: String?
     ) {
         if (name.isBlank() || description.isBlank() || estimatedValueText.isBlank()) {
             _addItemState.value = Resource.Error("Please fill in all required fields.")
@@ -70,6 +72,12 @@ class AddItemViewModel(
             return
         }
 
+        val stock = stockText.toIntOrNull()
+        if (stock == null || stock < 1) {
+            _addItemState.value = Resource.Error("Please enter a valid stock quantity (1 or more).")
+            return
+        }
+
         // Clean up optional date strings: trim whitespace and set to null if blank
         val bestBeforeDate = bestBeforeDateText?.trim()?.takeIf { it.isNotBlank() }
         val useByDate = useByDateText?.trim()?.takeIf { it.isNotBlank() }
@@ -82,7 +90,9 @@ class AddItemViewModel(
                 estimatedValue = estimatedValue,
                 categoryId = categoryId,
                 bestBeforeDate = bestBeforeDate, // Use the cleaned optional value
-                useByDate = useByDate // Use the cleaned optional value
+                useByDate = useByDate, // Use the cleaned optional value 
+                stock = stock,
+                imageUrl = imageUrl
             )
             _addItemState.value = itemRepository.createItem(request)
         }
