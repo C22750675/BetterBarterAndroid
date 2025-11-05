@@ -1,4 +1,3 @@
-// In: ui/map/MapFragment.kt
 package com.hugogarry.betterbarter.ui.map
 
 import android.Manifest
@@ -14,6 +13,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -35,6 +36,8 @@ class MapFragment : Fragment() {
     private var pulsePolygon: Polygon? = null
     private var pulseAnimator: ValueAnimator? = null
 
+    // Get a reference to the ViewModel
+    private val viewModel: MapViewModel by activityViewModels()
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -55,7 +58,6 @@ class MapFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_map, container, false)
         mapView = view.findViewById(R.id.map_view)
 
-        // UPDATED MAP THEME: CARTO Voyager (Simple and Colorful)
         val cartoVoyagerSource = object : OnlineTileSourceBase(
             "CARTO Voyager", 1, 19, 256, ".png",
             arrayOf(
@@ -74,8 +76,13 @@ class MapFragment : Fragment() {
 
         mapView.setMultiTouchControls(true)
         val mapController = mapView.controller
-        mapController.setZoom(12.0)
-        mapController.setCenter(GeoPoint(53.3498, -6.2603))
+
+        // Set map state from ViewModel
+        // If a location is saved, use it. Otherwise, use the defaults.
+        val centerPoint = viewModel.lastKnownLocation ?: viewModel.defaultLocation
+        val zoomLevel = viewModel.lastKnownZoom ?: viewModel.defaultZoom
+        mapController.setZoom(zoomLevel)
+        mapController.setCenter(centerPoint)
 
         return view
     }
@@ -86,7 +93,14 @@ class MapFragment : Fragment() {
         view.findViewById<FloatingActionButton>(R.id.fab_center_location).setOnClickListener {
             centerMapOnUserLocation()
         }
-        requestLocationPermissions()
+
+        // Only request location if we don't already have one
+        if (viewModel.lastKnownLocation == null) {
+            requestLocationPermissions()
+        } else {
+            // If we have a location, just update the marker
+            updateMyLocationMarker(viewModel.lastKnownLocation!!)
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -95,8 +109,14 @@ class MapFragment : Fragment() {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
                     val userLocation = GeoPoint(location.latitude, location.longitude)
+                    val targetZoom = 18.0
+
                     updateMyLocationMarker(userLocation)
-                    mapView.controller.animateTo(userLocation, 18.0, 1000L)
+                    mapView.controller.animateTo(userLocation, targetZoom, 1000L)
+
+                    // REQUIRED FIX: Save the new state to the ViewModel
+                    viewModel.lastKnownLocation = userLocation
+                    viewModel.lastKnownZoom = targetZoom
                 } else {
                     Toast.makeText(context, "Could not determine your location.", Toast.LENGTH_SHORT).show()
                 }

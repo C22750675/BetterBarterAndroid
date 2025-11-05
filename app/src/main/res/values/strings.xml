@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">BetterBarter</string>
+    <string name="reputation_score_format">Reputation: %.1f</string>
 </resources>
