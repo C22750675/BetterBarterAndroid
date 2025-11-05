@@ -19,8 +19,11 @@ class MapViewModel(
     val defaultZoom = 12.0
 
     // Stored state for map position
-    var lastKnownLocation: GeoPoint? = null
-    var lastKnownZoom: Double? = null
+    var lastMapCenter: GeoPoint? = null
+    var lastMapZoom: Double? = null
+
+    // Stored state for the user's actual location
+    var userLocation: GeoPoint? = null
 
     private val _circlesState = MutableStateFlow<Resource<List<Circle>>>(Resource.Idle())
     val circlesState: StateFlow<Resource<List<Circle>>> = _circlesState

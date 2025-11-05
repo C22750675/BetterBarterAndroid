@@ -91,8 +91,8 @@ class MapFragment : Fragment() {
         val mapController = mapView.controller
 
         // Set map state from ViewModel
-        val centerPoint = viewModel.lastKnownLocation ?: viewModel.defaultLocation
-        val zoomLevel = viewModel.lastKnownZoom ?: viewModel.defaultZoom
+        val centerPoint = viewModel.lastMapCenter ?: viewModel.defaultLocation
+        val zoomLevel = viewModel.lastMapZoom ?: viewModel.defaultZoom
         mapController.setZoom(zoomLevel)
         mapController.setCenter(centerPoint)
 
@@ -108,16 +108,16 @@ class MapFragment : Fragment() {
 
         observeCirclesState()
 
-        if (viewModel.lastKnownLocation == null) {
-            // If we don't have a location, request one
+        if (viewModel.userLocation == null) {
+            // If we don't have a user location, request one
             requestLocationPermissions()
         } else {
-            // If we already have a location (e.g., from rotation),
+            // If we already have a user location (e.g., from rotation),
             // update the marker and fetch circles immediately
-            updateMyLocationMarker(viewModel.lastKnownLocation!!)
+            updateMyLocationMarker(viewModel.userLocation!!)
             viewModel.fetchNearbyCircles(
-                viewModel.lastKnownLocation!!.latitude,
-                viewModel.lastKnownLocation!!.longitude
+                viewModel.userLocation!!.latitude,
+                viewModel.userLocation!!.longitude
             )
         }
     }
@@ -202,8 +202,9 @@ class MapFragment : Fragment() {
                     mapView.controller.animateTo(userLocation, targetZoom, 1000L)
 
                     // Save state to ViewModel
-                    viewModel.lastKnownLocation = userLocation
-                    viewModel.lastKnownZoom = targetZoom
+                    viewModel.userLocation = userLocation
+                    viewModel.lastMapCenter = userLocation
+                    viewModel.lastMapZoom = targetZoom
 
                     viewModel.fetchNearbyCircles(userLocation.latitude, userLocation.longitude)
 
@@ -252,8 +253,8 @@ class MapFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         // Save the map's current state to the ViewModel
-        viewModel.lastKnownLocation = mapView.mapCenter as GeoPoint
-        viewModel.lastKnownZoom = mapView.zoomLevelDouble
+        viewModel.lastMapCenter = mapView.mapCenter as GeoPoint
+        viewModel.lastMapZoom = mapView.zoomLevelDouble
 
         mapView.onPause()
         pulseAnimator?.cancel()
