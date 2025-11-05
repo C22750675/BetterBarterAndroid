@@ -18,6 +18,6 @@ data class Circle(
     val reputationScore: Double,
     val minimumRepThreshold: Int,
     val createdAt: String,
-    val memberCount: Int,
+    val memberCount: Int = 1,
     val color: String
 )

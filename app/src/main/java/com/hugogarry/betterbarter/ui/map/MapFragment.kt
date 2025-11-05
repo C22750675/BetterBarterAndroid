@@ -12,7 +12,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -32,6 +31,7 @@ import org.osmdroid.util.MapTileIndex
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
+import androidx.core.graphics.toColorInt
 
 class MapFragment : Fragment() {
 
@@ -158,9 +158,9 @@ class MapFragment : Fragment() {
 
             // Parse the color
             val parsedColor = try {
-                Color.parseColor(circle.color)
-            } catch (e: IllegalArgumentException) {
-                Color.parseColor("#3498DB") // Default blue on error
+                circle.color.toColorInt()
+            } catch (_: IllegalArgumentException) {
+                "#3498DB".toColorInt() // Default blue on error
             }
 
             // 4. Create the radius polygon
@@ -196,7 +196,7 @@ class MapFragment : Fragment() {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
                     val userLocation = GeoPoint(location.latitude, location.longitude)
-                    val targetZoom = 18.0
+                    val targetZoom = 17.0
 
                     updateMyLocationMarker(userLocation)
                     mapView.controller.animateTo(userLocation, targetZoom, 1000L)
