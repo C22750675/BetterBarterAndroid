@@ -10,6 +10,7 @@ import com.hugogarry.betterbarter.util.Resource
 import java.io.IOException
 import retrofit2.HttpException
 import com.hugogarry.betterbarter.util.SessionManager
+import com.hugogarry.betterbarter.data.model.UpdateProfileRequest
 
 class AuthRepository(private val apiService: ApiService = ApiClient.apiService) {
 
@@ -53,6 +54,17 @@ class AuthRepository(private val apiService: ApiService = ApiClient.apiService) 
             Resource.Success(apiService.getProfile())
         } catch (e: Exception) {
             Resource.Error("Failed to fetch profile: ${e.message}")
+        }
+    }
+
+    suspend fun updateProfile(updateProfileDto: UpdateProfileRequest): Resource<User> {
+        return try {
+            val user = apiService.updateProfile(updateProfileDto)
+            Resource.Success(user)
+        } catch (e: IOException) {
+            Resource.Error("Network error: Could not update profile.")
+        } catch (e: Exception) {
+            Resource.Error("Failed to update profile: ${e.message}")
         }
     }
 

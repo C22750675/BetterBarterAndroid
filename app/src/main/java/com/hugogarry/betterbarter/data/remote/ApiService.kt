@@ -7,12 +7,19 @@ import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.model.LoginRequest
 import com.hugogarry.betterbarter.data.model.LoginResponse
 import com.hugogarry.betterbarter.data.model.RegisterRequest
+import com.hugogarry.betterbarter.data.model.UploadResponse
 import com.hugogarry.betterbarter.data.model.User
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
+import com.hugogarry.betterbarter.data.model.UpdateProfileRequest
+
 
 interface ApiService {
 
@@ -51,4 +58,14 @@ interface ApiService {
 
     @GET("items/categories")
     suspend fun getCategories(): List<Category>
+
+    @Multipart
+    @POST("uploads")
+    suspend fun uploadImage(
+        @Part file: MultipartBody.Part
+    ): UploadResponse
+
+    // Endpoint to update the user's profile
+    @PATCH("auth/profile")
+    suspend fun updateProfile(@Body updateProfileDto: UpdateProfileRequest): User
 }
