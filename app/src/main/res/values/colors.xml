@@ -1,5 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="circle_color_blue">#3498DB</color>
+    <color name="circle_color_red">#E74C3C</color>
+    <color name="circle_color_green">#2ECC71</color>
+    <color name="circle_color_purple">#9B59B6</color>
+    <color name="circle_color_orange">#E67E22</color>
 </resources>

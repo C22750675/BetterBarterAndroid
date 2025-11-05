@@ -8,6 +8,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import coil.transform.CircleCropTransformation
+import com.hugogarry.betterbarter.BuildConfig
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Item
 
@@ -22,8 +25,15 @@ class ProfileItemsAdapter : ListAdapter<Item, ProfileItemsAdapter.ItemViewHolder
         fun bind(item: Item) {
             itemName.text = item.name
             itemDescription.text = item.description
-            // TODO: Load image with a library like Glide or Coil
-            // e.g., Glide.with(itemView.context).load(item.imageUrl).into(itemImage)
+
+            val baseUrl = BuildConfig.BASE_URL.removeSuffix("/api/")
+            val fullImageUrl = item.imageUrl?.let { "$baseUrl/api/uploads$it" }
+
+            itemImage.load(fullImageUrl) {
+                placeholder(R.drawable.ic_profile)
+                error(R.drawable.ic_profile)
+                transformations(CircleCropTransformation())
+            }
         }
     }
 
@@ -38,7 +48,6 @@ class ProfileItemsAdapter : ListAdapter<Item, ProfileItemsAdapter.ItemViewHolder
     }
 }
 
-// DiffUtil calculates the difference between two lists for efficient updates
 class ItemDiffCallback : DiffUtil.ItemCallback<Item>() {
     override fun areItemsTheSame(oldItem: Item, newItem: Item): Boolean {
         return oldItem.id == newItem.id

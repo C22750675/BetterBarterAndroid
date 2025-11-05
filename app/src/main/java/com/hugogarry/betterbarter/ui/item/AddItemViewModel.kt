@@ -5,11 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.hugogarry.betterbarter.data.model.Category
 import com.hugogarry.betterbarter.data.model.CreateItemRequest
 import com.hugogarry.betterbarter.data.model.Item
+import com.hugogarry.betterbarter.data.model.UploadResponse
 import com.hugogarry.betterbarter.data.repository.ItemRepository
+import com.hugogarry.betterbarter.data.repository.UploadRepository
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
 
 sealed class CategoryState {
     object Loading : CategoryState()
@@ -19,7 +22,8 @@ sealed class CategoryState {
 }
 
 class AddItemViewModel(
-    private val itemRepository: ItemRepository = ItemRepository()
+    private val itemRepository: ItemRepository = ItemRepository(),
+    private val uploadRepository: UploadRepository = UploadRepository()
 ) : ViewModel() {
 
     private val _addItemState = MutableStateFlow<Resource<Item>>(Resource.Idle())
@@ -28,8 +32,30 @@ class AddItemViewModel(
     private val _categoryState = MutableStateFlow<CategoryState>(CategoryState.Idle)
     val categoryState: StateFlow<CategoryState> = _categoryState
 
+    private val _imageUploadState = MutableStateFlow<Resource<UploadResponse>>(Resource.Idle())
+    val imageUploadState: StateFlow<Resource<UploadResponse>> = _imageUploadState
+
+
+    private val _uploadedImageUrl = MutableStateFlow<String?>(null)
+
     init {
         fetchCategories()
+    }
+
+    fun uploadItemImage(filePart: MultipartBody.Part) {
+        viewModelScope.launch {
+            _imageUploadState.value = Resource.Loading()
+            when (val result = uploadRepository.uploadImage(filePart)) {
+                is Resource.Success -> {
+                    _uploadedImageUrl.value = result.data?.url
+                    _imageUploadState.value = result
+                }
+                is Resource.Error -> {
+                    _imageUploadState.value = Resource.Error(result.message ?: "Image upload failed")
+                }
+                else -> { /* No-op */ }
+            }
+        }
     }
 
     fun fetchCategories() {
@@ -46,6 +72,8 @@ class AddItemViewModel(
     /**
      * Validates and submits the new item for creation.
      * UPDATED: Now includes bestBeforeDateText and useByDateText for optional date inputs.
+     *
+     * MODIFIED: Removed 'imageUrl' from parameters, as it's now managed internally.
      */
     fun createItem(
         name: String,
@@ -54,8 +82,7 @@ class AddItemViewModel(
         categoryId: String?,
         bestBeforeDateText: String?,
         useByDateText: String?,
-        stockText: String,
-        imageUrl: String?
+        stockText: String
     ) {
         if (name.isBlank() || description.isBlank() || estimatedValueText.isBlank()) {
             _addItemState.value = Resource.Error("Please fill in all required fields.")
@@ -82,6 +109,9 @@ class AddItemViewModel(
         val bestBeforeDate = bestBeforeDateText?.trim()?.takeIf { it.isNotBlank() }
         val useByDate = useByDateText?.trim()?.takeIf { it.isNotBlank() }
 
+        // --- MODIFIED: Get the URL from our internal state ---
+        val imageUrl = _uploadedImageUrl.value
+
         viewModelScope.launch {
             _addItemState.value = Resource.Loading()
             val request = CreateItemRequest(
@@ -89,10 +119,10 @@ class AddItemViewModel(
                 description = description,
                 estimatedValue = estimatedValue,
                 categoryId = categoryId,
-                bestBeforeDate = bestBeforeDate, // Use the cleaned optional value
-                useByDate = useByDate, // Use the cleaned optional value 
+                bestBeforeDate = bestBeforeDate,
+                useByDate = useByDate,
                 stock = stock,
-                imageUrl = imageUrl
+                imageUrl = imageUrl // <-- Use the URL from our state
             )
             _addItemState.value = itemRepository.createItem(request)
         }

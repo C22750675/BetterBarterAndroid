@@ -12,14 +12,19 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.hugogarry.betterbarter.BuildConfig
 import com.hugogarry.betterbarter.R
+import com.hugogarry.betterbarter.data.model.Circle
+import com.hugogarry.betterbarter.util.Resource
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.util.GeoPoint
@@ -32,19 +37,24 @@ class MapFragment : Fragment() {
 
     private lateinit var mapView: MapView
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    // User location overlays
     private var myLocationMarker: Marker? = null
     private var pulsePolygon: Polygon? = null
     private var pulseAnimator: ValueAnimator? = null
 
-    // Get a reference to the ViewModel
+    private var circlePolygons = mutableListOf<Polygon>()
+
+    // Get a reference to the ViewModel (using activityViewModels)
     private val viewModel: MapViewModel by activityViewModels()
+
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false)) {
             centerMapOnUserLocation()
         } else {
-            Toast.makeText(context, "Location permission is required to show your position.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Location permission is required", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -58,6 +68,7 @@ class MapFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_map, container, false)
         mapView = view.findViewById(R.id.map_view)
 
+        // Set up the custom tile source for CARTO Voyager
         val cartoVoyagerSource = object : OnlineTileSourceBase(
             "CARTO Voyager", 1, 19, 256, ".png",
             arrayOf(
@@ -74,11 +85,12 @@ class MapFragment : Fragment() {
         }
         mapView.setTileSource(cartoVoyagerSource)
 
+        mapView.setBuiltInZoomControls(false)
+
         mapView.setMultiTouchControls(true)
         val mapController = mapView.controller
 
         // Set map state from ViewModel
-        // If a location is saved, use it. Otherwise, use the defaults.
         val centerPoint = viewModel.lastKnownLocation ?: viewModel.defaultLocation
         val zoomLevel = viewModel.lastKnownZoom ?: viewModel.defaultZoom
         mapController.setZoom(zoomLevel)
@@ -94,13 +106,88 @@ class MapFragment : Fragment() {
             centerMapOnUserLocation()
         }
 
-        // Only request location if we don't already have one
+        observeCirclesState()
+
         if (viewModel.lastKnownLocation == null) {
+            // If we don't have a location, request one
             requestLocationPermissions()
         } else {
-            // If we have a location, just update the marker
+            // If we already have a location (e.g., from rotation),
+            // update the marker and fetch circles immediately
             updateMyLocationMarker(viewModel.lastKnownLocation!!)
+            viewModel.fetchNearbyCircles(
+                viewModel.lastKnownLocation!!.latitude,
+                viewModel.lastKnownLocation!!.longitude
+            )
         }
+    }
+
+    private fun observeCirclesState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.circlesState.collectLatest { resource ->
+                when (resource) {
+                    is Resource.Success -> {
+                        // We have circles, let's draw them
+                        drawCircles(resource.data)
+                    }
+                    is Resource.Error -> {
+                        Toast.makeText(context, resource.message, Toast.LENGTH_SHORT).show()
+                    }
+                    is Resource.Loading -> {
+                        // You could show a loading indicator here
+                    }
+                    is Resource.Idle -> {
+                        // Nothing to do
+                    }
+                }
+            }
+        }
+    }
+
+    private fun drawCircles(circles: List<Circle>?) {
+        // Clear all old circle overlays
+        mapView.overlays.removeAll(circlePolygons)
+        circlePolygons.clear()
+
+        if (circles == null) return
+
+        // Loop through each circle and create overlays
+        circles.forEach { circle ->
+            // Backend uses [longitude, latitude], GeoPoint uses (latitude, longitude)
+            val centerPoint = GeoPoint(circle.origin.coordinates[1], circle.origin.coordinates[0])
+
+            // Parse the color
+            val parsedColor = try {
+                Color.parseColor(circle.color)
+            } catch (e: IllegalArgumentException) {
+                Color.parseColor("#3498DB") // Default blue on error
+            }
+
+            // 4. Create the radius polygon
+            val polygon = Polygon(mapView).apply {
+                points = Polygon.pointsAsCircle(centerPoint, circle.radius.toDouble())
+                // Set fill and stroke based on the circle's color
+                fillColor = Color.argb(40, Color.red(parsedColor), Color.green(parsedColor), Color.blue(parsedColor))
+                strokeColor = Color.argb(100, Color.red(parsedColor), Color.green(parsedColor), Color.blue(parsedColor))
+                strokeWidth = 2.0f
+
+                // You can still add info for when the polygon is clicked
+                // This is just an example
+                id = circle.id
+                title = circle.name
+                setOnClickListener { _, _, _ ->
+                    Toast.makeText(context, "Circle: $title", Toast.LENGTH_SHORT).show()
+                    true
+                }
+            }
+
+            //  Add to our tracking list
+            circlePolygons.add(polygon)
+        }
+
+        //  Add new overlays to the map
+        mapView.overlays.addAll(circlePolygons)
+        mapView.invalidate() // Redraw the map
     }
 
     @SuppressLint("MissingPermission")
@@ -114,14 +201,18 @@ class MapFragment : Fragment() {
                     updateMyLocationMarker(userLocation)
                     mapView.controller.animateTo(userLocation, targetZoom, 1000L)
 
-                    // REQUIRED FIX: Save the new state to the ViewModel
+                    // Save state to ViewModel
                     viewModel.lastKnownLocation = userLocation
                     viewModel.lastKnownZoom = targetZoom
+
+                    viewModel.fetchNearbyCircles(userLocation.latitude, userLocation.longitude)
+
                 } else {
-                    Toast.makeText(context, "Could not determine your location.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Could not determine location.", Toast.LENGTH_SHORT).show()
                 }
             }
         } else {
+            // Request permissions if not granted
             requestLocationPermissions()
         }
     }
@@ -133,14 +224,15 @@ class MapFragment : Fragment() {
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
             }
             pulsePolygon = Polygon(mapView).apply {
-                fillColor = Color.argb(50, 200, 200, 100)
+                fillColor = Color.argb(50, 200, 200, 100) // Example pulse color
                 strokeWidth = 0f
             }
+            // Add pulse *before* marker so marker is on top
             mapView.overlays.add(pulsePolygon)
             mapView.overlays.add(myLocationMarker)
         }
         myLocationMarker?.position = position
-        pulsePolygon?.let { it.points = Polygon.pointsAsCircle(position, 1.0) }
+        pulsePolygon?.let { it.points = Polygon.pointsAsCircle(position, 1.0) } // Small pulse
         mapView.invalidate()
     }
 
@@ -159,6 +251,10 @@ class MapFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
+        // Save the map's current state to the ViewModel
+        viewModel.lastKnownLocation = mapView.mapCenter as GeoPoint
+        viewModel.lastKnownZoom = mapView.zoomLevelDouble
+
         mapView.onPause()
         pulseAnimator?.cancel()
     }

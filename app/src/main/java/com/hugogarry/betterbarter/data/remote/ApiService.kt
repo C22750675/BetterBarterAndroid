@@ -1,6 +1,8 @@
 package com.hugogarry.betterbarter.data.remote
 
 import com.hugogarry.betterbarter.data.model.Category
+import com.hugogarry.betterbarter.data.model.Circle
+import com.hugogarry.betterbarter.data.model.CreateCircleRequest
 import com.hugogarry.betterbarter.data.model.CreateItemRequest
 import com.hugogarry.betterbarter.data.model.Item
 import com.hugogarry.betterbarter.data.model.Trade
@@ -19,6 +21,7 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
 import com.hugogarry.betterbarter.data.model.UpdateProfileRequest
+import retrofit2.http.Query
 
 
 interface ApiService {
@@ -68,4 +71,17 @@ interface ApiService {
     // Endpoint to update the user's profile
     @PATCH("auth/profile")
     suspend fun updateProfile(@Body updateProfileDto: UpdateProfileRequest): User
+
+    @GET("circles/my-circles")
+    suspend fun getMyCircles(): List<Circle>
+
+    @POST("circles")
+    suspend fun createCircle(@Body createCircleRequest: CreateCircleRequest): Circle
+
+    @GET("circles/near")
+    suspend fun findNearbyCircles(
+        @Query("lat") latitude: Double,
+        @Query("lon") longitude: Double,
+        @Query("radius") radius: Int = 25000 // 25km radius, you can change this
+    ): List<Circle>
 }

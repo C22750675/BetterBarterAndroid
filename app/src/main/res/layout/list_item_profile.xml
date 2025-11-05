@@ -4,14 +4,11 @@
     android:orientation="horizontal"
     android:padding="16dp">
 
-    <!-- Placeholder for item image -->
     <ImageView
         android:id="@+id/imageViewItem"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:background="@color/material_on_surface_disabled"
         android:contentDescription="Item Image" />
-
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"

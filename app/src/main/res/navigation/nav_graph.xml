@@ -4,7 +4,6 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/auth_flow">
 
-    <!-- Nested Graph for Authentication -->
     <navigation android:id="@+id/auth_flow" app:startDestination="@id/welcomeFragment">
         <fragment
             android:id="@+id/welcomeFragment"
@@ -21,7 +20,6 @@
             android:id="@+id/loginFragment"
             android:name="com.hugogarry.betterbarter.ui.auth.LoginFragment"
             android:label="LoginFragment">
-            <!-- Action now goes to the main flow graph -->
             <action
                 android:id="@+id/action_auth_to_main"
                 app:destination="@id/main_flow"
@@ -32,7 +30,6 @@
             android:id="@+id/registerFragment"
             android:name="com.hugogarry.betterbarter.ui.auth.RegisterFragment"
             android:label="RegisterFragment">
-            <!-- Action now goes to the main flow graph -->
             <action
                 android:id="@+id/action_auth_to_main"
                 app:destination="@id/main_flow"
@@ -41,26 +38,49 @@
         </fragment>
     </navigation>
 
-    <!-- Nested Graph for Main App Content -->
     <navigation android:id="@+id/main_flow" app:startDestination="@id/mapFragment">
         <fragment
             android:id="@+id/mapFragment"
             android:name="com.hugogarry.betterbarter.ui.map.MapFragment"
             android:label="MapFragment"
             tools:layout="@layout/fragment_map" />
+
+        <fragment
+            android:id="@+id/circlesFragment"
+            android:name="com.hugogarry.betterbarter.ui.circles.CirclesFragment"
+            android:label="CirclesFragment"
+            tools:layout="@layout/fragment_circles">
+            <action
+                android:id="@+id/action_circlesFragment_to_createCircleFragment"
+                app:destination="@id/createCircleFragment" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/createCircleFragment"
+            android:name="com.hugogarry.betterbarter.ui.circles.CreateCircleFragment"
+            android:label="CreateCircleFragment"
+            tools:layout="@layout/fragment_create_circle" />
+
         <fragment
             android:id="@+id/profileFragment"
             android:name="com.hugogarry.betterbarter.ui.profile.ProfileFragment"
             android:label="ProfileFragment">
             <action
                 android:id="@+id/action_profileFragment_to_addItemFragment"
-                app:destination="@id/addItemFragment" /> </fragment>
+                app:destination="@id/addItemFragment" />
+        </fragment>
 
         <fragment
             android:id="@+id/addItemFragment"
             android:name="com.hugogarry.betterbarter.ui.item.AddItemFragment"
             android:label="AddItemFragment"
             tools:layout="@layout/fragment_add_item" />
+
+        <fragment
+            android:id="@+id/tradesFragment"
+            android:name="com.hugogarry.betterbarter.ui.trades.TradesFragment"
+            android:label="TradesFragment"
+            tools:layout="@layout/fragment_trades" />
 
     </navigation>
 
