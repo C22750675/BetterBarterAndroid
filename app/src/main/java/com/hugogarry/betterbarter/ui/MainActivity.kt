@@ -2,11 +2,13 @@ package com.hugogarry.betterbarter.ui
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions // REQUIRED IMPORT
 import androidx.navigation.fragment.NavHostFragment
@@ -14,6 +16,8 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.util.SessionManager
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
@@ -45,9 +49,39 @@ class MainActivity : AppCompatActivity() {
 
         // Call the new function to handle insets
         setupWindowInsets()
+
+        // Start observing for session expiry events
+        observeSessionExpiry()
     }
 
-    // NEW FUNCTION: Handles window insets for edge-to-edge display
+    private fun observeSessionExpiry() {
+        lifecycleScope.launch {
+            SessionManager.sessionExpired.collectLatest { hasExpired ->
+                if (hasExpired) {
+                    // Show a message to the user
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Your session has expired. Please log in again.",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    // Reset the flag in the SessionManager
+                    SessionManager.clearSessionExpiredFlag()
+
+                    // Define navigation options to clear the entire back stack
+                    // (all fragments in main_flow)
+                    val navOptions = NavOptions.Builder()
+                        .setPopUpTo(R.id.main_flow, true)
+                        .build()
+
+                    // Navigate back to the auth_flow (which leads to WelcomeFragment)
+                    navController.navigate(R.id.auth_flow, null, navOptions)
+                }
+            }
+        }
+    }
+
+    // Handles window insets for edge-to-edge display
     private fun setupWindowInsets() {
         val rootLayout = findViewById<ConstraintLayout>(R.id.main_activity_root)
 
