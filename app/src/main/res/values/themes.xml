@@ -4,6 +4,9 @@
 
     <style name="Theme.BetterBarter" parent="Base.Theme.BetterBarter" />
 
+    <style name="ThemeOverlay.App.Toolbar.Dark" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
+    </style>
+
     <style name="ShapeAppearance.App.Circle" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>

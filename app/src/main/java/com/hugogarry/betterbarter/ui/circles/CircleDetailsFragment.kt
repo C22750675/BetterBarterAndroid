@@ -32,7 +32,6 @@ class CircleDetailsFragment : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var descriptionText: TextView
     private lateinit var adminText: TextView
-    private lateinit var collapsingToolbar: CollapsingToolbarLayout
     private lateinit var toolbar: Toolbar
 
     override fun onCreateView(
@@ -50,7 +49,6 @@ class CircleDetailsFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBarItems)
         descriptionText = view.findViewById(R.id.textViewCircleDescription)
         adminText = view.findViewById(R.id.textViewAdmins)
-        collapsingToolbar = view.findViewById(R.id.toolbar_layout)
         toolbar = view.findViewById(R.id.toolbar)
 
         // Setup toolbar
@@ -82,17 +80,17 @@ class CircleDetailsFragment : Fragment() {
                 when (resource) {
                     is Resource.Success -> {
                         val circle = resource.data!!
-                        collapsingToolbar.title = circle.name
+                        toolbar.title = circle.name
                         descriptionText.text = circle.description
-                        // You'll need to format the admin list
+                        // Format the admin list
                         adminText.text = "Admins: ${circle.admins?.joinToString { it.username }}"
                     }
                     is Resource.Error -> {
-                        collapsingToolbar.title = "Error"
+                        toolbar.title = "Error"
                         descriptionText.text = resource.message
                     }
                     is Resource.Loading -> {
-                        collapsingToolbar.title = "Loading..."
+                        toolbar.title = "Loading..."
                     }
                     else -> {}
                 }
