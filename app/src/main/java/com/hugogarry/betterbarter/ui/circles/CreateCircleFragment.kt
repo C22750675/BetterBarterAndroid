@@ -36,7 +36,7 @@ class CreateCircleFragment : Fragment() {
     // UI Components
     private lateinit var nameEditText: EditText
     private lateinit var radiusEditText: EditText
-    private lateinit var rulesEditText: EditText
+    private lateinit var descriptionEditText: EditText
     private lateinit var setLocationButton: Button
     private lateinit var createButton: Button
     private lateinit var progressBar: ProgressBar
@@ -76,6 +76,7 @@ class CreateCircleFragment : Fragment() {
         // Find all views
         nameEditText = view.findViewById(R.id.editTextName)
         radiusEditText = view.findViewById(R.id.editTextRadius)
+        descriptionEditText = view.findViewById(R.id.editTextRules)
         setLocationButton = view.findViewById(R.id.buttonSetLocation)
         createButton = view.findViewById(R.id.buttonCreate)
         progressBar = view.findViewById(R.id.progressBarCreate)
@@ -91,12 +92,15 @@ class CreateCircleFragment : Fragment() {
         }
 
         createButton.setOnClickListener {
+            val description = descriptionEditText.text.toString()
+
             viewModel.createCircle(
                 name = nameEditText.text.toString().trim(),
                 radiusMeters = radiusEditText.text.toString().toIntOrNull(),
                 latitude = currentLatitude,
                 longitude = currentLongitude,
-                color = selectedColor // Pass the selected color
+                color = selectedColor,
+                description = description
             )
         }
 
@@ -176,10 +180,8 @@ class CreateCircleFragment : Fragment() {
         colors.forEach { (hex, drawableRes) ->
             val swatch = View(context).apply {
                 layoutParams = LinearLayout.LayoutParams(swatchSize, swatchSize).apply {
-                    // --- THIS IS THE FIX ---
                     leftMargin = margin
                     rightMargin = margin
-                    // --- END OF FIX ---
                 }
                 setBackgroundResource(drawableRes)
                 tag = hex

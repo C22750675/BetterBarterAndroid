@@ -15,6 +15,9 @@ data class Item(
     val createdAt: String,
     val ownerId: String,
     val categoryId: String?,
-    // You might include the full User object if your API sends it nested
-    val owner: User?
+    val owner: User?,
+    // The ID of the circle this item is posted in
+    val circleId: String?,
+    // The full Circle object, if the API sends it nested
+    val circle: Circle?
 )

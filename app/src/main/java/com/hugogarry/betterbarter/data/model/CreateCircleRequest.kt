@@ -20,5 +20,6 @@ data class CreateCircleRequest(
     val name: String,
     val origin: RequestPoint,
     val radius: Int, // Radius in meters
-    val color: String
+    val color: String,
+    val description: String
 )

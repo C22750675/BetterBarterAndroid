@@ -72,6 +72,9 @@ interface ApiService {
     @PATCH("auth/profile")
     suspend fun updateProfile(@Body updateProfileDto: UpdateProfileRequest): User
 
+    @GET("circles/{circleId}")
+    suspend fun getCircleDetails(@Path("circleId") circleId: String): Circle
+
     @GET("circles/my-circles")
     suspend fun getMyCircles(): List<Circle>
 

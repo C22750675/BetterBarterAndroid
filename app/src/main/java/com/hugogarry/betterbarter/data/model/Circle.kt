@@ -19,5 +19,7 @@ data class Circle(
     val minimumRepThreshold: Int,
     val createdAt: String,
     val memberCount: Int = 1,
-    val color: String
+    val color: String,
+    val description: String?,
+    val admins: List<UserSummary>?
 )

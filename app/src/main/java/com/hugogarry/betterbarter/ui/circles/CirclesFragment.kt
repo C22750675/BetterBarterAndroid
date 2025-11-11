@@ -53,6 +53,18 @@ class CirclesFragment : Fragment() {
 
     private fun setupRecyclerView() {
         circlesAdapter = CirclesAdapter()
+
+        // Set the click listener. This is the lambda from Step 1.
+        circlesAdapter.onItemClick = { circle ->
+            // Use the generated NavDirections class to create the action
+            // This class only exists after you rebuild the project (Step 2)
+            val action = CirclesFragmentDirections
+                .actionCirclesFragmentToCircleDetailsFragment(circle.id)
+
+            // Navigate to the detail fragment
+            findNavController().navigate(action)
+        }
+
         recyclerView.apply {
             adapter = circlesAdapter
             layoutManager = LinearLayoutManager(context)

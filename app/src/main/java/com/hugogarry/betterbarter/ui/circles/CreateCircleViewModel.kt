@@ -23,9 +23,10 @@ class CreateCircleViewModel(
         radiusMeters: Int?,
         latitude: Double?,
         longitude: Double?,
-        color: String
+        color: String,
+        description: String
     ) {
-        if (name.isBlank() || radiusMeters == null || latitude == null || longitude == null) {
+        if (name.isBlank() || description.isBlank() || radiusMeters == null || latitude == null || longitude == null) {
             _createState.value = Resource.Error("Please fill in all fields and set a location.")
             return
         }
@@ -42,7 +43,7 @@ class CreateCircleViewModel(
             origin = originPoint,
             radius = radiusMeters,
             color = color,
-
+            description = description
         )
 
         viewModelScope.launch {

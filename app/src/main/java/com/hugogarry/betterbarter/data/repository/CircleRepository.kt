@@ -10,11 +10,27 @@ import com.hugogarry.betterbarter.data.model.CreateCircleRequest
 
 class CircleRepository(private val apiService: ApiService = ApiClient.apiService) {
 
+    suspend fun getCircleDetails(circleId: String): Resource<Circle> {
+        return try {
+            val circle = apiService.getCircleDetails(circleId)
+            Resource.Success(circle)
+        } catch (_: IOException) {
+            Resource.Error("Network error: Could not fetch circle details.")
+        } catch (e: HttpException) {
+            val errorMsg = when (e.code()) {
+                404 -> "Circle not found."
+                500 -> "Server error. Please try again later."
+                else -> "An unexpected error occurred: ${e.message()}"
+            }
+            Resource.Error(errorMsg)
+        }
+    }
+
     suspend fun getMyCircles(): Resource<List<Circle>> {
         return try {
             val circles = apiService.getMyCircles()
             Resource.Success(circles)
-        } catch (e: IOException) {
+        } catch (_: IOException) {
             Resource.Error("Network error: Could not fetch circles. Please check your connection.")
         } catch (e: HttpException) {
             val errorMsg = when (e.code()) {
@@ -31,7 +47,7 @@ class CircleRepository(private val apiService: ApiService = ApiClient.apiService
         return try {
             val newCircle = apiService.createCircle(request)
             Resource.Success(newCircle)
-        } catch (e: IOException) {
+        } catch (_: IOException) {
             Resource.Error("Network error: Could not create circle.")
         } catch (e: HttpException) {
             val errorMsg = when (e.code()) {
@@ -48,7 +64,7 @@ class CircleRepository(private val apiService: ApiService = ApiClient.apiService
             // We can hardcode the radius for now or pass it in
             val circles = apiService.findNearbyCircles(latitude, longitude, radius = 50000) // 50km
             Resource.Success(circles)
-        } catch (e: IOException) {
+        } catch (_: IOException) {
             Resource.Error("Network error: Could not find circles.")
         } catch (e: HttpException) {
             Resource.Error("An unexpected error occurred: ${e.message()}")

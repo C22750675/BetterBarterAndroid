@@ -12,6 +12,8 @@ import com.hugogarry.betterbarter.data.model.Circle
 
 class CirclesAdapter : ListAdapter<Circle, CirclesAdapter.CircleViewHolder>(CircleDiffCallback()) {
 
+    // A lambda for handling item clicks
+    var onItemClick: ((Circle) -> Unit)? = null
     class CircleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val circleName: TextView = itemView.findViewById(R.id.textViewCircleName)
         private val circleMembers: TextView = itemView.findViewById(R.id.textViewCircleMembers)
@@ -32,7 +34,13 @@ class CirclesAdapter : ListAdapter<Circle, CirclesAdapter.CircleViewHolder>(Circ
     }
 
     override fun onBindViewHolder(holder: CircleViewHolder, position: Int) {
+        val circle = getItem(position) // Get the item
         holder.bind(getItem(position))
+
+        // Set the click listener on the entire item view
+        holder.itemView.setOnClickListener {
+            onItemClick?.invoke(circle) // Call the lambda
+        }
     }
 }
 
