@@ -12,7 +12,6 @@ import com.hugogarry.betterbarter.data.model.RegisterRequest
 import com.hugogarry.betterbarter.data.model.UploadResponse
 import com.hugogarry.betterbarter.data.model.User
 import okhttp3.MultipartBody
-import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Multipart
