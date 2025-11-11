@@ -52,9 +52,7 @@ class CircleDetailsViewModel(
 
             // Run all network calls in parallel
             val circleDetailsDeferred = async { circleRepository.getCircleDetails(circleId) }
-            // --- THIS IS THE FIX ---
             val tradesDeferred = async { tradeRepository.getTradesForCircle(circleId) }
-            // --- END OF FIX ---
             val userProfileDeferred = async { authRepository.getProfile() }
 
             // Await the results
