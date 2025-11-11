@@ -109,7 +109,6 @@ class AddItemViewModel(
         val bestBeforeDate = bestBeforeDateText?.trim()?.takeIf { it.isNotBlank() }
         val useByDate = useByDateText?.trim()?.takeIf { it.isNotBlank() }
 
-        // --- MODIFIED: Get the URL from our internal state ---
         val imageUrl = _uploadedImageUrl.value
 
         viewModelScope.launch {
@@ -122,7 +121,7 @@ class AddItemViewModel(
                 bestBeforeDate = bestBeforeDate,
                 useByDate = useByDate,
                 stock = stock,
-                imageUrl = imageUrl // <-- Use the URL from our state
+                imageUrl = imageUrl
             )
             _addItemState.value = itemRepository.createItem(request)
         }

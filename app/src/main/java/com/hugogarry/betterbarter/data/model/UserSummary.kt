@@ -9,5 +9,6 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class UserSummary(
     val id: String,
-    val username: String
+    val username: String,
+    val profilePictureUrl: String?
 )

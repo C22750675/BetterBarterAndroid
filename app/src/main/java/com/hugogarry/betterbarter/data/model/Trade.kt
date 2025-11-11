@@ -8,9 +8,12 @@ data class Trade(
     val status: TradeStatus,
     val creationDate: String,
     val completionDate: String?,
+    val description: String?,
     val proposerId: String,
-    val recipientId: String,
-    // You can include nested objects if the API provides them
-    val proposer: User?,
-    val recipient: User?
+    val proposer: UserSummary,
+    val recipientId: String?,
+    val recipient: User?,
+    val offeredItemQuantity: Int,
+    val offeredItem: Item?,
+    val circleId: String
 )

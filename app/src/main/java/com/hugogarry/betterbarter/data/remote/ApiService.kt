@@ -22,6 +22,7 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 import com.hugogarry.betterbarter.data.model.UpdateProfileRequest
 import retrofit2.http.Query
+import com.hugogarry.betterbarter.data.model.CreateTradeRequest
 
 
 interface ApiService {
@@ -42,13 +43,6 @@ interface ApiService {
      */
     @GET("items/{itemId}")
     suspend fun getItemDetails(@Path("itemId") itemId: String): Item
-
-    /**
-     * Creates a new trade. The Trade object will be converted to JSON.
-     * The server's response (likely the newly created trade) is returned.
-     */
-    @POST("trades")
-    suspend fun createTrade(@Body trade: Trade): Response<Trade>
 
     @GET("auth/profile") // We'll use this to get the user's profile data
     suspend fun getProfile(): User // Assuming this returns a User object
@@ -87,4 +81,10 @@ interface ApiService {
         @Query("lon") longitude: Double,
         @Query("radius") radius: Int = 25000 // 25km radius, you can change this
     ): List<Circle>
+
+    @POST("trades")
+    suspend fun createTrade(@Body createTradeRequest: CreateTradeRequest): Trade
+
+    @GET("trades/circle/{circleId}")
+    suspend fun getTradesForCircle(@Path("circleId") circleId: String): List<Trade>
 }

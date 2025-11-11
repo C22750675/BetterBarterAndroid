@@ -4,7 +4,16 @@
 
     <style name="Theme.BetterBarter" parent="Base.Theme.BetterBarter" />
 
+    <!--
+      This is the correct, official Material Design solution.
+      It's a Theme Overlay that tells any component using it
+      to use "dark action bar" styling (i.e., light text and light icons).
+    -->
     <style name="ThemeOverlay.App.Toolbar.Dark" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        <!--
+          This parent theme automatically sets icon and title colors to white.
+          We can leave this empty.
+        -->
     </style>
 
     <style name="ShapeAppearance.App.Circle" parent="">

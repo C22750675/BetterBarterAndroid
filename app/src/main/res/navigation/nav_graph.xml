@@ -87,6 +87,16 @@
             tools:layout="@layout/fragment_trades" />
 
         <fragment
+            android:id="@+id/createTradeFragment"
+            android:name="com.hugogarry.betterbarter.ui.trades.CreateTradeFragment"
+            android:label="CreateTradeFragment"
+            tools:layout="@layout/fragment_create_trade">
+            <argument
+                android:name="circleId"
+                app:argType="string" />
+        </fragment>
+
+        <fragment
             android:id="@+id/circleDetailsFragment"
             android:name="com.hugogarry.betterbarter.ui.circles.CircleDetailsFragment"
             android:label="Circle Details"
@@ -96,6 +106,9 @@
                 android:name="circleId"
                 app:argType="string" />
 
+            <action
+                android:id="@+id/action_circleDetailsFragment_to_createTradeFragment"
+                app:destination="@id/createTradeFragment" />
         </fragment>
     </navigation>
 

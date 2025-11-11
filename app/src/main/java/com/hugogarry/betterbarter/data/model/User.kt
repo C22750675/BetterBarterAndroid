@@ -8,7 +8,6 @@ data class User(
     val id: String,
     val username: String,
     val bio: String?,
-    @Json(name = "profilePictureUrl") // Example if your JSON key is different
     val profilePictureUrl: String?,
     val reputationScore: Double,
     val createdAt: String // e.g., "2025-10-10T10:00:00.000Z"

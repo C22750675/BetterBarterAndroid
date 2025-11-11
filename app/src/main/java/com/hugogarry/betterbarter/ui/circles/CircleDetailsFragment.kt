@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -15,9 +16,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.hugogarry.betterbarter.R
-import com.hugogarry.betterbarter.ui.profile.ProfileItemsAdapter
+import com.hugogarry.betterbarter.data.model.Trade // <-- Make sure this is imported
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -27,12 +28,14 @@ class CircleDetailsFragment : Fragment() {
 
     private val viewModel: CircleDetailsViewModel by viewModels()
 
-    private lateinit var itemsAdapter: ProfileItemsAdapter
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var progressBar: ProgressBar
+    private lateinit var toolbar: Toolbar
+    private lateinit var fabAddTrade: FloatingActionButton
     private lateinit var descriptionText: TextView
     private lateinit var adminText: TextView
-    private lateinit var toolbar: Toolbar
+
+    private lateinit var activeTradesAdapter: ActiveTradesAdapter
+    private lateinit var recyclerViewActiveTrades: RecyclerView
+    private lateinit var progressBarActiveTrades: ProgressBar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,74 +48,68 @@ class CircleDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Find all views
-        recyclerView = view.findViewById(R.id.recyclerViewCircleItems)
-        progressBar = view.findViewById(R.id.progressBarItems)
         descriptionText = view.findViewById(R.id.textViewCircleDescription)
         adminText = view.findViewById(R.id.textViewAdmins)
         toolbar = view.findViewById(R.id.toolbar)
+        fabAddTrade = view.findViewById(R.id.fabAddTrade)
+
+        recyclerViewActiveTrades = view.findViewById(R.id.recyclerViewActiveTrades)
+        progressBarActiveTrades = view.findViewById(R.id.progressBarActiveTrades)
 
         // Setup toolbar
         NavigationUI.setupWithNavController(toolbar, findNavController())
 
         setupRecyclerView()
-        observeCircleDetails()
-        observeCircleItems()
+
+        fabAddTrade.setOnClickListener {
+            // Create the action, passing the circleId
+            val action = CircleDetailsFragmentDirections
+                .actionCircleDetailsFragmentToCreateTradeFragment(viewModel.circleId)
+            findNavController().navigate(action)
+        }
+
+        observeUiState()
     }
 
     private fun setupRecyclerView() {
-        itemsAdapter = ProfileItemsAdapter()
-        // --- TODO for Step 5 ---
-        // itemsAdapter.onItemClick = { item ->
-        //    val action = CircleDetailFragmentDirections.actionCircleDetailFragmentToTradeProposalFragment(item.id)
-        //    findNavController().navigate(action)
-        // }
-        // --- End TODO ---
+        activeTradesAdapter = ActiveTradesAdapter()
+        // --- THIS IS THE FIX ---
+        activeTradesAdapter.onProposeClick = { trade: Trade -> // <-- Explicitly set type to Trade
+            // TODO: Navigate to trade proposal screen
+            Toast.makeText(context, "Propose on ${trade.offeredItem?.name}", Toast.LENGTH_SHORT).show()
+        }
+        // --- END OF FIX ---
 
-        recyclerView.apply {
-            adapter = itemsAdapter
+        recyclerViewActiveTrades.apply {
+            adapter = activeTradesAdapter
             layoutManager = LinearLayoutManager(context)
         }
     }
 
-    private fun observeCircleDetails() {
+    private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.circleDetails.collectLatest { resource ->
-                when (resource) {
-                    is Resource.Success -> {
-                        val circle = resource.data!!
-                        toolbar.title = circle.name
-                        descriptionText.text = circle.description
-                        // Format the admin list
-                        adminText.text = "Admins: ${circle.admins?.joinToString { it.username }}"
-                    }
-                    is Resource.Error -> {
-                        toolbar.title = "Error"
-                        descriptionText.text = resource.message
-                    }
-                    is Resource.Loading -> {
-                        toolbar.title = "Loading..."
-                    }
-                    else -> {}
-                }
-            }
-        }
-    }
+            viewModel.uiState.collectLatest { state ->
+                // Show loading on the *list* progress bar
+                progressBarActiveTrades.isVisible = state.isLoading
 
-    private fun observeCircleItems() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.circleItems.collectLatest { resource ->
-                progressBar.isVisible = resource is Resource.Loading
-                recyclerView.isVisible = resource is Resource.Success
-
-                when (resource) {
-                    is Resource.Success -> {
-                        itemsAdapter.submitList(resource.data)
-                    }
-                    is Resource.Error -> {
-                        // You might want a dedicated error TextView for this list
-                    }
-                    else -> {}
+                // Handle Error
+                if (state.error != null) {
+                    Toast.makeText(context, state.error, Toast.LENGTH_LONG).show()
+                    // You might want a dedicated error text view
                 }
+
+                // Handle Success data
+                state.circle?.let { circle ->
+                    toolbar.title = circle.name
+                    descriptionText.text = circle.description
+                    adminText.text = "Admins: ${circle.admins?.joinToString { it.username }}"
+                }
+
+                // Submit the list of Trades
+                activeTradesAdapter.submitList(state.activeTrades)
+
+                // The main logic for the FAB
+                fabAddTrade.isVisible = state.isUserAdmin
             }
         }
     }
