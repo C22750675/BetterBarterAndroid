@@ -88,7 +88,7 @@ class ProfileFragment : Fragment() {
             findNavController().navigate(R.id.action_profileFragment_to_addItemFragment)
         }
 
-        // NEW: Click listener for profile image
+        // Click listener for profile image
         profileImageView.setOnClickListener {
             requestPermissionAndPickImage()
         }

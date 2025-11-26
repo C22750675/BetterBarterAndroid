@@ -24,12 +24,15 @@ class MyTradesAdapter(
 
     enum class ActionType { ACCEPT, REJECT, COMPLETE, RATE }
 
+    // Callback for item clicks
+    var onItemClick: ((Trade) -> Unit)? = null
+
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Bind to the views in list_item_trade.xml
         val ownerProfilePic: ImageView = itemView.findViewById(R.id.imageViewOwnerProfile)
         val ownerName: TextView = itemView.findViewById(R.id.textViewOwnerName)
         val itemNameAndStock: TextView = itemView.findViewById(R.id.textViewItemNameAndStock)
-        val itemImage: ImageView = itemView.findViewById(R.id.imageViewItem) // This was likely missing logic
+        val itemImage: ImageView = itemView.findViewById(R.id.imageViewItem)
         val btnAction: Button = itemView.findViewById(R.id.buttonProposeTrade)
 
         private val baseUrl = BuildConfig.BASE_URL.removeSuffix("/api/")
@@ -38,7 +41,7 @@ class MyTradesAdapter(
             val item = trade.offeredItem
 
             // 1. Set Text Data
-           ownerName.text = trade.proposer.username
+            ownerName.text = trade.proposer.username
             itemNameAndStock.text = "${item?.name ?: "Unknown Item"} (${trade.offeredItemQuantity})\nStatus: ${trade.status.name}"
 
             // 2. Load Owner Profile Pic
@@ -49,12 +52,11 @@ class MyTradesAdapter(
                 transformations(CircleCropTransformation())
             }
 
-            // 3. Load Item Image (The fix)
+            // 3. Load Item Image
             val itemPicUrl = item?.imageUrl?.let { "$baseUrl/api/uploads$it" }
             itemImage.load(itemPicUrl) {
                 placeholder(R.drawable.ic_launcher_background)
                 error(R.drawable.ic_launcher_background)
-                // Add a crossfade for smoother loading if desired
                 crossfade(true)
             }
 
@@ -93,7 +95,13 @@ class MyTradesAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val trade = getItem(position)
+        holder.bind(trade)
+
+        // Set click listener on the root view
+        holder.itemView.setOnClickListener {
+            onItemClick?.invoke(trade)
+        }
     }
 
     class DiffCallback : DiffUtil.ItemCallback<Trade>() {

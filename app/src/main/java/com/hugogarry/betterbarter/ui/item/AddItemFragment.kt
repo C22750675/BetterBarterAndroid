@@ -250,7 +250,7 @@ class AddItemFragment : Fragment() {
         }
     }
 
-    // --- NEW: Observe the image upload state ---
+    // Observe the image upload state
     private fun observeImageUploadState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.imageUploadState.collectLatest { resource ->
@@ -277,7 +277,7 @@ class AddItemFragment : Fragment() {
         }
     }
 
-    // --- NEW: Copied from ProfileFragment ---
+    // Copied from ProfileFragment
     private fun requestPermissionAndPickImage() {
         val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Manifest.permission.READ_MEDIA_IMAGES

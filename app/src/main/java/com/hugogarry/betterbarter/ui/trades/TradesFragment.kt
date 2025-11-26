@@ -8,10 +8,10 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.hugogarry.betterbarter.R
@@ -40,7 +40,6 @@ class TradesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Decode JWT to get User ID (Simple approach for MVP)
         val userId = getUserIdFromToken() ?: ""
 
         adapter = MyTradesAdapter(userId) { trade, action ->
@@ -52,13 +51,16 @@ class TradesFragment : Fragment() {
             }
         }
 
-        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewTrades) // Need to add ID to layout
-        // NOTE: You need to add android:id="@+id/recyclerViewTrades" to your fragment_trades.xml
-        // If it's not there, add it now. Assuming you have a basic RecyclerView there.
+        // NEW: Handle Item Click
+        adapter.onItemClick = { trade ->
+            // Use the newly created action
+            val action = TradesFragmentDirections
+                .actionTradesFragmentToTradeDetailsFragment(trade.id)
+            findNavController().navigate(action)
+        }
 
-        // Wait, your uploaded fragment_trades.xml only had a TextView.
-        // I will assume you can swap that TextView for a RecyclerView in your IDE.
-        // Or I can provide the layout file update below.
+        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewTrades)
+        progressBar = view.findViewById<ProgressBar>(R.id.progressBarTrades) // Init progressBar
 
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -70,6 +72,13 @@ class TradesFragment : Fragment() {
     private fun observeState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.trades.collectLatest { resource ->
+                // Basic loading handling
+                if (resource is Resource.Loading) {
+                    progressBar.visibility = View.VISIBLE
+                } else {
+                    progressBar.visibility = View.GONE
+                }
+
                 if (resource is Resource.Success) {
                     adapter.submitList(resource.data)
                 }

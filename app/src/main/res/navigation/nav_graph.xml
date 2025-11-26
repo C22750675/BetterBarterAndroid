@@ -84,7 +84,12 @@
             android:id="@+id/tradesFragment"
             android:name="com.hugogarry.betterbarter.ui.trades.TradesFragment"
             android:label="TradesFragment"
-            tools:layout="@layout/fragment_trades" />
+            tools:layout="@layout/fragment_trades">
+
+            <action
+                android:id="@+id/action_tradesFragment_to_tradeDetailsFragment"
+                app:destination="@id/tradeDetailsFragment" />
+        </fragment>
 
         <fragment
             android:id="@+id/createTradeFragment"
@@ -118,7 +123,7 @@
         <fragment
             android:id="@+id/tradeDetailsFragment"
             android:name="com.hugogarry.betterbarter.ui.trades.TradeDetailsFragment"
-            android:label="Trade Details"
+            android:label="TradeDetailsFragment"
             tools:layout="@layout/fragment_trade_details">
             <argument
                 android:name="tradeId"
