@@ -74,6 +74,10 @@ interface ApiService {
         @Body ratingDto: CreateRatingRequest
     ): Void
 
+    // Get Single Trade
+    @GET("trades/{id}")
+    suspend fun getTrade(@Path("id") tradeId: String): Trade
+
     // Upload
     @Multipart
     @POST("uploads")

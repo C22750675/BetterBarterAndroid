@@ -74,10 +74,15 @@ class CircleDetailsFragment : Fragment() {
 
         activeTradesAdapter = ActiveTradesAdapter(currentUserId)
 
-        // Note: This logic is now mostly handled inside the adapter (disabling buttons)
-        // but we keep the callback structure for when functionality is added.
         activeTradesAdapter.onProposeClick = { trade: Trade ->
             Toast.makeText(context, "Applying for trade on ${trade.offeredItem?.name}", Toast.LENGTH_SHORT).show()
+        }
+
+        // Handle Item Click to navigate to Details
+        activeTradesAdapter.onItemClick = { trade: Trade ->
+            val action = CircleDetailsFragmentDirections
+                .actionCircleDetailsFragmentToTradeDetailsFragment(trade.id)
+            findNavController().navigate(action)
         }
 
         recyclerViewActiveTrades.apply {
@@ -103,8 +108,6 @@ class CircleDetailsFragment : Fragment() {
 
                 activeTradesAdapter.submitList(state.activeTrades)
 
-                // FAB logic (e.g. only admins or members can add trades)
-                // Assuming any member can propose a trade in the circle:
                 fabAddTrade.isVisible = !state.isLoading
             }
         }

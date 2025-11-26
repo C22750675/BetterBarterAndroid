@@ -1,14 +1,13 @@
 package com.hugogarry.betterbarter.data.repository
 
-import com.hugogarry.betterbarter.data.model.CreateRatingRequest
 import com.hugogarry.betterbarter.data.model.CreateTradeRequest
 import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.model.TradeStatus
-import com.hugogarry.betterbarter.data.model.UpdateTradeStatusRequest
 import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.remote.ApiService
 import com.hugogarry.betterbarter.util.Resource
-
+import com.hugogarry.betterbarter.data.model.UpdateTradeStatusRequest // Ensure imports
+import com.hugogarry.betterbarter.data.model.CreateRatingRequest
 
 class TradeRepository(private val apiService: ApiService = ApiClient.apiService) {
 
@@ -54,6 +53,16 @@ class TradeRepository(private val apiService: ApiService = ApiClient.apiService)
             Resource.Success(true)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to submit review")
+        }
+    }
+
+    // Get Single Trade
+    suspend fun getTrade(tradeId: String): Resource<Trade> {
+        return try {
+            val trade = apiService.getTrade(tradeId)
+            Resource.Success(trade)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to load trade details")
         }
     }
 }

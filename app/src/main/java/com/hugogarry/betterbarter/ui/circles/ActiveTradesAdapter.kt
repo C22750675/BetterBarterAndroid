@@ -20,6 +20,8 @@ class ActiveTradesAdapter(
 ) : ListAdapter<Trade, ActiveTradesAdapter.TradeViewHolder>(TradeDiffCallback()) {
 
     var onProposeClick: ((Trade) -> Unit)? = null
+    // Callback for item clicks
+    var onItemClick: ((Trade) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TradeViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -39,6 +41,11 @@ class ActiveTradesAdapter(
         } else {
             // Remove listener for own trades (or set a different one for editing later)
             holder.proposeButton.setOnClickListener(null)
+        }
+
+        // Set click listener on the whole card
+        holder.itemView.setOnClickListener {
+            onItemClick?.invoke(trade)
         }
     }
 
@@ -76,7 +83,6 @@ class ActiveTradesAdapter(
                 // User created this trade
                 proposeButton.text = "Edit Trade Proposal"
                 proposeButton.isEnabled = false // Disabled for now
-                // Optionally change style to look disabled/secondary
                 proposeButton.alpha = 0.5f
             } else {
                 // Someone else created this trade
