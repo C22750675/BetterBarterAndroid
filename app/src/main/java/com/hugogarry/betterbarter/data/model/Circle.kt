@@ -21,5 +21,6 @@ data class Circle(
     val memberCount: Int = 1,
     val color: String,
     val description: String?,
-    val admins: List<UserSummary>?
+    val admins: List<UserSummary>?,
+    val isMember: Boolean = false
 )

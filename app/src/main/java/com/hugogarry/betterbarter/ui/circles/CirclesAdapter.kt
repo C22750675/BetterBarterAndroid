@@ -3,27 +3,35 @@ package com.hugogarry.betterbarter.ui.circles
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Circle
 
-class CirclesAdapter : ListAdapter<Circle, CirclesAdapter.CircleViewHolder>(CircleDiffCallback()) {
+class CirclesAdapter(
+    private val showJoinButton: Boolean = false
+) : ListAdapter<Circle, CirclesAdapter.CircleViewHolder>(CircleDiffCallback()) {
 
-    // A lambda for handling item clicks
     var onItemClick: ((Circle) -> Unit)? = null
+    var onJoinClick: ((Circle) -> Unit)? = null
+
     class CircleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val circleName: TextView = itemView.findViewById(R.id.textViewCircleName)
         private val circleMembers: TextView = itemView.findViewById(R.id.textViewCircleMembers)
         private val circleReputation: TextView = itemView.findViewById(R.id.textViewCircleReputation)
+        val joinButton: Button = itemView.findViewById(R.id.buttonJoinCircle)
 
-        fun bind(circle: Circle) {
+        fun bind(circle: Circle, showJoin: Boolean) {
             circleName.text = circle.name
             circleMembers.text = "${circle.memberCount} Members"
             // Using a star emoji for reputation
             circleReputation.text = "%.1f ★".format(circle.reputationScore)
+
+            joinButton.isVisible = showJoin
         }
     }
 
@@ -34,12 +42,15 @@ class CirclesAdapter : ListAdapter<Circle, CirclesAdapter.CircleViewHolder>(Circ
     }
 
     override fun onBindViewHolder(holder: CircleViewHolder, position: Int) {
-        val circle = getItem(position) // Get the item
-        holder.bind(getItem(position))
+        val circle = getItem(position)
+        holder.bind(circle, showJoinButton)
 
-        // Set the click listener on the entire item view
         holder.itemView.setOnClickListener {
-            onItemClick?.invoke(circle) // Call the lambda
+            onItemClick?.invoke(circle)
+        }
+
+        holder.joinButton.setOnClickListener {
+            onJoinClick?.invoke(circle)
         }
     }
 }

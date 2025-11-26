@@ -1,11 +1,18 @@
 package com.hugogarry.betterbarter.ui.circles
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -13,6 +20,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.util.Resource
@@ -22,11 +31,26 @@ import kotlinx.coroutines.launch
 class CirclesFragment : Fragment() {
 
     private val viewModel: CirclesViewModel by viewModels()
-    private lateinit var circlesAdapter: CirclesAdapter
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var progressBar: ProgressBar
+    // Adapters
+    private lateinit var myCirclesAdapter: CirclesAdapter
+    private lateinit var nearbyCirclesAdapter: CirclesAdapter
+
+    // Views
+    private lateinit var rvMyCircles: RecyclerView
+    private lateinit var rvNearbyCircles: RecyclerView
+    private lateinit var pbMyCircles: ProgressBar
+    private lateinit var pbNearby: ProgressBar
     private lateinit var errorTextView: TextView
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private val locationPermissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false)) {
+            getCurrentLocation()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,9 +61,12 @@ class CirclesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
-        recyclerView = view.findViewById(R.id.recyclerViewCircles)
-        progressBar = view.findViewById(R.id.progressBarCircles)
+        rvMyCircles = view.findViewById(R.id.recyclerViewMyCircles)
+        rvNearbyCircles = view.findViewById(R.id.recyclerViewNearbyCircles)
+        pbMyCircles = view.findViewById(R.id.progressBarMyCircles)
+        pbNearby = view.findViewById(R.id.progressBarNearby)
         errorTextView = view.findViewById(R.id.textViewErrorCircles)
 
         val fab = view.findViewById<FloatingActionButton>(R.id.fabAddCircle)
@@ -47,52 +74,125 @@ class CirclesFragment : Fragment() {
             findNavController().navigate(R.id.action_circlesFragment_to_createCircleFragment)
         }
 
-        setupRecyclerView()
-        observeCirclesState()
+        setupRecyclerViews()
+        observeViewModel()
+
+        // Try to get location for nearby circles
+        checkLocationPermission()
     }
 
-    private fun setupRecyclerView() {
-        circlesAdapter = CirclesAdapter()
-
-        // Set the click listener. This is the lambda from Step 1.
-        circlesAdapter.onItemClick = { circle ->
-            // Use the generated NavDirections class to create the action
-            // This class only exists after you rebuild the project (Step 2)
+    private fun setupRecyclerViews() {
+        // My Circles (Standard adapter)
+        myCirclesAdapter = CirclesAdapter(showJoinButton = false)
+        myCirclesAdapter.onItemClick = { circle ->
             val action = CirclesFragmentDirections
                 .actionCirclesFragmentToCircleDetailsFragment(circle.id)
-
-            // Navigate to the detail fragment
             findNavController().navigate(action)
         }
+        rvMyCircles.apply {
+            adapter = myCirclesAdapter
+            layoutManager = LinearLayoutManager(context)
+        }
 
-        recyclerView.apply {
-            adapter = circlesAdapter
+        // Nearby Circles (With Join Button)
+        nearbyCirclesAdapter = CirclesAdapter(showJoinButton = true)
+        nearbyCirclesAdapter.onJoinClick = { circle ->
+            viewModel.joinCircle(circle)
+            Toast.makeText(context, "Joining ${circle.name}...", Toast.LENGTH_SHORT).show()
+        }
+        rvNearbyCircles.apply {
+            adapter = nearbyCirclesAdapter
             layoutManager = LinearLayoutManager(context)
         }
     }
 
-    private fun observeCirclesState() {
+    private fun observeViewModel() {
+        // Observe My Circles
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.circlesState.collectLatest { resource ->
-                progressBar.isVisible = resource is Resource.Loading
-                recyclerView.isVisible = resource is Resource.Success
-                errorTextView.isVisible = resource is Resource.Error
+            viewModel.myCirclesState.collectLatest { resource ->
+                pbMyCircles.isVisible = resource is Resource.Loading
+                rvMyCircles.isVisible = resource is Resource.Success
 
-                when (resource) {
-                    is Resource.Success -> {
-                        circlesAdapter.submitList(resource.data)
-                        if (resource.data.isNullOrEmpty()) {
-                            errorTextView.isVisible = true
-                            errorTextView.text = "You haven't joined any circles yet."
-                        }
+                if (resource is Resource.Success) {
+                    myCirclesAdapter.submitList(resource.data)
+                    if (resource.data.isNullOrEmpty()) {
+                        errorTextView.isVisible = true
+                        errorTextView.text = "You haven't joined any circles yet."
+                    } else {
+                        errorTextView.isVisible = false
                     }
-                    is Resource.Error -> {
-                        errorTextView.text = resource.message
-                    }
-                    is Resource.Loading, is Resource.Idle -> {
-                        // Handled by visibility bindings
-                    }
+                    // Refresh nearby circles to filter out joined ones if needed
+                } else if (resource is Resource.Error) {
+                    errorTextView.isVisible = true
+                    errorTextView.text = resource.message
                 }
+            }
+        }
+
+        // Observe Nearby Circles
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.nearbyCirclesState.collectLatest { resource ->
+                pbNearby.isVisible = resource is Resource.Loading
+                rvNearbyCircles.isVisible = resource is Resource.Success
+
+                if (resource is Resource.Success) {
+                    val circles = resource.data ?: emptyList()
+                    nearbyCirclesAdapter.submitList(circles)
+                    adjustNearbyCirclesHeight(circles.size)
+                }
+            }
+        }
+    }
+
+    /**
+     * Dynamically adjusts the height of the nearby circles RecyclerView.
+     * It wraps content for small lists and caps height at 1/3 screen height for large lists.
+     */
+    private fun adjustNearbyCirclesHeight(itemCount: Int) {
+        rvNearbyCircles.post {
+            val parentHeight = (view?.height ?: 0)
+            val maxAllowedHeight = parentHeight / 3
+
+            // Calculate expected height:
+
+            val layoutParams = rvNearbyCircles.layoutParams
+
+            if (itemCount <= 2) {
+                if (layoutParams is LinearLayout.LayoutParams) {
+                    layoutParams.weight = 0f
+                    layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                } else {
+                    layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                }
+            } else {
+                // For many items, restrict to 1/3 screen height
+                if (layoutParams is LinearLayout.LayoutParams) {
+                    layoutParams.weight = 0f // Disable weight to enforce explicit height
+                    layoutParams.height = maxAllowedHeight
+                } else {
+                    layoutParams.height = maxAllowedHeight
+                }
+            }
+            rvNearbyCircles.layoutParams = layoutParams
+        }
+    }
+
+    private fun checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            getCurrentLocation()
+        } else {
+            locationPermissionRequest.launch(arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ))
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getCurrentLocation() {
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                viewModel.fetchNearbyCircles(location.latitude, location.longitude)
             }
         }
     }
