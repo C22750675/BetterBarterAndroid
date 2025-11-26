@@ -6,7 +6,6 @@ import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.remote.ApiService
 import com.hugogarry.betterbarter.util.Resource
 import retrofit2.HttpException
-import java.io.IOException
 
 class CircleRepository(private val apiService: ApiService = ApiClient.apiService) {
 
