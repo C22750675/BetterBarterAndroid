@@ -18,11 +18,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.hugogarry.betterbarter.R
-import com.hugogarry.betterbarter.data.model.Trade // <-- Make sure this is imported
-import com.hugogarry.betterbarter.util.Resource
+import com.hugogarry.betterbarter.data.model.Trade
+import com.hugogarry.betterbarter.util.SessionManager
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlin.getValue
+import org.json.JSONObject
 
 class CircleDetailsFragment : Fragment() {
 
@@ -47,7 +47,6 @@ class CircleDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Find all views
         descriptionText = view.findViewById(R.id.textViewCircleDescription)
         adminText = view.findViewById(R.id.textViewAdmins)
         toolbar = view.findViewById(R.id.toolbar)
@@ -56,13 +55,11 @@ class CircleDetailsFragment : Fragment() {
         recyclerViewActiveTrades = view.findViewById(R.id.recyclerViewActiveTrades)
         progressBarActiveTrades = view.findViewById(R.id.progressBarActiveTrades)
 
-        // Setup toolbar
         NavigationUI.setupWithNavController(toolbar, findNavController())
 
         setupRecyclerView()
 
         fabAddTrade.setOnClickListener {
-            // Create the action, passing the circleId
             val action = CircleDetailsFragmentDirections
                 .actionCircleDetailsFragmentToCreateTradeFragment(viewModel.circleId)
             findNavController().navigate(action)
@@ -72,13 +69,16 @@ class CircleDetailsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        activeTradesAdapter = ActiveTradesAdapter()
-        // --- THIS IS THE FIX ---
-        activeTradesAdapter.onProposeClick = { trade: Trade -> // <-- Explicitly set type to Trade
-            // TODO: Navigate to trade proposal screen
-            Toast.makeText(context, "Propose on ${trade.offeredItem?.name}", Toast.LENGTH_SHORT).show()
+        // Get User ID from token
+        val currentUserId = getUserIdFromToken() ?: ""
+
+        activeTradesAdapter = ActiveTradesAdapter(currentUserId)
+
+        // Note: This logic is now mostly handled inside the adapter (disabling buttons)
+        // but we keep the callback structure for when functionality is added.
+        activeTradesAdapter.onProposeClick = { trade: Trade ->
+            Toast.makeText(context, "Applying for trade on ${trade.offeredItem?.name}", Toast.LENGTH_SHORT).show()
         }
-        // --- END OF FIX ---
 
         recyclerViewActiveTrades.apply {
             adapter = activeTradesAdapter
@@ -89,28 +89,36 @@ class CircleDetailsFragment : Fragment() {
     private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
-                // Show loading on the *list* progress bar
                 progressBarActiveTrades.isVisible = state.isLoading
 
-                // Handle Error
                 if (state.error != null) {
                     Toast.makeText(context, state.error, Toast.LENGTH_LONG).show()
-                    // You might want a dedicated error text view
                 }
 
-                // Handle Success data
                 state.circle?.let { circle ->
                     toolbar.title = circle.name
                     descriptionText.text = circle.description
                     adminText.text = "Admins: ${circle.admins?.joinToString { it.username }}"
                 }
 
-                // Submit the list of Trades
                 activeTradesAdapter.submitList(state.activeTrades)
 
-                // The main logic for the FAB
-                fabAddTrade.isVisible = state.isUserAdmin
+                // FAB logic (e.g. only admins or members can add trades)
+                // Assuming any member can propose a trade in the circle:
+                fabAddTrade.isVisible = !state.isLoading
             }
         }
+    }
+
+    // Helper to extract ID from JWT
+    private fun getUserIdFromToken(): String? {
+        val token = SessionManager.getToken() ?: return null
+        try {
+            val parts = token.split(".")
+            if (parts.size < 2) return null
+            val payload = String(android.util.Base64.decode(parts[1], android.util.Base64.URL_SAFE))
+            val json = JSONObject(payload)
+            return json.optString("sub")
+        } catch (e: Exception) { return null }
     }
 }

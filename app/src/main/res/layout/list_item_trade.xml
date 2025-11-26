@@ -36,28 +36,30 @@
             app:layout_constraintTop_toTopOf="@id/imageViewOwnerProfile"
             tools:text="Owner Name" />
 
-        <!-- Item Name & Stock -->
+        <!-- Item Name & Stock (and Status) -->
         <TextView
             android:id="@+id/textViewItemNameAndStock"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
             android:textAppearance="?attr/textAppearanceBody2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/textViewOwnerName"
             app:layout_constraintTop_toBottomOf="@id/textViewOwnerName"
-            tools:text="Fresh Bread (5)" />
+            app:layout_constraintBottom_toTopOf="@id/imageViewItem"
+            tools:text="Fresh Bread (5)\nStatus: Pending" />
 
-        <!-- NEW: Item's Picture -->
+        <!-- Item's Picture -->
         <ImageView
             android:id="@+id/imageViewItem"
             android:layout_width="0dp"
             android:layout_height="150dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:scaleType="centerCrop"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imageViewOwnerProfile"
+            app:layout_constraintTop_toBottomOf="@id/textViewItemNameAndStock"
             tools:srcCompat="@drawable/ic_launcher_background" />
 
         <!-- Propose Trade Button -->
@@ -70,7 +72,8 @@
             android:text="Propose Trade"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imageViewItem" />
+            app:layout_constraintTop_toBottomOf="@id/imageViewItem"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

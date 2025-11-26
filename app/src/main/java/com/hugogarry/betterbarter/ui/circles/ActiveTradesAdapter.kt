@@ -15,7 +15,9 @@ import com.hugogarry.betterbarter.BuildConfig
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Trade
 
-class ActiveTradesAdapter : ListAdapter<Trade, ActiveTradesAdapter.TradeViewHolder>(TradeDiffCallback()) {
+class ActiveTradesAdapter(
+    private val currentUserId: String
+) : ListAdapter<Trade, ActiveTradesAdapter.TradeViewHolder>(TradeDiffCallback()) {
 
     var onProposeClick: ((Trade) -> Unit)? = null
 
@@ -26,10 +28,17 @@ class ActiveTradesAdapter : ListAdapter<Trade, ActiveTradesAdapter.TradeViewHold
     }
 
     override fun onBindViewHolder(holder: TradeViewHolder, position: Int) {
-        val trade = getItem(position) // <-- This is now a Trade object
-        holder.bind(trade)
-        holder.proposeButton.setOnClickListener {
-            onProposeClick?.invoke(trade)
+        val trade = getItem(position)
+        holder.bind(trade, currentUserId)
+
+        // Only set click listener if it's NOT the user's own trade
+        if (trade.proposerId != currentUserId) {
+            holder.proposeButton.setOnClickListener {
+                onProposeClick?.invoke(trade)
+            }
+        } else {
+            // Remove listener for own trades (or set a different one for editing later)
+            holder.proposeButton.setOnClickListener(null)
         }
     }
 
@@ -42,16 +51,13 @@ class ActiveTradesAdapter : ListAdapter<Trade, ActiveTradesAdapter.TradeViewHold
 
         private val baseUrl = BuildConfig.BASE_URL.removeSuffix("/api/")
 
-        // --- BIND LOGIC UPDATED ---
-        fun bind(trade: Trade) {
-            // Get the item from the trade
+        fun bind(trade: Trade, currentUserId: String) {
             val item = trade.offeredItem
 
-            // Format text
             ownerName.text = trade.proposer.username
             itemNameAndStock.text = "${item?.name ?: "Unknown Item"} (${trade.offeredItemQuantity})"
 
-            // Load owner profile pic (from the trade's proposer)
+            // Load owner profile pic
             val profilePicUrl = trade.proposer.profilePictureUrl?.let { "$baseUrl/api/uploads$it" }
             ownerProfilePic.load(profilePicUrl) {
                 placeholder(R.drawable.ic_profile)
@@ -59,17 +65,29 @@ class ActiveTradesAdapter : ListAdapter<Trade, ActiveTradesAdapter.TradeViewHold
                 transformations(CircleCropTransformation())
             }
 
-            // Load item image (from the trade's offeredItem)
+            // Load item image
             val itemPicUrl = item?.imageUrl?.let { "$baseUrl/api/uploads$it" }
             itemImage.load(itemPicUrl) {
                 placeholder(R.drawable.ic_launcher_background)
                 error(R.drawable.ic_launcher_background)
             }
+
+            if (trade.proposerId == currentUserId) {
+                // User created this trade
+                proposeButton.text = "Edit Trade Proposal"
+                proposeButton.isEnabled = false // Disabled for now
+                // Optionally change style to look disabled/secondary
+                proposeButton.alpha = 0.5f
+            } else {
+                // Someone else created this trade
+                proposeButton.text = "Apply for Trade"
+                proposeButton.isEnabled = false // Disabled for now
+                proposeButton.alpha = 0.5f
+            }
         }
     }
 }
 
-// --- CHANGED from Item to Trade ---
 class TradeDiffCallback : DiffUtil.ItemCallback<Trade>() {
     override fun areItemsTheSame(oldItem: Trade, newItem: Trade): Boolean {
         return oldItem.id == newItem.id
