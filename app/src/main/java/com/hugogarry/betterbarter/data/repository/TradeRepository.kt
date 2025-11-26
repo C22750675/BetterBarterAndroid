@@ -6,8 +6,12 @@ import com.hugogarry.betterbarter.data.model.TradeStatus
 import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.remote.ApiService
 import com.hugogarry.betterbarter.util.Resource
-import com.hugogarry.betterbarter.data.model.UpdateTradeStatusRequest // Ensure imports
+import com.hugogarry.betterbarter.data.model.UpdateTradeStatusRequest
 import com.hugogarry.betterbarter.data.model.CreateRatingRequest
+import com.hugogarry.betterbarter.data.model.ApplyTradeRequest
+import com.hugogarry.betterbarter.data.model.TradeApplication
+
+
 
 class TradeRepository(private val apiService: ApiService = ApiClient.apiService) {
 
@@ -63,6 +67,16 @@ class TradeRepository(private val apiService: ApiService = ApiClient.apiService)
             Resource.Success(trade)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to load trade details")
+        }
+    }
+
+    suspend fun applyForTrade(tradeId: String, itemId: String, quantity: Int, message: String): Resource<TradeApplication> {
+        return try {
+            val request = ApplyTradeRequest(itemId, quantity, message)
+            val response = apiService.applyForTrade(tradeId, request)
+            Resource.Success(response)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to apply for trade")
         }
     }
 }

@@ -33,7 +33,7 @@ class CircleDetailsFragment : Fragment() {
     private lateinit var descriptionText: TextView
     private lateinit var adminText: TextView
 
-    private lateinit var activeTradesAdapter: ActiveTradesAdapter
+    private lateinit var availableTradesAdapter: AvailableTradesAdapter
     private lateinit var recyclerViewActiveTrades: RecyclerView
     private lateinit var progressBarActiveTrades: ProgressBar
 
@@ -52,8 +52,8 @@ class CircleDetailsFragment : Fragment() {
         toolbar = view.findViewById(R.id.toolbar)
         fabAddTrade = view.findViewById(R.id.fabAddTrade)
 
-        recyclerViewActiveTrades = view.findViewById(R.id.recyclerViewActiveTrades)
-        progressBarActiveTrades = view.findViewById(R.id.progressBarActiveTrades)
+        recyclerViewActiveTrades = view.findViewById(R.id.recyclerViewAvailableTrades)
+        progressBarActiveTrades = view.findViewById(R.id.progressBarAvailableTrades)
 
         NavigationUI.setupWithNavController(toolbar, findNavController())
 
@@ -68,25 +68,37 @@ class CircleDetailsFragment : Fragment() {
         observeUiState()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Refresh data when returning to this screen (e.g., after applying for a trade)
+        viewModel.fetchScreenData()
+    }
+
     private fun setupRecyclerView() {
         // Get User ID from token
         val currentUserId = getUserIdFromToken() ?: ""
 
-        activeTradesAdapter = ActiveTradesAdapter(currentUserId)
+        availableTradesAdapter = AvailableTradesAdapter(currentUserId)
 
-        activeTradesAdapter.onProposeClick = { trade: Trade ->
-            Toast.makeText(context, "Applying for trade on ${trade.offeredItem?.name}", Toast.LENGTH_SHORT).show()
+        availableTradesAdapter.onProposeClick = { trade: Trade ->
+            // Navigate to Apply Trade Fragment with existing app if present
+            val action = CircleDetailsFragmentDirections
+                .actionCircleDetailsFragmentToApplyTradeFragment(
+                    tradeId = trade.id,
+                    existingApplication = trade.myApplication
+                )
+            findNavController().navigate(action)
         }
 
         // Handle Item Click to navigate to Details
-        activeTradesAdapter.onItemClick = { trade: Trade ->
+        availableTradesAdapter.onItemClick = { trade: Trade ->
             val action = CircleDetailsFragmentDirections
                 .actionCircleDetailsFragmentToTradeDetailsFragment(trade.id)
             findNavController().navigate(action)
         }
 
         recyclerViewActiveTrades.apply {
-            adapter = activeTradesAdapter
+            adapter = availableTradesAdapter
             layoutManager = LinearLayoutManager(context)
         }
     }
@@ -106,7 +118,7 @@ class CircleDetailsFragment : Fragment() {
                     adminText.text = "Admins: ${circle.admins?.joinToString { it.username }}"
                 }
 
-                activeTradesAdapter.submitList(state.activeTrades)
+                availableTradesAdapter.submitList(state.availableTrades)
 
                 fabAddTrade.isVisible = !state.isLoading
             }

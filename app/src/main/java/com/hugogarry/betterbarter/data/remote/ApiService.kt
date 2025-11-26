@@ -78,6 +78,17 @@ interface ApiService {
     @GET("trades/{id}")
     suspend fun getTrade(@Path("id") tradeId: String): Trade
 
+    // Apply for a trade
+    @POST("trades/{id}/apply")
+    suspend fun applyForTrade(
+        @Path("id") tradeId: String,
+        @Body applyRequest: ApplyTradeRequest
+    ): TradeApplication
+
+    // Get applications (We will use this in the next step/response)
+    // @GET("trades/{id}/applications")
+    // suspend fun getTradeApplications(@Path("id") tradeId: String): List<TradeApplication>
+
     // Upload
     @Multipart
     @POST("uploads")

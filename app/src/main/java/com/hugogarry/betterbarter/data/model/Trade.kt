@@ -15,5 +15,7 @@ data class Trade(
     val recipient: User?,
     val offeredItemQuantity: Int,
     val offeredItem: Item?,
-    val circleId: String
+    val circleId: String,
+    val myApplication: TradeApplication? = null
+
 )

@@ -15,9 +15,9 @@ import com.hugogarry.betterbarter.BuildConfig
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Trade
 
-class ActiveTradesAdapter(
+class AvailableTradesAdapter(
     private val currentUserId: String
-) : ListAdapter<Trade, ActiveTradesAdapter.TradeViewHolder>(TradeDiffCallback()) {
+) : ListAdapter<Trade, AvailableTradesAdapter.TradeViewHolder>(TradeDiffCallback()) {
 
     var onProposeClick: ((Trade) -> Unit)? = null
     // Callback for item clicks
@@ -80,15 +80,18 @@ class ActiveTradesAdapter(
             }
 
             if (trade.proposerId == currentUserId) {
-                // User created this trade
                 proposeButton.text = "Edit Trade Proposal"
-                proposeButton.isEnabled = false // Disabled for now
+                proposeButton.isEnabled = true
                 proposeButton.alpha = 0.5f
             } else {
-                // Someone else created this trade
-                proposeButton.text = "Apply for Trade"
-                proposeButton.isEnabled = false // Disabled for now
-                proposeButton.alpha = 0.5f
+                // CHECK MY APPLICATION
+                if (trade.myApplication != null) {
+                    proposeButton.text = "Edit Application"
+                } else {
+                    proposeButton.text = "Apply for Trade"
+                }
+                proposeButton.isEnabled = true
+                proposeButton.alpha = 1.0f
             }
         }
     }

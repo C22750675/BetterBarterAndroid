@@ -45,7 +45,7 @@
                     tools:text="Admins: user1, user2" />
 
                 <TextView
-                    android:id="@+id/textViewActiveTradesTitle"
+                    android:id="@+id/textViewAvailableTradesTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
@@ -53,7 +53,7 @@
                     android:textAppearance="?attr/textAppearanceHeadline6" />
 
                 <ProgressBar
-                    android:id="@+id/progressBarActiveTrades"
+                    android:id="@+id/progressBarAvailableTrades"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
@@ -61,7 +61,7 @@
                     android:visibility="gone" />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerViewActiveTrades"
+                    android:id="@+id/recyclerViewAvailableTrades"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -73,10 +73,6 @@
 
     </LinearLayout>
 
-    <!--
-      STEP 2: Remove all tint attributes from the FAB.
-      Let the Material theme handle the icon color.
-    -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddTrade"
         android:layout_width="wrap_content"

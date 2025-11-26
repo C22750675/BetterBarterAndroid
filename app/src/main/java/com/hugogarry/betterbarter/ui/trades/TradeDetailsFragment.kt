@@ -72,10 +72,6 @@ class TradeDetailsFragment : Fragment() {
         tradeDescriptionTextView = view.findViewById(R.id.textViewTradeDescriptionDetails)
         actionButton = view.findViewById(R.id.buttonTradeActionDetails)
 
-        // Disable button initially as requested ("non-functional for now")
-        actionButton.isEnabled = false
-        actionButton.alpha = 0.5f
-
         // Fetch data
         viewModel.fetchTrade(args.tradeId)
         observeTradeState()
@@ -134,9 +130,29 @@ class TradeDetailsFragment : Fragment() {
 
         // Button Logic
         if (trade.proposerId == currentUserId) {
-            actionButton.text = "Edit Trade Proposal"
+            actionButton.text = "View Applications"
+            actionButton.isEnabled = true
+            // TODO: Navigation to View Apps
         } else {
-            actionButton.text = "Apply for Trade"
+            // Check if user has already applied
+            if (trade.myApplication != null) {
+                actionButton.text = "Edit Trade Application"
+            } else {
+                actionButton.text = "Apply for Trade"
+            }
+
+            actionButton.isEnabled = true
+            actionButton.alpha = 1.0f
+
+            actionButton.setOnClickListener {
+                // Pass both tradeId and the existing application (which might be null)
+                val action = TradeDetailsFragmentDirections
+                    .actionTradeDetailsFragmentToApplyTradeFragment(
+                        tradeId = trade.id,
+                        existingApplication = trade.myApplication
+                    )
+                findNavController().navigate(action)
+            }
         }
     }
 

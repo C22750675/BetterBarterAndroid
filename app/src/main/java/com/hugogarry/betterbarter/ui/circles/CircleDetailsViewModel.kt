@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 // Data class to hold the complete state for the screen
 data class CircleDetailsUiState(
     val circle: Circle? = null,
-    val activeTrades: List<Trade> = emptyList(),
+    val availableTrades: List<Trade> = emptyList(),
     val isUserAdmin: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null
@@ -73,16 +73,16 @@ class CircleDetailsViewModel(
 
             // We can assume success if no errors
             val circle = (circleResult as Resource.Success).data!!
-            val activeTrades = (tradesResult as Resource.Success).data ?: emptyList() // <-- Get trades
+            val availableTrades = (tradesResult as Resource.Success).data ?: emptyList() // <-- Get trades
             val user = (profileResult as Resource.Success).data!!
 
-            // --- Simplified Admin Check ---
+            // Simplified Admin Check
             val adminIds = circle.admins?.map { it.id }?.toSet() ?: emptySet()
             val isUserAdmin = user.id in adminIds
 
             _uiState.value = CircleDetailsUiState(
                 circle = circle,
-                activeTrades = activeTrades, // <-- Pass the new list of Trades
+                availableTrades = availableTrades,
                 isUserAdmin = isUserAdmin,
                 isLoading = false
             )

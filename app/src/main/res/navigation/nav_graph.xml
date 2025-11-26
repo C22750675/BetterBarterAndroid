@@ -8,7 +8,7 @@
         <fragment
             android:id="@+id/welcomeFragment"
             android:name="com.hugogarry.betterbarter.ui.auth.WelcomeFragment"
-            android:label="WelcomeFragment">
+            android:label="Welcome">
             <action
                 android:id="@+id/action_welcomeFragment_to_loginFragment"
                 app:destination="@id/loginFragment" />
@@ -19,7 +19,7 @@
         <fragment
             android:id="@+id/loginFragment"
             android:name="com.hugogarry.betterbarter.ui.auth.LoginFragment"
-            android:label="LoginFragment">
+            android:label="Login">
             <action
                 android:id="@+id/action_auth_to_main"
                 app:destination="@id/main_flow"
@@ -29,7 +29,7 @@
         <fragment
             android:id="@+id/registerFragment"
             android:name="com.hugogarry.betterbarter.ui.auth.RegisterFragment"
-            android:label="RegisterFragment">
+            android:label="Register">
             <action
                 android:id="@+id/action_auth_to_main"
                 app:destination="@id/main_flow"
@@ -42,13 +42,13 @@
         <fragment
             android:id="@+id/mapFragment"
             android:name="com.hugogarry.betterbarter.ui.map.MapFragment"
-            android:label="MapFragment"
+            android:label="Map"
             tools:layout="@layout/fragment_map" />
 
         <fragment
             android:id="@+id/circlesFragment"
             android:name="com.hugogarry.betterbarter.ui.circles.CirclesFragment"
-            android:label="CirclesFragment"
+            android:label="Circles"
             tools:layout="@layout/fragment_circles">
             <action
                 android:id="@+id/action_circlesFragment_to_createCircleFragment"
@@ -62,13 +62,13 @@
         <fragment
             android:id="@+id/createCircleFragment"
             android:name="com.hugogarry.betterbarter.ui.circles.CreateCircleFragment"
-            android:label="CreateCircleFragment"
+            android:label="Create Circle"
             tools:layout="@layout/fragment_create_circle" />
 
         <fragment
             android:id="@+id/profileFragment"
             android:name="com.hugogarry.betterbarter.ui.profile.ProfileFragment"
-            android:label="ProfileFragment">
+            android:label="Profile">
             <action
                 android:id="@+id/action_profileFragment_to_addItemFragment"
                 app:destination="@id/addItemFragment" />
@@ -77,13 +77,13 @@
         <fragment
             android:id="@+id/addItemFragment"
             android:name="com.hugogarry.betterbarter.ui.item.AddItemFragment"
-            android:label="AddItemFragment"
+            android:label="Add Item"
             tools:layout="@layout/fragment_add_item" />
 
         <fragment
             android:id="@+id/tradesFragment"
             android:name="com.hugogarry.betterbarter.ui.trades.TradesFragment"
-            android:label="TradesFragment"
+            android:label="Trades"
             tools:layout="@layout/fragment_trades">
 
             <action
@@ -94,7 +94,7 @@
         <fragment
             android:id="@+id/createTradeFragment"
             android:name="com.hugogarry.betterbarter.ui.trades.CreateTradeFragment"
-            android:label="CreateTradeFragment"
+            android:label="Create Trade"
             tools:layout="@layout/fragment_create_trade">
             <argument
                 android:name="circleId"
@@ -118,17 +118,38 @@
             <action
                 android:id="@+id/action_circleDetailsFragment_to_tradeDetailsFragment"
                 app:destination="@id/tradeDetailsFragment" />
+            <action
+                android:id="@+id/action_circleDetailsFragment_to_applyTradeFragment"
+                app:destination="@id/applyTradeFragment" />
         </fragment>
 
         <fragment
             android:id="@+id/tradeDetailsFragment"
             android:name="com.hugogarry.betterbarter.ui.trades.TradeDetailsFragment"
-            android:label="TradeDetailsFragment"
+            android:label="Trade Details"
             tools:layout="@layout/fragment_trade_details">
             <argument
                 android:name="tradeId"
                 app:argType="string" />
+            <action
+                android:id="@+id/action_tradeDetailsFragment_to_applyTradeFragment"
+                app:destination="@id/applyTradeFragment" />
         </fragment>
+        <fragment
+            android:id="@+id/applyTradeFragment"
+            android:name="com.hugogarry.betterbarter.ui.trades.ApplyTradeFragment"
+            android:label="Apply for Trade"
+            tools:layout="@layout/fragment_apply_trade">
+            <argument
+                android:name="tradeId"
+                app:argType="string" />
+            <argument
+                android:name="existingApplication"
+                app:argType="com.hugogarry.betterbarter.data.model.TradeApplication"
+                app:nullable="true"
+                android:defaultValue="@null" />
+        </fragment>
+
     </navigation>
 
 </navigation>
