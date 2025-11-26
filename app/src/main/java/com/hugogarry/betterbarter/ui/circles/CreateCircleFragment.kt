@@ -16,12 +16,14 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.NavigationUI
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.hugogarry.betterbarter.R
@@ -74,6 +76,7 @@ class CreateCircleFragment : Fragment() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         // Find all views
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbarCreateCircle)
         nameEditText = view.findViewById(R.id.editTextName)
         radiusEditText = view.findViewById(R.id.editTextRadius)
         descriptionEditText = view.findViewById(R.id.editTextRules)
@@ -82,6 +85,9 @@ class CreateCircleFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBarCreate)
         errorTextView = view.findViewById(R.id.textViewError)
         colorSwatchLayout = view.findViewById(R.id.linearLayoutColorSwatches)
+
+        // Setup Toolbar with Nav Controller for back button
+        NavigationUI.setupWithNavController(toolbar, findNavController())
 
         // Setup UI
         setupColorSwatches()

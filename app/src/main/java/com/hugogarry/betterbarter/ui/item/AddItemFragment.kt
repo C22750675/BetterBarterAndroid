@@ -16,12 +16,14 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.NavigationUI
 import com.google.android.material.textfield.TextInputLayout
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Category
@@ -92,6 +94,9 @@ class AddItemFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbarAddItem)
+        NavigationUI.setupWithNavController(toolbar, findNavController())
 
         // Initialize UI components
         val itemNameEditText = view.findViewById<EditText>(R.id.editTextItemName)

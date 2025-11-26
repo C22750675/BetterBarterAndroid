@@ -49,7 +49,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="Active Trades"
+                    android:text="Available Trades"
                     android:textAppearance="?attr/textAppearanceHeadline6" />
 
                 <ProgressBar

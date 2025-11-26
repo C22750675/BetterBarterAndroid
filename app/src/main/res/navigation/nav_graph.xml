@@ -62,7 +62,7 @@
         <fragment
             android:id="@+id/createCircleFragment"
             android:name="com.hugogarry.betterbarter.ui.circles.CreateCircleFragment"
-            android:label="CreateCircleFragment"
+            android:label="Create a Circle"
             tools:layout="@layout/fragment_create_circle" />
 
         <fragment
@@ -77,7 +77,7 @@
         <fragment
             android:id="@+id/addItemFragment"
             android:name="com.hugogarry.betterbarter.ui.item.AddItemFragment"
-            android:label="AddItemFragment"
+            android:label="Add an Item"
             tools:layout="@layout/fragment_add_item" />
 
         <fragment
