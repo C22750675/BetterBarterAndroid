@@ -89,7 +89,7 @@
         <fragment
             android:id="@+id/createTradeFragment"
             android:name="com.hugogarry.betterbarter.ui.trades.CreateTradeFragment"
-            android:label="CreateTradeFragment"
+            android:label="Create a Trade"
             tools:layout="@layout/fragment_create_trade">
             <argument
                 android:name="circleId"
