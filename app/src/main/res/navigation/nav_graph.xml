@@ -137,7 +137,11 @@
             <action
                 android:id="@+id/action_tradeDetailsFragment_to_tradeApplicationsFragment"
                 app:destination="@id/tradeApplicationsFragment" />
+            <action
+                android:id="@+id/action_tradeDetailsFragment_to_chatFragment"
+                app:destination="@id/chatFragment" />
         </fragment>
+
         <fragment
             android:id="@+id/applyTradeFragment"
             android:name="com.hugogarry.betterbarter.ui.trades.ApplyTradeFragment"
@@ -158,6 +162,26 @@
             android:name="com.hugogarry.betterbarter.ui.trades.TradeApplicationsFragment"
             android:label="View Applications"
             tools:layout="@layout/fragment_trade_applications">
+            <argument
+                android:name="tradeId"
+                app:argType="string" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/myChatsFragment"
+            android:name="com.hugogarry.betterbarter.ui.chat.MyChatsFragment"
+            android:label="Chats"
+            tools:layout="@layout/fragment_my_chats">
+            <action
+                android:id="@+id/action_myChatsFragment_to_chatFragment"
+                app:destination="@id/chatFragment" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/chatFragment"
+            android:name="com.hugogarry.betterbarter.ui.chat.ChatFragment"
+            android:label="Chat"
+            tools:layout="@layout/fragment_chat">
             <argument
                 android:name="tradeId"
                 app:argType="string" />

@@ -21,6 +21,7 @@ import coil.transform.CircleCropTransformation
 import com.hugogarry.betterbarter.BuildConfig
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Trade
+import com.hugogarry.betterbarter.data.model.TradeStatus
 import com.hugogarry.betterbarter.util.Resource
 import com.hugogarry.betterbarter.util.SessionManager
 import kotlinx.coroutines.flow.collectLatest
@@ -130,13 +131,23 @@ class TradeDetailsFragment : Fragment() {
 
         // Button Logic
         if (trade.proposerId == currentUserId) {
-            actionButton.text = "View Applications"
-            actionButton.isEnabled = true
-
-            actionButton.setOnClickListener {
-                val action = TradeDetailsFragmentDirections
-                    .actionTradeDetailsFragmentToTradeApplicationsFragment(trade.id)
-                findNavController().navigate(action)
+            // Check if trade is already accepted/active
+            if (trade.status == TradeStatus.accepted || trade.status == TradeStatus.completed) {
+                actionButton.text = "Go to Chat"
+                actionButton.isEnabled = true
+                actionButton.setOnClickListener {
+                    val action = TradeDetailsFragmentDirections.actionTradeDetailsFragmentToChatFragment(trade.id)
+                    findNavController().navigate(action)
+                }
+            } else {
+                // Trade is pending, view applications
+                actionButton.text = "View Applications"
+                actionButton.isEnabled = true
+                actionButton.setOnClickListener {
+                    val action = TradeDetailsFragmentDirections
+                        .actionTradeDetailsFragmentToTradeApplicationsFragment(trade.id)
+                    findNavController().navigate(action)
+                }
             }
         } else {
             // Check if user has already applied
@@ -146,17 +157,21 @@ class TradeDetailsFragment : Fragment() {
                 actionButton.text = "Apply for Trade"
             }
 
-            actionButton.isEnabled = true
-            actionButton.alpha = 1.0f
-
-            actionButton.setOnClickListener {
-                // Pass both tradeId and the existing application (which might be null)
-                val action = TradeDetailsFragmentDirections
-                    .actionTradeDetailsFragmentToApplyTradeFragment(
-                        tradeId = trade.id,
-                        existingApplication = trade.myApplication
-                    )
-                findNavController().navigate(action)
+            // Disable apply button if trade is no longer pending
+            if (trade.status != TradeStatus.pending) {
+                actionButton.isEnabled = false
+                actionButton.text = "Trade Unavailable"
+            } else {
+                actionButton.isEnabled = true
+                actionButton.alpha = 1.0f
+                actionButton.setOnClickListener {
+                    val action = TradeDetailsFragmentDirections
+                        .actionTradeDetailsFragmentToApplyTradeFragment(
+                            tradeId = trade.id,
+                            existingApplication = trade.myApplication
+                        )
+                    findNavController().navigate(action)
+                }
             }
         }
     }

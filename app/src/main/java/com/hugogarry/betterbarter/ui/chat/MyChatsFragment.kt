@@ -1,4 +1,4 @@
-package com.hugogarry.betterbarter.ui.trades
+package com.hugogarry.betterbarter.ui.chat
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,15 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
-import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.hugogarry.betterbarter.R
@@ -22,11 +18,10 @@ import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class TradeApplicationsFragment : Fragment() {
+class MyChatsFragment : Fragment() {
 
-    private val viewModel: TradeApplicationsViewModel by viewModels()
-    private val args: TradeApplicationsFragmentArgs by navArgs()
-    private lateinit var adapter: TradeApplicationsAdapter
+    private val viewModel: MyChatsViewModel by viewModels()
+    private lateinit var adapter: MyChatsAdapter
 
     private lateinit var progressBar: ProgressBar
     private lateinit var emptyView: TextView
@@ -37,40 +32,33 @@ class TradeApplicationsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_trade_applications, container, false)
+        return inflater.inflate(R.layout.fragment_my_chats, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbarApplications)
-        NavigationUI.setupWithNavController(toolbar, findNavController())
-
-        progressBar = view.findViewById(R.id.progressBarApplications)
-        emptyView = view.findViewById(R.id.textViewNoApplications)
+        progressBar = view.findViewById(R.id.progressBarChats)
+        emptyView = view.findViewById(R.id.textViewNoChats)
         errorView = view.findViewById(R.id.textViewError)
-        recyclerView = view.findViewById(R.id.recyclerViewApplications)
+        recyclerView = view.findViewById(R.id.recyclerViewChats)
 
-        adapter = TradeApplicationsAdapter(
-            onAccept = { app ->
-                viewModel.acceptApplication(app)
-            },
-            onDecline = { app ->
-                viewModel.declineApplication(app)
-            }
-        )
+        adapter = MyChatsAdapter { chat ->
+            // Navigate to Chat Fragment
+            val action = MyChatsFragmentDirections.actionMyChatsFragmentToChatFragment(chat.id)
+            findNavController().navigate(action)
+        }
 
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
-        viewModel.fetchApplications(args.tradeId)
+        viewModel.fetchChats()
         observeState()
-        observeActionState()
     }
 
     private fun observeState() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.applications.collectLatest { resource ->
+            viewModel.chats.collectLatest { resource ->
                 progressBar.isVisible = resource is Resource.Loading
                 errorView.isVisible = resource is Resource.Error
                 emptyView.isVisible = resource is Resource.Success && resource.data.isNullOrEmpty()
@@ -80,20 +68,6 @@ class TradeApplicationsFragment : Fragment() {
                     adapter.submitList(resource.data)
                 } else if (resource is Resource.Error) {
                     errorView.text = resource.message
-                }
-            }
-        }
-    }
-
-    private fun observeActionState() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.actionState.collectLatest { resource ->
-                if (resource is Resource.Success) {
-                    Toast.makeText(context, resource.data, Toast.LENGTH_SHORT).show()
-                    viewModel.clearActionState()
-                } else if (resource is Resource.Error) {
-                    Toast.makeText(context, resource.message, Toast.LENGTH_SHORT).show()
-                    viewModel.clearActionState()
                 }
             }
         }

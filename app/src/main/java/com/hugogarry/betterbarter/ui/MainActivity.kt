@@ -10,7 +10,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import androidx.navigation.NavOptions // REQUIRED IMPORT
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -106,6 +106,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.mapFragment,
                 R.id.circlesFragment,
                 R.id.tradesFragment,
+                R.id.myChatsFragment,
                 R.id.profileFragment
             )
             if (destination.id in topLevelDestinations) {

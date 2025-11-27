@@ -50,7 +50,7 @@ interface ApiService {
     ): List<Circle>
 
     @POST("circles/{id}/join")
-    suspend fun joinCircle(@Path("id") circleId: String): Void // Returns 201 Created
+    suspend fun joinCircle(@Path("id") circleId: String): Void
 
     // Trades
     @POST("trades")
@@ -74,20 +74,23 @@ interface ApiService {
         @Body ratingDto: CreateRatingRequest
     ): Void
 
-    // Get Single Trade
     @GET("trades/{id}")
     suspend fun getTrade(@Path("id") tradeId: String): Trade
 
-    // Apply for a trade
     @POST("trades/{id}/apply")
     suspend fun applyForTrade(
         @Path("id") tradeId: String,
         @Body applyRequest: ApplyTradeRequest
     ): TradeApplication
 
-    // Get applications for a trade
     @GET("trades/{id}/applications")
     suspend fun getTradeApplications(@Path("id") tradeId: String): List<TradeApplication>
+
+    @POST("trades/applications/{id}/accept")
+    suspend fun acceptApplication(@Path("id") applicationId: String): Void
+
+    @DELETE("trades/applications/{id}")
+    suspend fun declineApplication(@Path("id") applicationId: String): Void
 
     // Upload
     @Multipart
@@ -95,4 +98,17 @@ interface ApiService {
     suspend fun uploadImage(
         @Part file: MultipartBody.Part
     ): UploadResponse
+
+    // Chat Endpoints
+    @GET("chats")
+    suspend fun getMyChats(): List<Chat>
+
+    @GET("chats/{tradeId}/messages")
+    suspend fun getMessages(@Path("tradeId") tradeId: String): List<Message>
+
+    @POST("chats/{tradeId}/messages")
+    suspend fun sendMessage(
+        @Path("tradeId") tradeId: String,
+        @Body message: Map<String, String> // { "text": "hello" }
+    ): Message
 }

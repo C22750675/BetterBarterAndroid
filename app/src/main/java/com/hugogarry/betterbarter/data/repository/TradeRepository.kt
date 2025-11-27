@@ -86,4 +86,22 @@ class TradeRepository(private val apiService: ApiService = ApiClient.apiService)
             Resource.Error(e.message ?: "Failed to load applications")
         }
     }
+
+    suspend fun acceptApplication(applicationId: String): Resource<Boolean> {
+        return try {
+            apiService.acceptApplication(applicationId)
+            Resource.Success(true)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to accept application")
+        }
+    }
+
+    suspend fun declineApplication(applicationId: String): Resource<Boolean> {
+        return try {
+            apiService.declineApplication(applicationId)
+            Resource.Success(true)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to decline application")
+        }
+    }
 }
