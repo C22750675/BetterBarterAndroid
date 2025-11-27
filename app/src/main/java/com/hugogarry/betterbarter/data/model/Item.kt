@@ -1,8 +1,11 @@
 package com.hugogarry.betterbarter.data.model
 
+import android.os.Parcelable
 import com.squareup.moshi.JsonClass
+import kotlinx.parcelize.Parcelize
 
 @JsonClass(generateAdapter = true)
+@Parcelize
 data class Item(
     val id: String,
     val name: String,
@@ -20,4 +23,4 @@ data class Item(
     val circleId: String?,
     // The full Circle object, if the API sends it nested
     val circle: Circle?
-)
+) : Parcelable

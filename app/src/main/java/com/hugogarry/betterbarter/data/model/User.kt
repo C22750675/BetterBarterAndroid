@@ -1,9 +1,11 @@
 package com.hugogarry.betterbarter.data.model
 
-import com.squareup.moshi.Json
+import android.os.Parcelable
 import com.squareup.moshi.JsonClass
+import kotlinx.parcelize.Parcelize
 
 @JsonClass(generateAdapter = true)
+@Parcelize
 data class User(
     val id: String,
     val username: String,
@@ -11,4 +13,4 @@ data class User(
     val profilePictureUrl: String?,
     val reputationScore: Double,
     val createdAt: String // e.g., "2025-10-10T10:00:00.000Z"
-)
+) : Parcelable

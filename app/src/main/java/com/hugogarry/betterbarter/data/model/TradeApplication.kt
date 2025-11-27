@@ -4,8 +4,6 @@ import com.squareup.moshi.JsonClass
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-
-
 @JsonClass(generateAdapter = true)
 @Parcelize
 data class TradeApplication(
@@ -15,5 +13,8 @@ data class TradeApplication(
     val offeredItemQuantity: Int,
     val offeredItemId: String,
     val applicantId: String,
-    val createdAt: String
+    val createdAt: String,
+    // Nested objects populated by the backend relations
+    val applicant: User?,
+    val offeredItem: Item?
 ) : Parcelable

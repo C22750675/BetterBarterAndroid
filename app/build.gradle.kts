@@ -17,11 +17,11 @@ android {
     productFlavors {
         register("emulator") {
             dimension = "targetDevice"
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/api/\"")
+            buildConfigField("String", "BASE_URL", "\"http://10.156.13.143:3000/api/\"")
         }
         register("physical") {
             dimension = "targetDevice"
-            buildConfigField("String", "BASE_URL", "\"http://192.168.0.192:3000/api/\"")
+            buildConfigField("String", "BASE_URL", "\"http://10.156.13.143:3000/api/\"")
         }
     }
 
@@ -36,7 +36,6 @@ android {
     }
 
     buildTypes {
-        // Now that flavors handle the debug URL, this block can be simpler.
         getByName("debug") {
         }
         release {

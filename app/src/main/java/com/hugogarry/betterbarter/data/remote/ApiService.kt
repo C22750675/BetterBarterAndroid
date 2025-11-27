@@ -85,9 +85,9 @@ interface ApiService {
         @Body applyRequest: ApplyTradeRequest
     ): TradeApplication
 
-    // Get applications (We will use this in the next step/response)
-    // @GET("trades/{id}/applications")
-    // suspend fun getTradeApplications(@Path("id") tradeId: String): List<TradeApplication>
+    // Get applications for a trade
+    @GET("trades/{id}/applications")
+    suspend fun getTradeApplications(@Path("id") tradeId: String): List<TradeApplication>
 
     // Upload
     @Multipart

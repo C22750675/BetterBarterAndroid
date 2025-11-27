@@ -11,8 +11,6 @@ import com.hugogarry.betterbarter.data.model.CreateRatingRequest
 import com.hugogarry.betterbarter.data.model.ApplyTradeRequest
 import com.hugogarry.betterbarter.data.model.TradeApplication
 
-
-
 class TradeRepository(private val apiService: ApiService = ApiClient.apiService) {
 
     suspend fun createTrade(createTradeRequest: CreateTradeRequest): Resource<Trade> {
@@ -77,6 +75,15 @@ class TradeRepository(private val apiService: ApiService = ApiClient.apiService)
             Resource.Success(response)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to apply for trade")
+        }
+    }
+
+    suspend fun getTradeApplications(tradeId: String): Resource<List<TradeApplication>> {
+        return try {
+            val applications = apiService.getTradeApplications(tradeId)
+            Resource.Success(applications)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to load applications")
         }
     }
 }

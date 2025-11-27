@@ -132,7 +132,12 @@ class TradeDetailsFragment : Fragment() {
         if (trade.proposerId == currentUserId) {
             actionButton.text = "View Applications"
             actionButton.isEnabled = true
-            // TODO: Navigation to View Apps
+
+            actionButton.setOnClickListener {
+                val action = TradeDetailsFragmentDirections
+                    .actionTradeDetailsFragmentToTradeApplicationsFragment(trade.id)
+                findNavController().navigate(action)
+            }
         } else {
             // Check if user has already applied
             if (trade.myApplication != null) {

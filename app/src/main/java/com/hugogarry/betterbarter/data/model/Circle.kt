@@ -1,15 +1,12 @@
 package com.hugogarry.betterbarter.data.model
 
+import android.os.Parcelable
 import com.squareup.moshi.JsonClass
+import kotlinx.parcelize.Parcelize
 
-// A simple class to hold GeoJSON Point coordinates
-@JsonClass(generateAdapter = true)
-data class Point(
-    val type: String,
-    val coordinates: List<Double> // [longitude, latitude]
-)
 
 @JsonClass(generateAdapter = true)
+@Parcelize
 data class Circle(
     val id: String,
     val name: String,
@@ -23,4 +20,4 @@ data class Circle(
     val description: String?,
     val admins: List<UserSummary>?,
     val isMember: Boolean = false
-)
+) : Parcelable
