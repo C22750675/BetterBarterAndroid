@@ -182,6 +182,6 @@ class TradeDetailsFragment : Fragment() {
             val payload = String(android.util.Base64.decode(parts[1], android.util.Base64.URL_SAFE))
             val json = JSONObject(payload)
             return json.optString("sub")
-        } catch (e: Exception) { return null }
+        } catch (_: Exception) { return null }
     }
 }
