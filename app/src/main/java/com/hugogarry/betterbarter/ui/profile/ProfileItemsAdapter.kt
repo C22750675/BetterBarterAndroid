@@ -10,9 +10,9 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
-import com.hugogarry.betterbarter.BuildConfig
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Item
+import com.hugogarry.betterbarter.util.SessionManager
 
 class ProfileItemsAdapter : ListAdapter<Item, ProfileItemsAdapter.ItemViewHolder>(ItemDiffCallback()) {
 
@@ -26,8 +26,9 @@ class ProfileItemsAdapter : ListAdapter<Item, ProfileItemsAdapter.ItemViewHolder
             itemName.text = item.name
             itemDescription.text = item.description
 
-            val baseUrl = BuildConfig.BASE_URL.removeSuffix("/api/")
-            val fullImageUrl = item.imageUrl?.let { "$baseUrl/api/uploads$it" }
+            val currentApiUrl = SessionManager.getServerUrl()
+            val baseUrl = currentApiUrl.removeSuffix("api/")
+            val fullImageUrl = item.imageUrl?.let { "${baseUrl}api/uploads$it" }
 
             itemImage.load(fullImageUrl) {
                 placeholder(R.drawable.ic_profile)

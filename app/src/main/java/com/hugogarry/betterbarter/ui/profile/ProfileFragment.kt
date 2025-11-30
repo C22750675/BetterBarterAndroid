@@ -1,33 +1,36 @@
 package com.hugogarry.betterbarter.ui.profile
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.imageview.ShapeableImageView
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.User
+import com.hugogarry.betterbarter.util.SessionManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import android.Manifest
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
-import android.provider.OpenableColumns
-import androidx.core.content.ContextCompat
-import coil.load
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -48,11 +51,10 @@ class ProfileFragment : Fragment() {
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            // REQUIRED FIX: Launch coroutine to convert Uri off the main thread
             viewLifecycleOwner.lifecycleScope.launch {
-                val filePart = uriToMultipartBody(it) // Runs in background
+                val filePart = uriToMultipartBody(it)
                 if (filePart != null) {
-                    viewModel.uploadProfilePicture(filePart) // Runs on main thread
+                    viewModel.uploadProfilePicture(filePart)
                 } else {
                     Toast.makeText(context, "Could not read selected image", Toast.LENGTH_SHORT).show()
                 }
@@ -77,6 +79,23 @@ class ProfileFragment : Fragment() {
         profileImageView = view.findViewById(R.id.imageViewProfile)
         val fabAddItem = view.findViewById<FloatingActionButton>(R.id.fabAddItem)
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewProfileItems)
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbarProfile)
+
+        // Setup Toolbar Menu for Logout
+        toolbar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_logout -> {
+                    viewModel.logout()
+                    // Navigate to auth flow and clear backstack
+                    val navOptions = NavOptions.Builder()
+                        .setPopUpTo(R.id.main_flow, true)
+                        .build()
+                    findNavController().navigate(R.id.auth_flow, null, navOptions)
+                    true
+                }
+                else -> false
+            }
+        }
 
         // Setup RecyclerView
         itemsAdapter = ProfileItemsAdapter()
@@ -111,9 +130,6 @@ class ProfileFragment : Fragment() {
     private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
-                // TODO: Handle loading state with a ProgressBar
-                // progressBar.isVisible = state.isLoading
-
                 if (state.user != null) {
                     // Call new function to update UI
                     updateProfileUI(state.user)
@@ -142,8 +158,10 @@ class ProfileFragment : Fragment() {
             bioTextView.isVisible = false
         }
 
-        val baseUrl = com.hugogarry.betterbarter.BuildConfig.BASE_URL.removeSuffix("/api/")
-        val fullImageUrl = user.profilePictureUrl?.let { "$baseUrl/api/uploads$it" }
+        // Use SessionManager for URL
+        val currentApiUrl = SessionManager.getServerUrl()
+        val baseUrl = currentApiUrl.removeSuffix("api/")
+        val fullImageUrl = user.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
 
         profileImageView.load(fullImageUrl) {
             placeholder(R.drawable.ic_profile)
@@ -163,7 +181,6 @@ class ProfileFragment : Fragment() {
             ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED -> {
                 imagePickerLauncher.launch("image/*")
             }
-            // TODO: shouldShowRequestPermissionRationale(...) -> show an explanation
             else -> {
                 permissionLauncher.launch(permission)
             }
@@ -178,7 +195,7 @@ class ProfileFragment : Fragment() {
 
                 // 1. Get original file name and mime type
                 val mimeType = contentResolver.getType(uri)
-                var fileName = "image.jpg" // Default
+                var fileName = "image.jpg"
                 contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                     if (cursor.moveToFirst()) {
                         val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
@@ -194,10 +211,7 @@ class ProfileFragment : Fragment() {
                 inputStream.close()
 
                 // 3. Create RequestBody and MultipartBody.Part
-                val requestBody = fileBytes.toRequestBody(
-                    mimeType?.toMediaTypeOrNull()
-                )
-
+                val requestBody = fileBytes.toRequestBody(mimeType?.toMediaTypeOrNull())
                 MultipartBody.Part.createFormData("file", fileName, requestBody)
             } catch (e: Exception) {
                 e.printStackTrace()

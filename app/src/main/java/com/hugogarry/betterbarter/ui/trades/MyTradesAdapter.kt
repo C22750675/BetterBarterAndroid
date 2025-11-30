@@ -12,10 +12,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
-import com.hugogarry.betterbarter.BuildConfig
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.model.TradeStatus
+import com.hugogarry.betterbarter.util.SessionManager
 
 class MyTradesAdapter(
     private val currentUserId: String,
@@ -24,20 +24,19 @@ class MyTradesAdapter(
 
     enum class ActionType { ACCEPT, REJECT, COMPLETE, RATE }
 
-    // Callback for item clicks
     var onItemClick: ((Trade) -> Unit)? = null
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        // Bind to the views in list_item_trade.xml
         val ownerProfilePic: ImageView = itemView.findViewById(R.id.imageViewOwnerProfile)
         val ownerName: TextView = itemView.findViewById(R.id.textViewOwnerName)
         val itemNameAndStock: TextView = itemView.findViewById(R.id.textViewItemNameAndStock)
         val itemImage: ImageView = itemView.findViewById(R.id.imageViewItem)
         val btnAction: Button = itemView.findViewById(R.id.buttonProposeTrade)
 
-        private val baseUrl = BuildConfig.BASE_URL.removeSuffix("/api/")
-
         fun bind(trade: Trade) {
+            val currentApiUrl = SessionManager.getServerUrl()
+            val baseUrl = currentApiUrl.removeSuffix("api/")
+
             val item = trade.offeredItem
 
             // 1. Set Text Data
@@ -45,7 +44,7 @@ class MyTradesAdapter(
             itemNameAndStock.text = "${item?.name ?: "Unknown Item"} (${trade.offeredItemQuantity})\nStatus: ${trade.status.name}"
 
             // 2. Load Owner Profile Pic
-            val profilePicUrl = trade.proposer.profilePictureUrl?.let { "$baseUrl/api/uploads$it" }
+            val profilePicUrl = trade.proposer.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
             ownerProfilePic.load(profilePicUrl) {
                 placeholder(R.drawable.ic_profile)
                 error(R.drawable.ic_profile)
@@ -53,7 +52,7 @@ class MyTradesAdapter(
             }
 
             // 3. Load Item Image
-            val itemPicUrl = item?.imageUrl?.let { "$baseUrl/api/uploads$it" }
+            val itemPicUrl = item?.imageUrl?.let { "${baseUrl}api/uploads$it" }
             itemImage.load(itemPicUrl) {
                 placeholder(R.drawable.ic_launcher_background)
                 error(R.drawable.ic_launcher_background)
@@ -98,7 +97,6 @@ class MyTradesAdapter(
         val trade = getItem(position)
         holder.bind(trade)
 
-        // Set click listener on the root view
         holder.itemView.setOnClickListener {
             onItemClick?.invoke(trade)
         }

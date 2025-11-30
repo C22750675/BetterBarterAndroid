@@ -11,16 +11,15 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
-import com.hugogarry.betterbarter.BuildConfig
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Trade
+import com.hugogarry.betterbarter.util.SessionManager
 
 class AvailableTradesAdapter(
     private val currentUserId: String
 ) : ListAdapter<Trade, AvailableTradesAdapter.TradeViewHolder>(TradeDiffCallback()) {
 
     var onProposeClick: ((Trade) -> Unit)? = null
-    // Callback for item clicks
     var onItemClick: ((Trade) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TradeViewHolder {
@@ -33,17 +32,14 @@ class AvailableTradesAdapter(
         val trade = getItem(position)
         holder.bind(trade, currentUserId)
 
-        // Only set click listener if it's NOT the user's own trade
         if (trade.proposerId != currentUserId) {
             holder.proposeButton.setOnClickListener {
                 onProposeClick?.invoke(trade)
             }
         } else {
-            // Remove listener for own trades (or set a different one for editing later)
             holder.proposeButton.setOnClickListener(null)
         }
 
-        // Set click listener on the whole card
         holder.itemView.setOnClickListener {
             onItemClick?.invoke(trade)
         }
@@ -56,16 +52,17 @@ class AvailableTradesAdapter(
         private val itemImage: ImageView = itemView.findViewById(R.id.imageViewItem)
         val proposeButton: Button = itemView.findViewById(R.id.buttonProposeTrade)
 
-        private val baseUrl = BuildConfig.BASE_URL.removeSuffix("/api/")
-
         fun bind(trade: Trade, currentUserId: String) {
+            val currentApiUrl = SessionManager.getServerUrl()
+            val baseUrl = currentApiUrl.removeSuffix("api/")
+
             val item = trade.offeredItem
 
             ownerName.text = trade.proposer.username
             itemNameAndStock.text = "${item?.name ?: "Unknown Item"} (${trade.offeredItemQuantity})"
 
             // Load owner profile pic
-            val profilePicUrl = trade.proposer.profilePictureUrl?.let { "$baseUrl/api/uploads$it" }
+            val profilePicUrl = trade.proposer.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
             ownerProfilePic.load(profilePicUrl) {
                 placeholder(R.drawable.ic_profile)
                 error(R.drawable.ic_profile)
@@ -73,7 +70,7 @@ class AvailableTradesAdapter(
             }
 
             // Load item image
-            val itemPicUrl = item?.imageUrl?.let { "$baseUrl/api/uploads$it" }
+            val itemPicUrl = item?.imageUrl?.let { "${baseUrl}api/uploads$it" }
             itemImage.load(itemPicUrl) {
                 placeholder(R.drawable.ic_launcher_background)
                 error(R.drawable.ic_launcher_background)
@@ -84,7 +81,6 @@ class AvailableTradesAdapter(
                 proposeButton.isEnabled = true
                 proposeButton.alpha = 0.5f
             } else {
-                // CHECK MY APPLICATION
                 if (trade.myApplication != null) {
                     proposeButton.text = "Edit Application"
                 } else {

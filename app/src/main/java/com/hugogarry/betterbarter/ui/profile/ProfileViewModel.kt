@@ -103,4 +103,8 @@ class ProfileViewModel(
             }
         }
     }
+
+    fun logout() {
+        authRepository.logout()
+    }
 }

@@ -19,7 +19,6 @@ import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import com.hugogarry.betterbarter.BuildConfig
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.util.Resource
 import com.hugogarry.betterbarter.util.SessionManager
@@ -39,8 +38,6 @@ class ChatFragment : Fragment() {
     private lateinit var tradeItemImage: ImageView
     private lateinit var tradeItemName: TextView
     private lateinit var tradeStatus: TextView
-
-    private val baseUrl = BuildConfig.BASE_URL.removeSuffix("/api/")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,7 +73,7 @@ class ChatFragment : Fragment() {
         adapter = ChatAdapter(currentUserId)
 
         recyclerView.layoutManager = LinearLayoutManager(context).apply {
-            stackFromEnd = true // Scroll to bottom
+            stackFromEnd = true
         }
         recyclerView.adapter = adapter
 
@@ -122,8 +119,11 @@ class ChatFragment : Fragment() {
                     val item = trade.offeredItem
                     val currentUserId = getUserIdFromToken()
 
+                    // Dynamic URL
+                    val currentApiUrl = SessionManager.getServerUrl()
+                    val baseUrl = currentApiUrl.removeSuffix("api/")
+
                     // Set Toolbar Title to other user's name
-                    // Branch logic because 'recipient' is User? and 'proposer' is UserSummary
                     val otherUserName = if (trade.proposerId == currentUserId) {
                         trade.recipient?.username
                     } else {
@@ -135,7 +135,7 @@ class ChatFragment : Fragment() {
                     tradeItemName.text = "${item?.name ?: "Unknown Item"} (${trade.offeredItemQuantity})"
                     tradeStatus.text = "Status: ${trade.status.name.uppercase()}"
 
-                    val itemUrl = item?.imageUrl?.let { "$baseUrl/api/uploads$it" }
+                    val itemUrl = item?.imageUrl?.let { "${baseUrl}api/uploads$it" }
                     tradeItemImage.load(itemUrl) {
                         placeholder(R.drawable.ic_launcher_background)
                         error(R.drawable.ic_launcher_background)

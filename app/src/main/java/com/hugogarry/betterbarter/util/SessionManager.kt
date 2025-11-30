@@ -10,6 +10,10 @@ object SessionManager {
 
     private const val PREFS_NAME = "better_barter_prefs"
     private const val KEY_ACCESS_TOKEN = "access_token"
+    private const val KEY_SERVER_URL = "server_url"
+
+    // Default to the Android Emulator loopback address
+    private const val DEFAULT_URL = "http://10.0.2.2:3000/api/"
 
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -48,6 +52,24 @@ object SessionManager {
         sharedPreferences.edit {
             remove(KEY_ACCESS_TOKEN)
         }
+    }
+
+    /**
+     * Saves the custom server URL.
+     * Ensures it ends with a slash for consistency.
+     */
+    fun saveServerUrl(url: String) {
+        val formattedUrl = if (url.endsWith("/")) url else "$url/"
+        sharedPreferences.edit {
+            putString(KEY_SERVER_URL, formattedUrl)
+        }
+    }
+
+    /**
+     * Retrieves the currently configured server URL.
+     */
+    fun getServerUrl(): String {
+        return sharedPreferences.getString(KEY_SERVER_URL, DEFAULT_URL) ?: DEFAULT_URL
     }
 
     /**

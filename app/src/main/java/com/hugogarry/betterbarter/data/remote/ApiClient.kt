@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit
 
 object ApiClient {
 
+    // This is a placeholder base URL.
+    // It will be overridden by the HostSelectionInterceptor at runtime
     private const val BASE_URL = BuildConfig.BASE_URL
 
     private val moshi = Moshi.Builder()
@@ -23,6 +25,7 @@ object ApiClient {
     }
 
     private val okHttpClient = OkHttpClient.Builder()
+        .addInterceptor(HostSelectionInterceptor()) // Dynamic Host Swapping
         .addInterceptor(AuthInterceptor())
         .addInterceptor(loggingInterceptor)
         .connectTimeout(30, TimeUnit.SECONDS)

@@ -18,7 +18,6 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.NavigationUI
 import coil.load
 import coil.transform.CircleCropTransformation
-import com.hugogarry.betterbarter.BuildConfig
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.model.TradeStatus
@@ -44,8 +43,6 @@ class TradeDetailsFragment : Fragment() {
 
     private lateinit var tradeDescriptionTextView: TextView
     private lateinit var actionButton: Button
-
-    private val baseUrl = BuildConfig.BASE_URL.removeSuffix("/api/")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -90,9 +87,6 @@ class TradeDetailsFragment : Fragment() {
                     is Resource.Error -> {
                         Toast.makeText(context, resource.message, Toast.LENGTH_SHORT).show()
                     }
-                    is Resource.Loading -> {
-                        // Optional: show loading state
-                    }
                     else -> {}
                 }
             }
@@ -104,8 +98,12 @@ class TradeDetailsFragment : Fragment() {
         val proposer = trade.proposer
         val currentUserId = getUserIdFromToken()
 
+        // Use SessionManager
+        val currentApiUrl = SessionManager.getServerUrl()
+        val baseUrl = currentApiUrl.removeSuffix("api/")
+
         // Bind Item
-        val itemPicUrl = item?.imageUrl?.let { "$baseUrl/api/uploads$it" }
+        val itemPicUrl = item?.imageUrl?.let { "${baseUrl}api/uploads$it" }
         itemImageView.load(itemPicUrl) {
             placeholder(R.drawable.ic_launcher_background)
             error(R.drawable.ic_launcher_background)
@@ -116,7 +114,7 @@ class TradeDetailsFragment : Fragment() {
         itemDescriptionTextView.text = item?.description ?: "No description"
 
         // Bind Proposer
-        val profilePicUrl = proposer.profilePictureUrl?.let { "$baseUrl/api/uploads$it" }
+        val profilePicUrl = proposer.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
         proposerImageView.load(profilePicUrl) {
             placeholder(R.drawable.ic_profile)
             error(R.drawable.ic_profile)

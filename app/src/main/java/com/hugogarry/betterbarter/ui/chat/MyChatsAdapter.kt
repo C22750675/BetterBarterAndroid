@@ -10,9 +10,9 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
-import com.hugogarry.betterbarter.BuildConfig
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Chat
+import com.hugogarry.betterbarter.util.SessionManager
 
 class MyChatsAdapter(
     private val onChatClick: (Chat) -> Unit
@@ -36,23 +36,23 @@ class MyChatsAdapter(
         private val timeText: TextView = itemView.findViewById(R.id.textViewChatTime)
         private val statusText: TextView = itemView.findViewById(R.id.textViewTradeStatus)
 
-        private val baseUrl = BuildConfig.BASE_URL.removeSuffix("/api/")
-
         fun bind(chat: Chat, onClick: (Chat) -> Unit) {
+            val currentApiUrl = SessionManager.getServerUrl()
+            val baseUrl = currentApiUrl.removeSuffix("api/")
+
             nameText.text = chat.otherUser.username
             messageText.text = chat.lastMessage ?: "Start the conversation!"
 
-            // Simple date formatting (you might want a better utility for "Just now", "Yesterday", etc.)
+            // Simple date formatting
             timeText.text = chat.lastMessageTimestamp?.let {
                 try {
-                    // Assuming ISO string from backend, simple substring for time
                     it.substring(11, 16)
                 } catch (e: Exception) { "" }
             } ?: ""
 
             statusText.text = chat.tradeStatus.name
 
-            val profileUrl = chat.otherUser.profilePictureUrl?.let { "$baseUrl/api/uploads$it" }
+            val profileUrl = chat.otherUser.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
             profileImage.load(profileUrl) {
                 placeholder(R.drawable.ic_profile)
                 error(R.drawable.ic_profile)
