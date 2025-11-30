@@ -15,11 +15,11 @@ android {
     flavorDimensions += "targetDevice"
 
     productFlavors {
-        register("emulator") {
+        create("emulator") {
             dimension = "targetDevice"
             buildConfigField("String", "BASE_URL", "\"http://10.156.13.143:3000/api/\"")
         }
-        register("physical") {
+        create("physical") {
             dimension = "targetDevice"
             buildConfigField("String", "BASE_URL", "\"http://10.156.13.143:3000/api/\"")
         }
@@ -38,15 +38,13 @@ android {
     buildTypes {
         getByName("debug") {
         }
-        release {
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
             // This is a global setting for all 'release' builds.
-            // If you needed different release URLs per flavor, you would define them
-            // inside the flavor block instead.
             buildConfigField("String", "BASE_URL", "\"https://api.yourproduction.com/api/\"")
         }
     }
@@ -55,8 +53,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
 }
 
