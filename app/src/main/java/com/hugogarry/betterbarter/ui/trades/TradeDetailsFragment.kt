@@ -122,7 +122,10 @@ class TradeDetailsFragment : Fragment() {
         }
         proposerNameTextView.text = proposer.username
 
-        proposerReputationTextView.isVisible = false
+        // CHANGED: Display Reputation instead of hiding it
+        proposerReputationTextView.isVisible = true
+        val score = proposer.reputationScore ?: 0.0
+        proposerReputationTextView.text = "Reputation: %.1f ★".format(score)
 
         // Bind Trade
         tradeDescriptionTextView.text = trade.description ?: "No specific trade details provided."
