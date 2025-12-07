@@ -160,8 +160,13 @@ class MapFragment : Fragment() {
 
         if (circles == null) return
 
+        // Sort circles by radius descending.
+        // This ensures larger circles are drawn first (at the bottom)
+        // and smaller circles are drawn last (on top), making them clickable.
+        val sortedCircles = circles.sortedByDescending { it.radius }
+
         // Loop through each circle and create overlays
-        circles.forEach { circle ->
+        sortedCircles.forEach { circle ->
             // Backend uses [longitude, latitude], GeoPoint uses (latitude, longitude)
             val centerPoint = GeoPoint(circle.origin.coordinates[1], circle.origin.coordinates[0])
 
