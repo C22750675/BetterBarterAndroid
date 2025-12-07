@@ -66,7 +66,11 @@ class TradeApplicationsAdapter(
             // Item Info
             val item = app.offeredItem
             itemName.text = "Offered: ${item?.name ?: "Unknown Item"} (Qty: ${app.offeredItemQuantity})"
-            itemValue.text = "Est. Value: €${item?.estimatedValue ?: 0.0}"
+
+            // Calculate total value
+            val singleValue = item?.estimatedValue ?: 0.0
+            val totalValue = singleValue * app.offeredItemQuantity
+            itemValue.text = "Est. Value: €%.2f".format(totalValue)
 
             val itemUrl = item?.imageUrl?.let { "${baseUrl}api/uploads$it" }
             itemImage.load(itemUrl) {
