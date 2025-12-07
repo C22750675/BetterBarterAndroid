@@ -81,6 +81,17 @@ class CirclesFragment : Fragment() {
         checkLocationPermission()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Refresh My Circles to show newly created or joined circles immediately
+        viewModel.fetchMyCircles()
+
+        // Also refresh nearby circles to update member status or show new ones
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            getCurrentLocation()
+        }
+    }
+
     private fun setupRecyclerViews() {
         // My Circles (Standard adapter)
         myCirclesAdapter = CirclesAdapter(showJoinButton = false)
