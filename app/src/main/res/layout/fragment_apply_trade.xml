@@ -71,6 +71,115 @@
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Value Comparison Indicator Section -->
+            <TextView
+                android:id="@+id/textViewValueLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Value Match Estimate"
+                android:textAppearance="?attr/textAppearanceCaption"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textInputLayoutQuantity" />
+
+            <FrameLayout
+                android:id="@+id/frameLayoutValueBar"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="4dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textViewValueLabel">
+
+                <!-- The Colored Bar Background -->
+                <!-- Wrapped in MaterialCardView for rounded corners -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"
+                    android:layout_gravity="center_vertical"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:weightSum="10">
+
+                        <!-- -50% to -20% (3 units) -->
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:background="@color/circle_color_red" />
+
+                        <!-- -20% to -10% (1 unit) -->
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="@color/circle_color_orange" />
+
+                        <!-- -10% to +10% (2 units) - The Sweet Spot -->
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="2"
+                            android:background="@color/circle_color_green" />
+
+                        <!-- +10% to +20% (1 unit) -->
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="@color/circle_color_orange" />
+
+                        <!-- +20% to +50% (3 units) -->
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:background="@color/circle_color_red" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Center Marker -->
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="center"
+                    android:background="#80000000"
+                    android:elevation="1dp" />
+
+                <!-- The Moving Indicator -->
+                <!-- Wrapped in MaterialCardView to make it a rounded pill/capsule shape -->
+                <!-- Use ?attr/colorOnSurface so it's black in light mode and white in dark mode -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/viewValueIndicator"
+                    android:layout_width="6dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical|start"
+                    app:cardBackgroundColor="?attr/colorOnSurface"
+                    app:cardCornerRadius="3dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="0dp" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/textViewValueFeedback"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:text="Select an item to compare values"
+                android:textAppearance="?attr/textAppearanceCaption"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/frameLayoutValueBar" />
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputLayoutMessage"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -78,7 +187,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:hint="Message to Owner (Optional)"
-                app:layout_constraintTop_toBottomOf="@id/textInputLayoutQuantity"
+                app:layout_constraintTop_toBottomOf="@id/textViewValueFeedback"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
