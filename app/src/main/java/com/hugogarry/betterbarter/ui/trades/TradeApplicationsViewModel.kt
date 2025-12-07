@@ -33,8 +33,8 @@ class TradeApplicationsViewModel(
             val result = tradeRepository.acceptApplication(application.id)
             if (result is Resource.Success) {
                 _actionState.value = Resource.Success("Application Accepted! Chat created.")
-                // Refresh the list (which should now be empty or show status updated)
-                fetchApplications(application.id)
+                // Refresh the list using the TRADE ID, not the application ID
+                fetchApplications(application.tradeId)
             } else {
                 _actionState.value = Resource.Error(result.message ?: "Failed to accept")
             }
@@ -45,12 +45,21 @@ class TradeApplicationsViewModel(
         viewModelScope.launch {
             _actionState.value = Resource.Loading()
             val result = tradeRepository.declineApplication(application.id)
+
             if (result is Resource.Success) {
                 _actionState.value = Resource.Success("Application Declined")
-                // Remove the item locally or refresh
-                val currentList = (_applications.value as? Resource.Success)?.data?.toMutableList()
-                currentList?.removeAll { it.id == application.id }
-                _applications.value = Resource.Success(currentList ?: emptyList())
+
+                // Optimistic Update: Remove the item from the current local list immediately
+                val currentState = _applications.value
+                if (currentState is Resource.Success) {
+                    val currentList = currentState.data ?: emptyList()
+                    // Create a new list excluding the declined application
+                    val updatedList = currentList.filter { it.id != application.id }
+                    _applications.value = Resource.Success(updatedList)
+                } else {
+                    // Fallback: If local state isn't valid, fetch from server
+                    fetchApplications(application.tradeId)
+                }
             } else {
                 _actionState.value = Resource.Error(result.message ?: "Failed to decline")
             }

@@ -71,9 +71,6 @@ class AddItemViewModel(
 
     /**
      * Validates and submits the new item for creation.
-     * UPDATED: Now includes bestBeforeDateText and useByDateText for optional date inputs.
-     *
-     * MODIFIED: Removed 'imageUrl' from parameters, as it's now managed internally.
      */
     fun createItem(
         name: String,

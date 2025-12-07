@@ -8,6 +8,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class TradeApplication(
     val id: String,
+    val tradeId: String,
     val status: String, // "pending", "accepted", etc.
     val message: String?,
     val offeredItemQuantity: Int,

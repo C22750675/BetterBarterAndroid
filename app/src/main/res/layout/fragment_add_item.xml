@@ -165,22 +165,40 @@
                     android:text="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- New Switch for Perishable Items -->
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchPerishable"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Is this item perishable?"
+                android:checked="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textInputLayoutStock" />
+
+            <!-- Date fields hidden by default -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputLayoutBestBeforeDate"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Best Before Date (YYYY-MM-DD, Optional)"
+                android:hint="Best Before Date (YYYY-MM-DD)"
+                android:visibility="gone"
+                app:startIconDrawable="@android:drawable/ic_menu_my_calendar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textInputLayoutStock">
+                app:layout_constraintTop_toBottomOf="@id/switchPerishable">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextBestBeforeDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="date" />
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -189,7 +207,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Use By Date (YYYY-MM-DD, Optional)"
+                android:hint="Use By Date (YYYY-MM-DD)"
+                android:visibility="gone"
+                app:startIconDrawable="@android:drawable/ic_menu_my_calendar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textInputLayoutBestBeforeDate">
@@ -198,7 +218,10 @@
                     android:id="@+id/editTextUseByDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="date" />
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button

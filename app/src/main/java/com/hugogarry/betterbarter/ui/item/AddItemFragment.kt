@@ -1,6 +1,7 @@
 package com.hugogarry.betterbarter.ui.item
 
 import android.Manifest
+import android.app.DatePickerDialog
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -24,6 +25,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputLayout
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Category
@@ -36,6 +38,8 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import android.os.Build
+import java.util.Calendar
+import java.util.Locale
 
 
 class AddItemFragment : Fragment() {
@@ -52,6 +56,9 @@ class AddItemFragment : Fragment() {
     private lateinit var subCategoryAutoCompleteTextView: AutoCompleteTextView
     private lateinit var subCategoryInputLayout: TextInputLayout // For visibility control
 
+    private lateinit var switchPerishable: SwitchMaterial
+    private lateinit var bestBeforeDateInputLayout: TextInputLayout
+    private lateinit var useByDateInputLayout: TextInputLayout
     private lateinit var bestBeforeDateEditText: EditText
     private lateinit var useByDateEditText: EditText
 
@@ -115,8 +122,28 @@ class AddItemFragment : Fragment() {
         subCategoryAutoCompleteTextView = view.findViewById(R.id.autoCompleteTextViewSubCategory)
         subCategoryInputLayout = view.findViewById(R.id.textInputLayoutSubCategory)
 
+        // Perishable Logic
+        switchPerishable = view.findViewById(R.id.switchPerishable)
+        bestBeforeDateInputLayout = view.findViewById(R.id.textInputLayoutBestBeforeDate)
+        useByDateInputLayout = view.findViewById(R.id.textInputLayoutUseByDate)
         bestBeforeDateEditText = view.findViewById(R.id.editTextBestBeforeDate)
         useByDateEditText = view.findViewById(R.id.editTextUseByDate)
+
+        // Toggle visibility based on switch
+        switchPerishable.setOnCheckedChangeListener { _, isChecked ->
+            bestBeforeDateInputLayout.isVisible = isChecked
+            useByDateInputLayout.isVisible = isChecked
+
+            // Clear fields if unchecked so we don't send data accidentally
+            if (!isChecked) {
+                bestBeforeDateEditText.text.clear()
+                useByDateEditText.text.clear()
+            }
+        }
+
+        // Setup Date Pickers
+        setupDatePicker(bestBeforeDateEditText)
+        setupDatePicker(useByDateEditText)
 
         val addButton = view.findViewById<Button>(R.id.buttonAddItem)
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBarAddItem)
@@ -127,8 +154,11 @@ class AddItemFragment : Fragment() {
             val name = itemNameEditText.text.toString().trim()
             val description = itemDescriptionEditText.text.toString().trim()
             val estimatedValueText = estimatedValueEditText.text.toString().trim()
+
+            // Dates might be hidden, so check visibility or just grab text (we cleared them on hide)
             val bestBeforeDateText = bestBeforeDateEditText.text.toString()
             val useByDateText = useByDateEditText.text.toString()
+
             val stockText = stockEditText.text.toString().trim()
 
             viewModel.createItem(
@@ -146,6 +176,46 @@ class AddItemFragment : Fragment() {
         observeCategoryState()
         observeAddItemState(progressBar, errorTextView)
         observeImageUploadState()
+    }
+
+    private fun setupDatePicker(editText: EditText) {
+        editText.setOnClickListener {
+            // Get current date or parsed date from text
+            val calendar = Calendar.getInstance()
+
+            // If the field already has a date, try to parse it to set the picker to that date
+            if (editText.text.isNotEmpty()) {
+                val parts = editText.text.split("-")
+                if (parts.size == 3) {
+                    try {
+                        val year = parts[0].toInt()
+                        val month = parts[1].toInt() - 1 // Calendar months are 0-indexed
+                        val day = parts[2].toInt()
+                        calendar.set(year, month, day)
+                    } catch (e: Exception) {
+                        // Ignore parsing errors and use current date
+                    }
+                }
+            }
+
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+            val datePickerDialog = DatePickerDialog(
+                requireContext(),
+                { _, selectedYear, selectedMonth, selectedDay ->
+                    // Format: YYYY-MM-DD
+                    // String.format uses default locale, ensure we force US or standard for API consistency
+                    val formattedDate = String.format(Locale.US, "%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
+                    editText.setText(formattedDate)
+                },
+                year,
+                month,
+                day
+            )
+            datePickerDialog.show()
+        }
     }
 
     private fun observeCategoryState() {

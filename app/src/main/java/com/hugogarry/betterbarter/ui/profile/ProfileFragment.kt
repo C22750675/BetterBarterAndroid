@@ -116,6 +116,12 @@ class ProfileFragment : Fragment() {
         observeUiState()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Refresh data whenever the fragment becomes visible (e.g., returning from AddItemFragment)
+        viewModel.fetchProfileData()
+    }
+
     // Permission Launcher
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
