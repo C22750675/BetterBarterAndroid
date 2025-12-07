@@ -12,6 +12,8 @@ class CircleRepository(private val apiService: ApiService = ApiClient.apiService
     suspend fun joinCircle(circleId: String): Resource<Boolean> {
         return try {
             apiService.joinCircle(circleId)
+            // Success! The Unit return type means we don't care about the body,
+            // just that it didn't throw an HTTP exception.
             Resource.Success(true)
         } catch (e: HttpException) {
             val msg = when(e.code()) {
@@ -21,6 +23,7 @@ class CircleRepository(private val apiService: ApiService = ApiClient.apiService
             }
             Resource.Error(msg)
         } catch (e: Exception) {
+            e.printStackTrace() // Useful to see if it's a parsing error
             Resource.Error("Network error.")
         }
     }

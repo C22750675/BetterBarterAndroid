@@ -109,7 +109,6 @@ class CirclesFragment : Fragment() {
         nearbyCirclesAdapter = CirclesAdapter(showJoinButton = true)
         nearbyCirclesAdapter.onJoinClick = { circle ->
             viewModel.joinCircle(circle)
-            Toast.makeText(context, "Joining ${circle.name}...", Toast.LENGTH_SHORT).show()
         }
         rvNearbyCircles.apply {
             adapter = nearbyCirclesAdapter
@@ -132,7 +131,6 @@ class CirclesFragment : Fragment() {
                     } else {
                         errorTextView.isVisible = false
                     }
-                    // Refresh nearby circles to filter out joined ones if needed
                 } else if (resource is Resource.Error) {
                     errorTextView.isVisible = true
                     errorTextView.text = resource.message
@@ -153,6 +151,19 @@ class CirclesFragment : Fragment() {
                 }
             }
         }
+
+        // Observe Join Action Status
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.joinCircleState.collectLatest { resource ->
+                if (resource is Resource.Success) {
+                    Toast.makeText(context, resource.data, Toast.LENGTH_SHORT).show()
+                    viewModel.clearJoinState()
+                } else if (resource is Resource.Error) {
+                    Toast.makeText(context, resource.message, Toast.LENGTH_SHORT).show()
+                    viewModel.clearJoinState()
+                }
+            }
+        }
     }
 
     /**
@@ -163,8 +174,6 @@ class CirclesFragment : Fragment() {
         rvNearbyCircles.post {
             val parentHeight = (view?.height ?: 0)
             val maxAllowedHeight = parentHeight / 3
-
-            // Calculate expected height:
 
             val layoutParams = rvNearbyCircles.layoutParams
 

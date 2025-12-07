@@ -49,8 +49,9 @@ interface ApiService {
         @Query("radius") radius: Int = 25000
     ): List<Circle>
 
+    // CHANGED: Return Unit instead of Void to properly handle the response
     @POST("circles/{id}/join")
-    suspend fun joinCircle(@Path("id") circleId: String): Void
+    suspend fun joinCircle(@Path("id") circleId: String): Unit
 
     // Trades
     @POST("trades")

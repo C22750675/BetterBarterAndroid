@@ -19,6 +19,10 @@ class CirclesViewModel(
     private val _nearbyCirclesState = MutableStateFlow<Resource<List<Circle>>>(Resource.Idle())
     val nearbyCirclesState: StateFlow<Resource<List<Circle>>> = _nearbyCirclesState
 
+    // New state to track the specific action of joining a circle
+    private val _joinCircleState = MutableStateFlow<Resource<String>>(Resource.Idle())
+    val joinCircleState: StateFlow<Resource<String>> = _joinCircleState
+
     init {
         fetchMyCircles()
     }
@@ -48,13 +52,26 @@ class CirclesViewModel(
 
     fun joinCircle(circle: Circle) {
         viewModelScope.launch {
+            _joinCircleState.value = Resource.Loading()
             val result = circleRepository.joinCircle(circle.id)
+
             if (result is Resource.Success) {
+                _joinCircleState.value = Resource.Success("Successfully joined ${circle.name}!")
+
+                // Refresh My Circles to show the new addition
                 fetchMyCircles()
+
                 // Remove from the nearby list locally to be snappy
                 val currentNearby = (_nearbyCirclesState.value as? Resource.Success)?.data ?: emptyList()
                 _nearbyCirclesState.value = Resource.Success(currentNearby.filter { it.id != circle.id })
+            } else {
+                _joinCircleState.value = Resource.Error(result.message ?: "Failed to join circle")
             }
         }
+    }
+
+    // Helper to reset state after the UI has handled the Toast
+    fun clearJoinState() {
+        _joinCircleState.value = Resource.Idle()
     }
 }
