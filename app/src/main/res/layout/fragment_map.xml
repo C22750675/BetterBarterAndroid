@@ -1,4 +1,3 @@
-<!-- In: res/layout/fragment_map.xml -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -12,6 +11,30 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_zoom_in"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/ic_zoom_in"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toTopOf="@+id/fab_zoom_out"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="Zoom In" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_zoom_out"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/ic_zoom_out"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toTopOf="@+id/fab_center_location"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="Zoom Out" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_center_location"

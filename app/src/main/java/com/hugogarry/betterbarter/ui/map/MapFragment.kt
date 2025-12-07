@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -31,7 +32,6 @@ import org.osmdroid.util.MapTileIndex
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
-import androidx.core.graphics.toColorInt
 
 class MapFragment : Fragment() {
 
@@ -102,8 +102,17 @@ class MapFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
         view.findViewById<FloatingActionButton>(R.id.fab_center_location).setOnClickListener {
             centerMapOnUserLocation()
+        }
+
+        view.findViewById<FloatingActionButton>(R.id.fab_zoom_in).setOnClickListener {
+            mapView.controller.zoomIn()
+        }
+
+        view.findViewById<FloatingActionButton>(R.id.fab_zoom_out).setOnClickListener {
+            mapView.controller.zoomOut()
         }
 
         observeCirclesState()
