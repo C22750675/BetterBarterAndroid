@@ -9,6 +9,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+// Define specific results for actions
+sealed class TradeActionResult {
+    data class Accepted(val tradeId: String, val message: String) : TradeActionResult()
+    data class Declined(val message: String) : TradeActionResult()
+}
+
 class TradeApplicationsViewModel(
     private val tradeRepository: TradeRepository = TradeRepository()
 ) : ViewModel() {
@@ -16,9 +22,9 @@ class TradeApplicationsViewModel(
     private val _applications = MutableStateFlow<Resource<List<TradeApplication>>>(Resource.Idle())
     val applications: StateFlow<Resource<List<TradeApplication>>> = _applications
 
-    // Add state for accept/decline actions
-    private val _actionState = MutableStateFlow<Resource<String>>(Resource.Idle())
-    val actionState: StateFlow<Resource<String>> = _actionState
+    // Changed from Resource<String> to Resource<TradeActionResult> for type-safe handling
+    private val _actionState = MutableStateFlow<Resource<TradeActionResult>>(Resource.Idle())
+    val actionState: StateFlow<Resource<TradeActionResult>> = _actionState
 
     fun fetchApplications(tradeId: String) {
         viewModelScope.launch {
@@ -32,8 +38,11 @@ class TradeApplicationsViewModel(
             _actionState.value = Resource.Loading()
             val result = tradeRepository.acceptApplication(application.id)
             if (result is Resource.Success) {
-                _actionState.value = Resource.Success("Application Accepted! Chat created.")
-                // Refresh the list using the TRADE ID, not the application ID
+                // Return structured data: The ID to navigate to, and a message
+                _actionState.value = Resource.Success(
+                    TradeActionResult.Accepted(application.tradeId, "Trade Application Accepted!")
+                )
+                // Refresh the list
                 fetchApplications(application.tradeId)
             } else {
                 _actionState.value = Resource.Error(result.message ?: "Failed to accept")
@@ -47,17 +56,17 @@ class TradeApplicationsViewModel(
             val result = tradeRepository.declineApplication(application.id)
 
             if (result is Resource.Success) {
-                _actionState.value = Resource.Success("Application Declined")
+                _actionState.value = Resource.Success(
+                    TradeActionResult.Declined("Application Declined")
+                )
 
-                // Optimistic Update: Remove the item from the current local list immediately
+                // Optimistic Update
                 val currentState = _applications.value
                 if (currentState is Resource.Success) {
                     val currentList = currentState.data ?: emptyList()
-                    // Create a new list excluding the declined application
                     val updatedList = currentList.filter { it.id != application.id }
                     _applications.value = Resource.Success(updatedList)
                 } else {
-                    // Fallback: If local state isn't valid, fetch from server
                     fetchApplications(application.tradeId)
                 }
             } else {

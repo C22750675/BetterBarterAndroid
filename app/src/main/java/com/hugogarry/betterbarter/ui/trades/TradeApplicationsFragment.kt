@@ -89,7 +89,21 @@ class TradeApplicationsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.actionState.collectLatest { resource ->
                 if (resource is Resource.Success) {
-                    Toast.makeText(context, resource.data, Toast.LENGTH_SHORT).show()
+                    // Handle specific result types differently
+                    when (val result = resource.data) {
+                        is TradeActionResult.Accepted -> {
+                            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+                            // Navigate to Chat
+                            val action = TradeApplicationsFragmentDirections
+                                .actionTradeApplicationsFragmentToChatFragment(result.tradeId)
+                            findNavController().navigate(action)
+                        }
+                        is TradeActionResult.Declined -> {
+                            Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+                        }
+                        null -> { /* Should not happen if data is non-nullable in Success */ }
+                    }
+
                     viewModel.clearActionState()
                 } else if (resource is Resource.Error) {
                     Toast.makeText(context, resource.message, Toast.LENGTH_SHORT).show()

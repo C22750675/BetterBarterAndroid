@@ -49,7 +49,6 @@ interface ApiService {
         @Query("radius") radius: Int = 25000
     ): List<Circle>
 
-    // CHANGED: Return Unit instead of Void to properly handle the response
     @POST("circles/{id}/join")
     suspend fun joinCircle(@Path("id") circleId: String): Unit
 
@@ -73,7 +72,7 @@ interface ApiService {
     suspend fun rateTrade(
         @Path("id") tradeId: String,
         @Body ratingDto: CreateRatingRequest
-    ): Void
+    ): Unit
 
     @GET("trades/{id}")
     suspend fun getTrade(@Path("id") tradeId: String): Trade
@@ -88,10 +87,10 @@ interface ApiService {
     suspend fun getTradeApplications(@Path("id") tradeId: String): List<TradeApplication>
 
     @POST("trades/applications/{id}/accept")
-    suspend fun acceptApplication(@Path("id") applicationId: String): Void
+    suspend fun acceptApplication(@Path("id") applicationId: String): Unit
 
     @DELETE("trades/applications/{id}")
-    suspend fun declineApplication(@Path("id") applicationId: String): Void
+    suspend fun declineApplication(@Path("id") applicationId: String): Unit
 
     // Upload
     @Multipart
