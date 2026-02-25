@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hugogarry.betterbarter.data.model.Message
 import com.hugogarry.betterbarter.data.model.Trade
+import com.hugogarry.betterbarter.data.model.TradeStatus
 import com.hugogarry.betterbarter.data.repository.ChatRepository
 import com.hugogarry.betterbarter.data.repository.TradeRepository
 import com.hugogarry.betterbarter.util.Resource
@@ -24,6 +25,10 @@ class ChatViewModel(
 
     private val _tradeDetails = MutableStateFlow<Resource<Trade>>(Resource.Idle())
     val tradeDetails: StateFlow<Resource<Trade>> = _tradeDetails
+
+    // State for completing a trade
+    private val _completeTradeState = MutableStateFlow<Resource<Trade>>(Resource.Idle())
+    val completeTradeState: StateFlow<Resource<Trade>> = _completeTradeState
 
     fun fetchMessages(tradeId: String) {
         viewModelScope.launch {
@@ -55,6 +60,16 @@ class ChatViewModel(
     }
 
     fun completeTrade(tradeId: String) {
-        // Placeholder for future logic
+        viewModelScope.launch {
+            _completeTradeState.value = Resource.Loading()
+            // Using TradeRepository to update the status to completed
+            val result = tradeRepository.updateStatus(tradeId, TradeStatus.completed)
+            _completeTradeState.value = result
+
+            // If successful, re-fetch trade details to update UI (hide the menu item, update status text)
+            if (result is Resource.Success) {
+                fetchTradeDetails(tradeId)
+            }
+        }
     }
 }
