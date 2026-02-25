@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var navHostFragment: NavHostFragment
+    private var isBottomNavVisible = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +48,7 @@ class MainActivity : AppCompatActivity() {
             handleStartupNavigation()
         }
 
-        // Call the new function to handle insets
+        // Call the function to handle insets
         setupWindowInsets()
 
         // Start observing for session expiry events
@@ -85,16 +86,26 @@ class MainActivity : AppCompatActivity() {
     private fun setupWindowInsets() {
         val rootLayout = findViewById<ConstraintLayout>(R.id.main_activity_root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { view, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { _, windowInsets ->
+            val systemBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val imeInsets = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
 
             // Apply padding to the top of the NavHostFragment (for the status bar)
-            navHostFragment.view?.updatePadding(top = insets.top)
+            navHostFragment.view?.updatePadding(top = systemBarsInsets.top)
 
-            // Apply padding to the bottom of the BottomNavigationView (for the gesture nav bar)
-            bottomNav.updatePadding(bottom = insets.bottom)
+            if (isBottomNavVisible) {
+                // BottomNav is visible: Give it the bottom padding and clear the NavHost padding
+                bottomNav.updatePadding(bottom = systemBarsInsets.bottom)
+                navHostFragment.view?.updatePadding(bottom = 0)
+            } else {
+                // BottomNav is hidden: The NavHost needs the bottom padding (and keyboard inset if visible)
+                val bottomPadding = maxOf(systemBarsInsets.bottom, imeInsets.bottom)
+                navHostFragment.view?.updatePadding(bottom = bottomPadding)
+                // Clear padding from hidden bottom nav just to be safe
+                bottomNav.updatePadding(bottom = 0)
+            }
 
-            // Return default insets to let children handle their own if needed
+            // Return consumed so the root layout doesn't apply the insets globally and mess up our specific layout
             WindowInsetsCompat.CONSUMED
         }
     }
@@ -109,11 +120,18 @@ class MainActivity : AppCompatActivity() {
                 R.id.myChatsFragment,
                 R.id.profileFragment
             )
+            val rootLayout = findViewById<ConstraintLayout>(R.id.main_activity_root)
+
             if (destination.id in topLevelDestinations) {
                 bottomNav.visibility = View.VISIBLE
+                isBottomNavVisible = true
             } else {
                 bottomNav.visibility = View.GONE
+                isBottomNavVisible = false
             }
+
+            // Request an inset layout pass whenever visibility changes
+            ViewCompat.requestApplyInsets(rootLayout)
         }
     }
 
