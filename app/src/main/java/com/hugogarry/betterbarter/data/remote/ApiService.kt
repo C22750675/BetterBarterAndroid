@@ -72,7 +72,7 @@ interface ApiService {
     suspend fun rateTrade(
         @Path("id") tradeId: String,
         @Body ratingDto: CreateRatingRequest
-    ): Unit
+    )
 
     @GET("trades/{id}")
     suspend fun getTrade(@Path("id") tradeId: String): Trade
@@ -87,10 +87,10 @@ interface ApiService {
     suspend fun getTradeApplications(@Path("id") tradeId: String): List<TradeApplication>
 
     @POST("trades/applications/{id}/accept")
-    suspend fun acceptApplication(@Path("id") applicationId: String): Unit
+    suspend fun acceptApplication(@Path("id") applicationId: String)
 
     @DELETE("trades/applications/{id}")
-    suspend fun declineApplication(@Path("id") applicationId: String): Unit
+    suspend fun declineApplication(@Path("id") applicationId: String)
 
     // Upload
     @Multipart
