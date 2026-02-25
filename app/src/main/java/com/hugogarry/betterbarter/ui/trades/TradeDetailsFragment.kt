@@ -169,10 +169,6 @@ class TradeDetailsFragment : Fragment() {
         itemQuantityTextView.text = "Quantity: ${trade.offeredItemQuantity}"
         itemDescriptionTextView.text = item?.description ?: "No description"
 
-        // Log currentUserId, and trade object
-        println("Current User ID: $currentUserId")
-        println("Trade: $trade")
-
         // Determine which user to display in the "Other Party" section
         val partyToShow = if (trade.proposerId == currentUserId && trade.recipient != null) {
             otherPartyTitleTextView.text = "Trade Recipient"
