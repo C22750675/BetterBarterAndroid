@@ -36,6 +36,7 @@ class ChatFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var messageInput: EditText
     private lateinit var sendButton: ImageButton
+    private lateinit var tradeBannerLayout: View
     private lateinit var tradeItemImage: ImageView
     private lateinit var tradeItemName: TextView
     private lateinit var tradeStatus: TextView
@@ -67,6 +68,7 @@ class ChatFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerViewMessages)
         messageInput = view.findViewById(R.id.editTextMessage)
         sendButton = view.findViewById(R.id.buttonSend)
+        tradeBannerLayout = view.findViewById(R.id.layoutTradeBanner)
         tradeItemImage = view.findViewById(R.id.imageViewTradeItem)
         tradeItemName = view.findViewById(R.id.textViewTradeItemName)
         tradeStatus = view.findViewById(R.id.textViewTradeStatus)
@@ -88,6 +90,12 @@ class ChatFragment : Fragment() {
                 viewModel.sendMessage(args.tradeId, text)
                 messageInput.text.clear()
             }
+        }
+
+        // Navigate to trade details when the banner is clicked
+        tradeBannerLayout.setOnClickListener {
+            val action = ChatFragmentDirections.actionChatFragmentToTradeDetailsFragment(args.tradeId)
+            findNavController().navigate(action)
         }
 
         viewModel.fetchMessages(args.tradeId)
@@ -177,6 +185,6 @@ class ChatFragment : Fragment() {
             val payload = String(android.util.Base64.decode(parts[1], android.util.Base64.URL_SAFE))
             val json = JSONObject(payload)
             return json.optString("sub")
-        } catch (e: Exception) { return null }
+        } catch (_: Exception) { return null }
     }
 }

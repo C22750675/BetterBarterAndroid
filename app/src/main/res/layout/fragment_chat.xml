@@ -23,9 +23,13 @@
 
         <!-- Trade Item Summary -->
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutTradeBanner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/colorSurfaceVariant"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             android:padding="8dp">
 
             <ImageView

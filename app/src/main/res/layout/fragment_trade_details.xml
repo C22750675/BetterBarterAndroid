@@ -89,8 +89,9 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Proposer Section -->
+            <!-- Other Party Section -->
             <TextView
+                android:id="@+id/textViewOtherPartyTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Trade Proposer"
@@ -107,7 +108,7 @@
                 android:layout_marginBottom="24dp">
 
                 <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/imageViewProposerProfile"
+                    android:id="@+id/imageViewOtherPartyProfile"
                     android:layout_width="64dp"
                     android:layout_height="64dp"
                     android:scaleType="centerCrop"
@@ -122,7 +123,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/textViewProposerName"
+                        android:id="@+id/textViewOtherPartyName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?attr/textAppearanceSubtitle1"
@@ -130,7 +131,7 @@
                         tools:text="Hugo Garry" />
 
                     <TextView
-                        android:id="@+id/textViewProposerReputation"
+                        android:id="@+id/textViewOtherPartyReputation"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?attr/textAppearanceBody2"
@@ -151,8 +152,66 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceBody1"
-                android:layout_marginBottom="32dp"
+                android:layout_marginBottom="24dp"
                 tools:text="Looking for jam jars or compost in exchange." />
+
+            <!-- Rating Section (Shows only on completion) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/layoutRatingSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rate this Trade"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+
+                    <RatingBar
+                        android:id="@+id/ratingBarTrade"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:numStars="5"
+                        android:stepSize="1.0"
+                        android:rating="4"
+                        android:layout_marginBottom="12dp" />
+
+                    <EditText
+                        android:id="@+id/editTextRatingComment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Leave a comment (Optional)"
+                        android:inputType="textMultiLine"
+                        android:minLines="2"
+                        android:gravity="top|start"
+                        android:background="@null"
+                        android:padding="8dp"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textColorHint="?android:attr/textColorSecondary"
+                        android:layout_marginBottom="16dp"/>
+
+                    <Button
+                        android:id="@+id/buttonSubmitRating"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Submit Review" />
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Action Button -->
             <Button
@@ -160,6 +219,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="12dp"
+                android:layout_marginBottom="16dp"
                 tools:text="Apply for Trade" />
 
         </LinearLayout>

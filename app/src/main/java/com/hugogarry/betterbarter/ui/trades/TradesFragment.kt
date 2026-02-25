@@ -1,11 +1,9 @@
 package com.hugogarry.betterbarter.ui.trades
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -15,14 +13,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.hugogarry.betterbarter.R
-import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.model.TradeStatus
 import com.hugogarry.betterbarter.util.Resource
 import com.hugogarry.betterbarter.util.SessionManager
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.util.Base64
 
 class TradesFragment : Fragment() {
 
@@ -47,20 +43,18 @@ class TradesFragment : Fragment() {
                 MyTradesAdapter.ActionType.ACCEPT -> viewModel.updateStatus(trade, TradeStatus.accepted)
                 MyTradesAdapter.ActionType.REJECT -> viewModel.updateStatus(trade, TradeStatus.rejected)
                 MyTradesAdapter.ActionType.COMPLETE -> viewModel.updateStatus(trade, TradeStatus.completed)
-                MyTradesAdapter.ActionType.RATE -> showRatingDialog(trade)
             }
         }
 
-        // NEW: Handle Item Click
+        // Handle Item Click to navigate to TradeDetailsFragment
         adapter.onItemClick = { trade ->
-            // Use the newly created action
             val action = TradesFragmentDirections
                 .actionTradesFragmentToTradeDetailsFragment(trade.id)
             findNavController().navigate(action)
         }
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewTrades)
-        progressBar = view.findViewById<ProgressBar>(R.id.progressBarTrades) // Init progressBar
+        progressBar = view.findViewById<ProgressBar>(R.id.progressBarTrades)
 
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -98,18 +92,6 @@ class TradesFragment : Fragment() {
         }
     }
 
-    private fun showRatingDialog(trade: Trade) {
-        val input = EditText(context)
-        input.hint = "Comment (Optional)"
-
-        AlertDialog.Builder(context)
-            .setTitle("Rate this trade (1-5)")
-            .setView(input)
-            .setPositiveButton("5 Stars") { _, _ -> viewModel.submitRating(trade, 5, input.text.toString()) }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
     private fun getUserIdFromToken(): String? {
         val token = SessionManager.getToken() ?: return null
         try {
@@ -118,6 +100,6 @@ class TradesFragment : Fragment() {
             val payload = String(android.util.Base64.decode(parts[1], android.util.Base64.URL_SAFE))
             val json = JSONObject(payload)
             return json.optString("sub")
-        } catch (e: Exception) { return null }
+        } catch (_: Exception) { return null }
     }
 }

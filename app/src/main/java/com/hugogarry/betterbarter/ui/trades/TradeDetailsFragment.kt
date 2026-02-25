@@ -5,7 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
+import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
@@ -37,12 +39,20 @@ class TradeDetailsFragment : Fragment() {
     private lateinit var itemQuantityTextView: TextView
     private lateinit var itemDescriptionTextView: TextView
 
-    private lateinit var proposerImageView: ImageView
-    private lateinit var proposerNameTextView: TextView
-    private lateinit var proposerReputationTextView: TextView
+    // Other Party Views (Dynamic based on who is viewing)
+    private lateinit var otherPartyTitleTextView: TextView
+    private lateinit var otherPartyImageView: ImageView
+    private lateinit var otherPartyNameTextView: TextView
+    private lateinit var otherPartyReputationTextView: TextView
 
     private lateinit var tradeDescriptionTextView: TextView
     private lateinit var actionButton: Button
+
+    // Rating Views
+    private lateinit var ratingSection: View
+    private lateinit var ratingBar: RatingBar
+    private lateinit var ratingCommentEditText: EditText
+    private lateinit var submitRatingButton: Button
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,25 +67,46 @@ class TradeDetailsFragment : Fragment() {
         val toolbar = view.findViewById<Toolbar>(R.id.toolbarTradeDetails)
         NavigationUI.setupWithNavController(toolbar, findNavController())
 
-        // Bind views
+        // Bind main views
         itemImageView = view.findViewById(R.id.imageViewItemDetails)
         itemNameTextView = view.findViewById(R.id.textViewItemNameDetails)
         itemQuantityTextView = view.findViewById(R.id.textViewItemQuantityDetails)
         itemDescriptionTextView = view.findViewById(R.id.textViewItemDescriptionDetails)
 
-        proposerImageView = view.findViewById(R.id.imageViewProposerProfile)
-        proposerNameTextView = view.findViewById(R.id.textViewProposerName)
-        proposerReputationTextView = view.findViewById(R.id.textViewProposerReputation)
+        // Bind Other Party Views
+        otherPartyTitleTextView = view.findViewById(R.id.textViewOtherPartyTitle)
+        otherPartyImageView = view.findViewById(R.id.imageViewOtherPartyProfile)
+        otherPartyNameTextView = view.findViewById(R.id.textViewOtherPartyName)
+        otherPartyReputationTextView = view.findViewById(R.id.textViewOtherPartyReputation)
 
         tradeDescriptionTextView = view.findViewById(R.id.textViewTradeDescriptionDetails)
         actionButton = view.findViewById(R.id.buttonTradeActionDetails)
 
+        // Bind Rating Views
+        ratingSection = view.findViewById(R.id.layoutRatingSection)
+        ratingBar = view.findViewById(R.id.ratingBarTrade)
+        ratingCommentEditText = view.findViewById(R.id.editTextRatingComment)
+        submitRatingButton = view.findViewById(R.id.buttonSubmitRating)
+
+        setupClickListeners()
+        observeViewModel()
+
         // Fetch data
         viewModel.fetchTrade(args.tradeId)
-        observeTradeState()
     }
 
-    private fun observeTradeState() {
+    private fun setupClickListeners() {
+        submitRatingButton.setOnClickListener {
+            val score = ratingBar.rating.toInt()
+            val comment = ratingCommentEditText.text.toString().trim()
+
+            // Send the rating to the ViewModel
+            viewModel.rateTrade(args.tradeId, score, comment)
+        }
+    }
+
+    private fun observeViewModel() {
+        // Observe Trade Data
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.tradeState.collectLatest { resource ->
                 when (resource) {
@@ -91,14 +122,39 @@ class TradeDetailsFragment : Fragment() {
                 }
             }
         }
+
+        // Observe Rating Submission State
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.ratingState.collectLatest { state ->
+                when (state) {
+                    is Resource.Loading -> {
+                        submitRatingButton.isEnabled = false
+                        submitRatingButton.text = "Submitting..."
+                    }
+                    is Resource.Success -> {
+                        submitRatingButton.isEnabled = true
+                        submitRatingButton.text = "Submit Review"
+
+                        // Hide the rating section immediately on success
+                        ratingSection.isVisible = false
+
+                        Toast.makeText(requireContext(), "Rating submitted successfully!", Toast.LENGTH_SHORT).show()
+                    }
+                    is Resource.Error -> {
+                        submitRatingButton.isEnabled = true
+                        submitRatingButton.text = "Submit Review"
+                        Toast.makeText(requireContext(), state.message ?: "Failed to submit rating", Toast.LENGTH_LONG).show()
+                    }
+                    is Resource.Idle -> {}
+                }
+            }
+        }
     }
 
     private fun bindTradeData(trade: Trade) {
         val item = trade.offeredItem
-        val proposer = trade.proposer
         val currentUserId = getUserIdFromToken()
 
-        // Use SessionManager
         val currentApiUrl = SessionManager.getServerUrl()
         val baseUrl = currentApiUrl.removeSuffix("api/")
 
@@ -113,29 +169,48 @@ class TradeDetailsFragment : Fragment() {
         itemQuantityTextView.text = "Quantity: ${trade.offeredItemQuantity}"
         itemDescriptionTextView.text = item?.description ?: "No description"
 
-        // Bind Proposer
-        val profilePicUrl = proposer.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
-        proposerImageView.load(profilePicUrl) {
+        // Log currentUserId, and trade object
+        println("Current User ID: $currentUserId")
+        println("Trade: $trade")
+
+        // Determine which user to display in the "Other Party" section
+        val partyToShow = if (trade.proposerId == currentUserId && trade.recipient != null) {
+            otherPartyTitleTextView.text = "Trade Recipient"
+            trade.recipient
+        } else {
+            otherPartyTitleTextView.text = "Trade Proposer"
+            trade.proposer
+        }
+
+        // Bind Other Party
+        val profilePicUrl = partyToShow.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
+        otherPartyImageView.load(profilePicUrl) {
             placeholder(R.drawable.ic_profile)
             error(R.drawable.ic_profile)
             transformations(CircleCropTransformation())
         }
-        proposerNameTextView.text = proposer.username
+        otherPartyNameTextView.text = partyToShow.username
 
-        // CHANGED: Display Reputation instead of hiding it
-        proposerReputationTextView.isVisible = true
-        val score = proposer.reputationScore ?: 0.0
-        proposerReputationTextView.text = "Reputation: %.1f ★".format(score)
+        otherPartyReputationTextView.isVisible = true
+        val score = partyToShow.reputationScore ?: 0.0
+        otherPartyReputationTextView.text = "Reputation: %.1f ★".format(score)
 
         // Bind Trade
         tradeDescriptionTextView.text = trade.description ?: "No specific trade details provided."
 
+        // --- RATING SECTION LOGIC ---
+        val isProposer = trade.proposerId == currentUserId
+        val hasRated = if (isProposer) trade.isRatedByProposer else trade.isRatedByRecipient
+
+        ratingSection.isVisible = (trade.status == TradeStatus.completed && !hasRated)
+
         // Button Logic
         if (trade.proposerId == currentUserId) {
-            // Check if trade is already accepted/active
+            // Check if trade is already accepted/active/completed
             if (trade.status == TradeStatus.accepted || trade.status == TradeStatus.completed) {
                 actionButton.text = "Go to Chat"
                 actionButton.isEnabled = true
+                actionButton.isVisible = true
                 actionButton.setOnClickListener {
                     val action = TradeDetailsFragmentDirections.actionTradeDetailsFragmentToChatFragment(trade.id)
                     findNavController().navigate(action)
@@ -144,6 +219,7 @@ class TradeDetailsFragment : Fragment() {
                 // Trade is pending, view applications
                 actionButton.text = "View Applications"
                 actionButton.isEnabled = true
+                actionButton.isVisible = true
                 actionButton.setOnClickListener {
                     val action = TradeDetailsFragmentDirections
                         .actionTradeDetailsFragmentToTradeApplicationsFragment(trade.id)
@@ -161,9 +237,11 @@ class TradeDetailsFragment : Fragment() {
             // Disable apply button if trade is no longer pending
             if (trade.status != TradeStatus.pending) {
                 actionButton.isEnabled = false
+                actionButton.isVisible = false
                 actionButton.text = "Trade Unavailable"
             } else {
                 actionButton.isEnabled = true
+                actionButton.isVisible = true
                 actionButton.alpha = 1.0f
                 actionButton.setOnClickListener {
                     val action = TradeDetailsFragmentDirections

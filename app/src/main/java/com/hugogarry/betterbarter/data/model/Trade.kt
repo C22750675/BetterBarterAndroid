@@ -12,10 +12,12 @@ data class Trade(
     val proposerId: String,
     val proposer: UserSummary,
     val recipientId: String?,
-    val recipient: User?,
+    val recipient: UserSummary?,
     val offeredItemQuantity: Int,
     val offeredItem: Item?,
     val circleId: String,
+    val isRatedByProposer: Boolean = false,
+    val isRatedByRecipient: Boolean = false,
     val myApplication: TradeApplication? = null
 
 )

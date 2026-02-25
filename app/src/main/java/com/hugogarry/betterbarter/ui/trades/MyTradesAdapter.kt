@@ -22,7 +22,7 @@ class MyTradesAdapter(
     private val onAction: (Trade, ActionType) -> Unit
 ) : ListAdapter<Trade, MyTradesAdapter.ViewHolder>(DiffCallback()) {
 
-    enum class ActionType { ACCEPT, REJECT, COMPLETE, RATE }
+    enum class ActionType { ACCEPT, REJECT, COMPLETE }
 
     var onItemClick: ((Trade) -> Unit)? = null
 
@@ -77,11 +77,8 @@ class MyTradesAdapter(
                     btnAction.text = "Mark Complete"
                     btnAction.setOnClickListener { onAction(trade, ActionType.COMPLETE) }
                 }
-                TradeStatus.completed -> {
-                    btnAction.text = "Leave Review"
-                    btnAction.setOnClickListener { onAction(trade, ActionType.RATE) }
-                }
                 else -> {
+                    // Hide button for COMPLETED or REJECTED statuses
                     btnAction.isVisible = false
                 }
             }
