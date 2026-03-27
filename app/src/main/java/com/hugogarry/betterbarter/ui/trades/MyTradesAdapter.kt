@@ -29,7 +29,9 @@ class MyTradesAdapter(
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val ownerProfilePic: ImageView = itemView.findViewById(R.id.imageViewOwnerProfile)
         val ownerName: TextView = itemView.findViewById(R.id.textViewOwnerName)
-        val itemNameAndStock: TextView = itemView.findViewById(R.id.textViewItemNameAndStock)
+        val itemName: TextView = itemView.findViewById(R.id.textViewItemName)
+        val itemStock: TextView = itemView.findViewById(R.id.textViewStock)
+        val itemStatus: TextView = itemView.findViewById(R.id.textViewStatus)
         val itemImage: ImageView = itemView.findViewById(R.id.imageViewItem)
         val btnAction: Button = itemView.findViewById(R.id.buttonProposeTrade)
 
@@ -41,7 +43,9 @@ class MyTradesAdapter(
 
             // 1. Set Text Data
             ownerName.text = trade.proposer.username
-            itemNameAndStock.text = "${item?.name ?: "Unknown Item"} (${trade.offeredItemQuantity})\nStatus: ${trade.status.name}"
+            itemName.text = item?.name ?: "Unknown Item"
+            itemStock.text = "${trade.offeredItemQuantity} units available"
+            itemStatus.text = trade.status.name.uppercase()
 
             // 2. Load Owner Profile Pic
             val profilePicUrl = trade.proposer.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
