@@ -40,7 +40,7 @@ class TradeDetailsFragment : Fragment() {
     private lateinit var itemDescriptionTextView: TextView
 
     // Other Party Views (Dynamic based on who is viewing)
-    private lateinit var otherPartyTitleTextView: TextView
+    private lateinit var headerProposerTextView: TextView
     private lateinit var otherPartyImageView: ImageView
     private lateinit var otherPartyNameTextView: TextView
     private lateinit var otherPartyReputationTextView: TextView
@@ -74,7 +74,7 @@ class TradeDetailsFragment : Fragment() {
         itemDescriptionTextView = view.findViewById(R.id.textViewItemDescriptionDetails)
 
         // Bind Other Party Views
-        otherPartyTitleTextView = view.findViewById(R.id.textViewOtherPartyTitle)
+        headerProposerTextView = view.findViewById(R.id.headerProposer)
         otherPartyImageView = view.findViewById(R.id.imageViewOtherPartyProfile)
         otherPartyNameTextView = view.findViewById(R.id.textViewOtherPartyName)
         otherPartyReputationTextView = view.findViewById(R.id.textViewOtherPartyReputation)
@@ -171,10 +171,10 @@ class TradeDetailsFragment : Fragment() {
 
         // Determine which user to display in the "Other Party" section
         val partyToShow = if (trade.proposerId == currentUserId && trade.recipient != null) {
-            otherPartyTitleTextView.text = "Trade Recipient"
+            headerProposerTextView.text = "Trade Recipient"
             trade.recipient
         } else {
-            otherPartyTitleTextView.text = "Trade Proposer"
+            headerProposerTextView.text = "Trade Proposer"
             trade.proposer
         }
 
@@ -189,7 +189,8 @@ class TradeDetailsFragment : Fragment() {
 
         otherPartyReputationTextView.isVisible = true
         val score = partyToShow.reputationScore ?: 0.0
-        otherPartyReputationTextView.text = "Reputation: %.1f ★".format(score)
+        // Use the badge format compatible with the modernised UI
+        otherPartyReputationTextView.text = "%.1f ★".format(score)
 
         // Bind Trade
         tradeDescriptionTextView.text = trade.description ?: "No specific trade details provided."
