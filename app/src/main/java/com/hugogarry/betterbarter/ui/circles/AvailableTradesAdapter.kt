@@ -37,7 +37,10 @@ class AvailableTradesAdapter(
                 onProposeClick?.invoke(trade)
             }
         } else {
-            holder.proposeButton.setOnClickListener(null)
+            // Logic for when it's the user's own trade
+            holder.proposeButton.setOnClickListener {
+                onProposeClick?.invoke(trade)
+            }
         }
 
         holder.itemView.setOnClickListener {
@@ -48,7 +51,9 @@ class AvailableTradesAdapter(
     class TradeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val ownerProfilePic: ImageView = itemView.findViewById(R.id.imageViewOwnerProfile)
         private val ownerName: TextView = itemView.findViewById(R.id.textViewOwnerName)
-        private val itemNameAndStock: TextView = itemView.findViewById(R.id.textViewItemNameAndStock)
+        private val itemName: TextView = itemView.findViewById(R.id.textViewItemName)
+        private val itemStock: TextView = itemView.findViewById(R.id.textViewStock)
+        private val itemStatus: TextView = itemView.findViewById(R.id.textViewStatus)
         private val itemImage: ImageView = itemView.findViewById(R.id.imageViewItem)
         val proposeButton: Button = itemView.findViewById(R.id.buttonProposeTrade)
 
@@ -59,7 +64,9 @@ class AvailableTradesAdapter(
             val item = trade.offeredItem
 
             ownerName.text = trade.proposer.username
-            itemNameAndStock.text = "${item?.name ?: "Unknown Item"} (${trade.offeredItemQuantity})"
+            itemName.text = item?.name ?: "Unknown Item"
+            itemStock.text = "${trade.offeredItemQuantity} units available"
+            itemStatus.text = trade.status.toString().uppercase()
 
             // Load owner profile pic
             val profilePicUrl = trade.proposer.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
