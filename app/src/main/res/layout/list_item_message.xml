@@ -4,26 +4,31 @@
     android:id="@+id/messageContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clipToPadding="false"
     android:orientation="vertical"
+    android:paddingHorizontal="8dp"
     android:paddingVertical="4dp">
 
+    <!-- The adapter will directly set the background on this TextView -->
     <TextView
         android:id="@+id/textViewMessageBody"
+        style="@style/TextAppearance.Material3.BodyLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxWidth="280dp"
-        android:padding="12dp"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        tools:text="Hello, are you still interested in the trade?" />
+        android:maxWidth="260dp"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp"
+        tools:background="@drawable/bg_message_sent"
+        tools:text="Hello, are you still interested in the trade? I can bring the items to the circle meeting tomorrow."
+        tools:textColor="?attr/colorOnPrimary" />
 
     <TextView
         android:id="@+id/textViewMessageTime"
+        style="@style/TextAppearance.Material3.LabelSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:textSize="10sp"
-        android:textColor="?android:attr/textColorSecondary"
+        android:layout_marginTop="4dp"
+        android:alpha="0.7"
         tools:text="10:30 AM" />
 
 </LinearLayout>
