@@ -146,7 +146,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:lineSpacingExtra="4sp"
-                        android:text="Passionate about sustainable living and community bartering. I often have fresh produce from my garden and handmade woodcrafts to trade. Looking forward to meeting fellow circle members!" />
+                        android:text="" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
