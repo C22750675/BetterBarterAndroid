@@ -33,7 +33,6 @@ class ProfileItemsAdapter : ListAdapter<Item, ProfileItemsAdapter.ItemViewHolder
             itemImage.load(fullImageUrl) {
                 placeholder(R.drawable.ic_profile)
                 error(R.drawable.ic_profile)
-                transformations(CircleCropTransformation())
             }
         }
     }
