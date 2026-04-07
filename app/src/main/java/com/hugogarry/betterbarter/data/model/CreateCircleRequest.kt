@@ -8,7 +8,7 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class RequestPoint(
     val type: String = "Point",
-    val coordinates: List<Double> // [longitude, latitude]
+    val coordinates: List<Double>
 )
 
 /**
@@ -19,7 +19,8 @@ data class RequestPoint(
 data class CreateCircleRequest(
     val name: String,
     val origin: RequestPoint,
-    val radius: Int, // Radius in meters
+    val radius: Int,
     val color: String,
-    val description: String
+    val description: String,
+    val imageUrl: String? = null
 )

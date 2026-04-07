@@ -49,14 +49,50 @@
                 tools:text="An error occurred while creating the circle."
                 tools:visibility="visible" />
 
-            <!-- Section 1: Basic Info -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardBasicInfo"
+                android:id="@+id/cardImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
                 app:layout_constraintTop_toBottomOf="@id/textViewError"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/imageViewCircle"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:background="?attr/colorSurfaceVariant"
+                        android:scaleType="centerCrop"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+                        app:srcCompat="@drawable/ic_circles" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonSelectImage"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Choose Community Photo" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardBasicInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:layout_constraintTop_toBottomOf="@id/cardImage"
                 app:strokeColor="?attr/colorOutlineVariant"
                 app:strokeWidth="1dp">
 
@@ -108,7 +144,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section 2: Location & Range -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardLocation"
                 android:layout_width="match_parent"
@@ -162,7 +197,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section 3: Branding -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardBranding"
                 android:layout_width="match_parent"

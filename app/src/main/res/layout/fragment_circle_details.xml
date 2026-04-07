@@ -27,19 +27,24 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:paddingTop="?attr/actionBarSize"
+                android:layout_height="240dp"
                 app:layout_collapseMode="parallax">
 
-                <!-- Decorative Circle Element to reinforce branding -->
+                <ImageView
+                    android:id="@+id/imageViewCircleHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_circles"
+                    android:contentDescription="Circle header image" />
+
                 <View
-                    android:layout_width="140dp"
-                    android:layout_height="140dp"
-                    android:alpha="0.1"
-                    android:background="@drawable/ic_circles"
-                    android:backgroundTint="?attr/colorPrimary"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:background="@drawable/bg_message_received"
+                    android:alpha="0.6"
+                    android:backgroundTint="@android:color/black"
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

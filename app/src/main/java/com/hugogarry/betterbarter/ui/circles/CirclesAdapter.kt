@@ -4,13 +4,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Circle
+import com.hugogarry.betterbarter.util.SessionManager
 
 class CirclesAdapter(
     private val showJoinButton: Boolean = false
@@ -22,16 +25,35 @@ class CirclesAdapter(
     class CircleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val circleName: TextView = itemView.findViewById(R.id.textViewCircleName)
         private val circleMembers: TextView = itemView.findViewById(R.id.textViewCircleMembers)
-        private val circleReputation: TextView = itemView.findViewById(R.id.textViewCircleReputation)
+        private val circleIcon: ImageView = itemView.findViewById(R.id.imageViewCircleIcon)
         val joinButton: Button = itemView.findViewById(R.id.buttonJoinCircle)
 
         fun bind(circle: Circle, showJoin: Boolean) {
             circleName.text = circle.name
             circleMembers.text = "${circle.memberCount} Members"
-            // Using a star emoji for reputation
-            circleReputation.text = "%.1f ★".format(circle.reputationScore)
 
             joinButton.isVisible = showJoin
+
+            // Construct the full image URL
+            val currentApiUrl = SessionManager.getServerUrl()
+            val baseUrl = currentApiUrl.removeSuffix("api/")
+
+            // Backend returns 'imageUrl' with a leading slash
+            // We ensure we don't end up with triple slashes (e.g. uploads///image.jpg)
+            val path = circle.imageUrl?.removePrefix("/")
+            val fullImageUrl = path?.let { "${baseUrl}api/uploads/$it" }
+
+            // Clear the XML tint if we are loading a real photo.
+            // list_item_circle.xml has a default tint for the icon that will cover the photo.
+            if (fullImageUrl != null) {
+                circleIcon.imageTintList = null
+            }
+
+            circleIcon.load(fullImageUrl) {
+                crossfade(true)
+                placeholder(R.drawable.ic_circles)
+                error(R.drawable.ic_circles)
+            }
         }
     }
 

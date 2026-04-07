@@ -4,7 +4,6 @@ import android.os.Parcelable
 import com.squareup.moshi.JsonClass
 import kotlinx.parcelize.Parcelize
 
-
 @JsonClass(generateAdapter = true)
 @Parcelize
 data class Circle(
@@ -19,5 +18,6 @@ data class Circle(
     val color: String,
     val description: String?,
     val admins: List<UserSummary>?,
-    val isMember: Boolean = false
+    val isMember: Boolean = false,
+    val imageUrl: String?
 ) : Parcelable

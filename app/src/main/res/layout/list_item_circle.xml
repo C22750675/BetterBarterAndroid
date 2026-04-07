@@ -31,9 +31,9 @@
 
             <ImageView
                 android:id="@+id/imageViewCircleIcon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
                 android:contentDescription="Circle Icon"
                 android:src="@drawable/ic_circles"
                 app:tint="?attr/colorOnPrimaryContainer" />
@@ -48,7 +48,7 @@
             android:layout_marginEnd="8dp"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/reputationContainer"
+            app:layout_constraintEnd_toStartOf="@id/buttonJoinCircle"
             app:layout_constraintStart_toEndOf="@id/iconContainer"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -70,37 +70,6 @@
                 android:layout_marginTop="2dp"
                 android:alpha="0.7"
                 tools:text="15 members • 2km away" />
-        </LinearLayout>
-
-        <!-- Reputation Badge -->
-        <LinearLayout
-            android:id="@+id/reputationContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_status_badge"
-            android:backgroundTint="?attr/colorTertiaryContainer"
-            android:gravity="center"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="4dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/buttonJoinCircle"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <TextView
-                android:id="@+id/textViewCircleReputation"
-                style="@style/TextAppearance.Material3.LabelLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="?attr/colorOnTertiaryContainer"
-                android:textStyle="bold"
-                tools:text="5.0" />
-
-            <ImageView
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:layout_marginStart="2dp"
-                android:src="@android:drawable/btn_star_big_on"
-                app:tint="?attr/colorOnTertiaryContainer" />
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton

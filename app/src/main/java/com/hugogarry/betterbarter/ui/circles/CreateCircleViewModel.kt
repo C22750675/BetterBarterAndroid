@@ -6,17 +6,37 @@ import com.hugogarry.betterbarter.data.model.Circle
 import com.hugogarry.betterbarter.data.model.CreateCircleRequest
 import com.hugogarry.betterbarter.data.model.RequestPoint
 import com.hugogarry.betterbarter.data.repository.CircleRepository
+import com.hugogarry.betterbarter.data.repository.UploadRepository
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
 
 class CreateCircleViewModel(
-    private val circleRepository: CircleRepository = CircleRepository()
+    private val circleRepository: CircleRepository = CircleRepository(),
+    private val uploadRepository: UploadRepository = UploadRepository()
 ) : ViewModel() {
 
     private val _createState = MutableStateFlow<Resource<Circle>>(Resource.Idle())
     val createState: StateFlow<Resource<Circle>> = _createState
+
+    private val _uploadState = MutableStateFlow<Resource<String>>(Resource.Idle())
+    val uploadState: StateFlow<Resource<String>> = _uploadState
+
+    private var currentImageUrl: String? = null
+
+    fun uploadCircleImage(filePart: MultipartBody.Part) {
+        viewModelScope.launch {
+            _uploadState.value = Resource.Loading()
+            val result = uploadRepository.uploadImage(filePart)
+            if (result is Resource.Success) {
+                currentImageUrl = result.data?.url
+            }
+            _uploadState.value = result.data?.url?.let { Resource.Success(it) }
+                ?: Resource.Error(result.message ?: "Upload failed")
+        }
+    }
 
     fun createCircle(
         name: String,
@@ -43,7 +63,8 @@ class CreateCircleViewModel(
             origin = originPoint,
             radius = radiusMeters,
             color = color,
-            description = description
+            description = description,
+            imageUrl = currentImageUrl // Send the image URL to backend
         )
 
         viewModelScope.launch {

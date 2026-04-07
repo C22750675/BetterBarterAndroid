@@ -1,16 +1,18 @@
-// In: app/src/main/java/com/hugogarry/betterbarter/ui/circles/CreateCircleFragment.kt
-
 package com.hugogarry.betterbarter.ui.circles
 
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -24,12 +26,18 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
+import coil.load
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.util.Resource
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class CreateCircleFragment : Fragment() {
 
@@ -44,6 +52,8 @@ class CreateCircleFragment : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var errorTextView: TextView
     private lateinit var colorSwatchLayout: LinearLayout
+    private lateinit var circleImageView: ImageView
+    private lateinit var selectImageButton: Button
 
     // Location
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -54,6 +64,24 @@ class CreateCircleFragment : Fragment() {
     private var selectedColor: String = "#3498DB" // Default blue
     private var colorSwatches = mutableListOf<View>()
 
+    // Image Picker Launcher
+    private val imagePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            circleImageView.load(it) // Show local preview
+            viewLifecycleOwner.lifecycleScope.launch {
+                val filePart = uriToMultipartBody(it)
+                if (filePart != null) {
+                    viewModel.uploadCircleImage(filePart)
+                } else {
+                    Toast.makeText(context, "Could not read selected image", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    // Permission Launchers
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -61,6 +89,16 @@ class CreateCircleFragment : Fragment() {
             getCurrentLocation()
         } else {
             Toast.makeText(context, "Location permission is required", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            imagePickerLauncher.launch("image/*")
+        } else {
+            Toast.makeText(context, "Permission denied to read photos", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -85,6 +123,8 @@ class CreateCircleFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBarCreate)
         errorTextView = view.findViewById(R.id.textViewError)
         colorSwatchLayout = view.findViewById(R.id.linearLayoutColorSwatches)
+        circleImageView = view.findViewById(R.id.imageViewCircle)
+        selectImageButton = view.findViewById(R.id.buttonSelectImage)
 
         // Setup Toolbar with Nav Controller for back button
         NavigationUI.setupWithNavController(toolbar, findNavController())
@@ -95,6 +135,10 @@ class CreateCircleFragment : Fragment() {
         // Setup Listeners
         setLocationButton.setOnClickListener {
             requestLocationPermission()
+        }
+
+        selectImageButton.setOnClickListener {
+            requestPermissionAndPickImage()
         }
 
         createButton.setOnClickListener {
@@ -111,6 +155,7 @@ class CreateCircleFragment : Fragment() {
         }
 
         observeCreateState()
+        observeUploadState()
     }
 
     private fun observeCreateState() {
@@ -135,6 +180,23 @@ class CreateCircleFragment : Fragment() {
         }
     }
 
+    private fun observeUploadState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.uploadState.collectLatest { resource ->
+                // Show a small loading indicator on the image itself
+                when (resource) {
+                    is Resource.Success -> {
+                        Toast.makeText(context, "Image uploaded successfully", Toast.LENGTH_SHORT).show()
+                    }
+                    is Resource.Error -> {
+                        Toast.makeText(context, "Image upload failed: ${resource.message}", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
     private fun requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
@@ -146,6 +208,23 @@ class CreateCircleFragment : Fragment() {
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ))
+        }
+    }
+
+    private fun requestPermissionAndPickImage() {
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_IMAGES
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
+        when {
+            ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED -> {
+                imagePickerLauncher.launch("image/*")
+            }
+            else -> {
+                permissionLauncher.launch(permission)
+            }
         }
     }
 
@@ -163,15 +242,38 @@ class CreateCircleFragment : Fragment() {
         }
     }
 
-    /**
-     * Dynamically creates and configures the color swatches.
-     */
+    private suspend fun uriToMultipartBody(uri: Uri): MultipartBody.Part? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val contentResolver = requireContext().contentResolver
+                val mimeType = contentResolver.getType(uri)
+                var fileName = "circle_image.jpg"
+                contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                        if (nameIndex != -1) {
+                            fileName = cursor.getString(nameIndex)
+                        }
+                    }
+                }
+
+                val inputStream = contentResolver.openInputStream(uri) ?: return@withContext null
+                val fileBytes = inputStream.readBytes()
+                inputStream.close()
+
+                val requestBody = fileBytes.toRequestBody(mimeType?.toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("file", fileName, requestBody)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+    }
+
     private fun setupColorSwatches() {
-        // Clear any swatches from XML (if you had them) and the list
         colorSwatchLayout.removeAllViews()
         colorSwatches.clear()
 
-        // Define our colors (Tag = hex string, ResId = drawable)
         val colors = listOf(
             Pair("#3498DB", R.drawable.color_swatch_blue),
             Pair("#E74C3C", R.drawable.color_swatch_red),
@@ -180,8 +282,8 @@ class CreateCircleFragment : Fragment() {
             Pair("#E67E22", R.drawable.color_swatch_orange)
         )
 
-        val swatchSize = (48 * resources.displayMetrics.density).toInt() // 48dp
-        val margin = (8 * resources.displayMetrics.density).toInt() // 8dp
+        val swatchSize = (48 * resources.displayMetrics.density).toInt()
+        val margin = (8 * resources.displayMetrics.density).toInt()
 
         colors.forEach { (hex, drawableRes) ->
             val swatch = View(context).apply {
@@ -201,7 +303,7 @@ class CreateCircleFragment : Fragment() {
             colorSwatchLayout.addView(swatch)
         }
 
-        // Select the first one (blue) by default
+        // Select the first one by default
         colorSwatches.firstOrNull()?.isSelected = true
     }
 }

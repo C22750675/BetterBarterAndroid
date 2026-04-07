@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -16,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Trade
@@ -32,6 +34,7 @@ class CircleDetailsFragment : Fragment() {
     private lateinit var fabAddTrade: FloatingActionButton
     private lateinit var descriptionText: TextView
     private lateinit var adminText: TextView
+    private lateinit var headerImageView: ImageView
 
     private lateinit var availableTradesAdapter: AvailableTradesAdapter
     private lateinit var recyclerViewActiveTrades: RecyclerView
@@ -51,6 +54,7 @@ class CircleDetailsFragment : Fragment() {
         adminText = view.findViewById(R.id.textViewAdmins)
         toolbar = view.findViewById(R.id.toolbar)
         fabAddTrade = view.findViewById(R.id.fabAddTrade)
+        headerImageView = view.findViewById(R.id.imageViewCircleHeader)
 
         recyclerViewActiveTrades = view.findViewById(R.id.recyclerViewAvailableTrades)
         progressBarActiveTrades = view.findViewById(R.id.progressBarAvailableTrades)
@@ -75,13 +79,10 @@ class CircleDetailsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        // Get User ID from token
         val currentUserId = getUserIdFromToken() ?: ""
-
         availableTradesAdapter = AvailableTradesAdapter(currentUserId)
 
         availableTradesAdapter.onProposeClick = { trade: Trade ->
-            // Navigate to Apply Trade Fragment with existing app if present
             val action = CircleDetailsFragmentDirections
                 .actionCircleDetailsFragmentToApplyTradeFragment(
                     tradeId = trade.id,
@@ -90,7 +91,6 @@ class CircleDetailsFragment : Fragment() {
             findNavController().navigate(action)
         }
 
-        // Handle Item Click to navigate to Details
         availableTradesAdapter.onItemClick = { trade: Trade ->
             val action = CircleDetailsFragmentDirections
                 .actionCircleDetailsFragmentToTradeDetailsFragment(trade.id)
@@ -116,10 +116,23 @@ class CircleDetailsFragment : Fragment() {
                     toolbar.title = circle.name
                     descriptionText.text = circle.description
                     adminText.text = "Admins: ${circle.admins?.joinToString { it.username }}"
+
+                    // Load the header image
+                    val currentApiUrl = SessionManager.getServerUrl()
+                    val baseUrl = currentApiUrl.removeSuffix("api/")
+
+                    // Backend returns imageUrl starting with / per logs
+                    val path = circle.imageUrl?.removePrefix("/")
+                    val fullImageUrl = path?.let { "${baseUrl}api/uploads/$it" }
+
+                    headerImageView.load(fullImageUrl) {
+                        crossfade(true)
+                        placeholder(R.drawable.ic_circles)
+                        error(R.drawable.ic_circles)
+                    }
                 }
 
                 availableTradesAdapter.submitList(state.availableTrades)
-
                 fabAddTrade.isVisible = !state.isLoading
             }
         }
@@ -134,6 +147,6 @@ class CircleDetailsFragment : Fragment() {
             val payload = String(android.util.Base64.decode(parts[1], android.util.Base64.URL_SAFE))
             val json = JSONObject(payload)
             return json.optString("sub")
-        } catch (e: Exception) { return null }
+        } catch (_: Exception) { return null }
     }
 }
