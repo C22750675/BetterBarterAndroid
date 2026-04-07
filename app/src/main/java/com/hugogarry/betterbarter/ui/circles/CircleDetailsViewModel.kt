@@ -26,7 +26,6 @@ data class CircleDetailsUiState(
 
 class CircleDetailsViewModel(
     savedStateHandle: SavedStateHandle
-    // Remove AuthRepository from the constructor
 ) : ViewModel() {
 
     private val circleRepository = CircleRepository()
