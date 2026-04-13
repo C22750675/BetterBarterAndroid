@@ -86,8 +86,17 @@ class MapFragment : Fragment() {
         mapView.setTileSource(cartoVoyagerSource)
 
         mapView.setBuiltInZoomControls(false)
-
         mapView.setMultiTouchControls(true)
+
+        // Set a minimum zoom level to prevent the world map from appearing too small/repeated.
+        // A zoom of 3.0 or 4.0 ensures the map fills the container width on most devices.
+        mapView.minZoomLevel = 4.0
+
+        // Restrict the scrollable area to the actual world bounds.
+        // This prevents the user from scrolling infinitely into empty space.
+        mapView.setScrollableAreaLimitLatitude(85.0, -85.0, 0)
+        mapView.setScrollableAreaLimitLongitude(-180.0, 180.0, 0)
+
         val mapController = mapView.controller
 
         // Set map state from ViewModel
@@ -118,11 +127,8 @@ class MapFragment : Fragment() {
         observeCirclesState()
 
         if (viewModel.userLocation == null) {
-            // If we don't have a user location, request one
             requestLocationPermissions()
         } else {
-            // If we already have a user location (e.g., from rotation),
-            // update the marker and fetch circles immediately
             updateMyLocationMarker(viewModel.userLocation!!)
             viewModel.fetchNearbyCircles(
                 viewModel.userLocation!!.latitude,
@@ -136,57 +142,40 @@ class MapFragment : Fragment() {
             viewModel.circlesState.collectLatest { resource ->
                 when (resource) {
                     is Resource.Success -> {
-                        // We have circles, let's draw them
                         drawCircles(resource.data)
                     }
                     is Resource.Error -> {
                         Toast.makeText(context, resource.message, Toast.LENGTH_SHORT).show()
                     }
-                    is Resource.Loading -> {
-                        // You could show a loading indicator here
-                    }
-                    is Resource.Idle -> {
-                        // Nothing to do
-                    }
+                    is Resource.Loading -> { }
+                    is Resource.Idle -> { }
                 }
             }
         }
     }
 
     private fun drawCircles(circles: List<Circle>?) {
-        // Clear all old circle overlays
         mapView.overlays.removeAll(circlePolygons)
         circlePolygons.clear()
 
         if (circles == null) return
 
-        // Sort circles by radius descending.
-        // This ensures larger circles are drawn first (at the bottom)
-        // and smaller circles are drawn last (on top), making them clickable.
         val sortedCircles = circles.sortedByDescending { it.radius }
 
-        // Loop through each circle and create overlays
         sortedCircles.forEach { circle ->
-            // Backend uses [longitude, latitude], GeoPoint uses (latitude, longitude)
             val centerPoint = GeoPoint(circle.origin.coordinates[1], circle.origin.coordinates[0])
 
-            // Parse the color
             val parsedColor = try {
                 circle.color.toColorInt()
             } catch (_: IllegalArgumentException) {
-                "#3498DB".toColorInt() // Default blue on error
+                "#3498DB".toColorInt()
             }
 
-            // 4. Create the radius polygon
             val polygon = Polygon(mapView).apply {
                 points = Polygon.pointsAsCircle(centerPoint, circle.radius.toDouble())
-                // Set fill and stroke based on the circle's color
                 fillColor = Color.argb(40, Color.red(parsedColor), Color.green(parsedColor), Color.blue(parsedColor))
                 strokeColor = Color.argb(100, Color.red(parsedColor), Color.green(parsedColor), Color.blue(parsedColor))
                 strokeWidth = 2.0f
-
-                // You can still add info for when the polygon is clicked
-                // This is just an example
                 id = circle.id
                 title = circle.name
                 setOnClickListener { _, _, _ ->
@@ -194,14 +183,11 @@ class MapFragment : Fragment() {
                     true
                 }
             }
-
-            //  Add to our tracking list
             circlePolygons.add(polygon)
         }
 
-        //  Add new overlays to the map
         mapView.overlays.addAll(circlePolygons)
-        mapView.invalidate() // Redraw the map
+        mapView.invalidate()
     }
 
     @SuppressLint("MissingPermission")
@@ -215,7 +201,6 @@ class MapFragment : Fragment() {
                     updateMyLocationMarker(userLocation)
                     mapView.controller.animateTo(userLocation, targetZoom, 1000L)
 
-                    // Save state to ViewModel
                     viewModel.userLocation = userLocation
                     viewModel.lastMapCenter = userLocation
                     viewModel.lastMapZoom = targetZoom
@@ -227,7 +212,6 @@ class MapFragment : Fragment() {
                 }
             }
         } else {
-            // Request permissions if not granted
             requestLocationPermissions()
         }
     }
@@ -239,15 +223,14 @@ class MapFragment : Fragment() {
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
             }
             pulsePolygon = Polygon(mapView).apply {
-                fillColor = Color.argb(50, 200, 200, 100) // Example pulse color
+                fillColor = Color.argb(50, 200, 200, 100)
                 strokeWidth = 0f
             }
-            // Add pulse *before* marker so marker is on top
             mapView.overlays.add(pulsePolygon)
             mapView.overlays.add(myLocationMarker)
         }
         myLocationMarker?.position = position
-        pulsePolygon?.let { it.points = Polygon.pointsAsCircle(position, 1.0) } // Small pulse
+        pulsePolygon?.let { it.points = Polygon.pointsAsCircle(position, 1.0) }
         mapView.invalidate()
     }
 
@@ -266,7 +249,6 @@ class MapFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        // Save the map's current state to the ViewModel
         viewModel.lastMapCenter = mapView.mapCenter as GeoPoint
         viewModel.lastMapZoom = mapView.zoomLevelDouble
 
