@@ -21,7 +21,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Main Container -->
+    <!-- Main Container - No longer scrolls as a whole -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -41,6 +41,7 @@
             android:textColor="?attr/colorPrimary" />
 
         <FrameLayout
+            android:id="@+id/containerNearby"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -61,9 +62,19 @@
                 android:layout_gravity="center"
                 android:indeterminate="true"
                 android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/textViewNoNearby"
+                style="@style/TextAppearance.Material3.BodyMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:text="No nearby circles found. Try creating one for your community!"
+                android:visibility="gone" />
         </FrameLayout>
 
-        <!-- Divider -->
         <com.google.android.material.divider.MaterialDivider
             android:id="@+id/divider"
             android:layout_width="match_parent"

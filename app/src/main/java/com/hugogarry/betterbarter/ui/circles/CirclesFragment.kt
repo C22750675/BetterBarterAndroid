@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -41,6 +42,8 @@ class CirclesFragment : Fragment() {
     private lateinit var pbMyCircles: ProgressBar
     private lateinit var pbNearby: ProgressBar
     private lateinit var errorTextView: TextView
+    private lateinit var textViewNoNearby: TextView
+    private lateinit var containerNearby: ViewGroup
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private val locationPermissionRequest = registerForActivityResult(
@@ -67,6 +70,8 @@ class CirclesFragment : Fragment() {
         pbMyCircles = view.findViewById(R.id.progressBarMyCircles)
         pbNearby = view.findViewById(R.id.progressBarNearby)
         errorTextView = view.findViewById(R.id.textViewErrorCircles)
+        textViewNoNearby = view.findViewById(R.id.textViewNoNearby)
+        containerNearby = view.findViewById(R.id.containerNearby)
 
         val fab = view.findViewById<FloatingActionButton>(R.id.fabAddCircle)
         fab.setOnClickListener {
@@ -147,11 +152,39 @@ class CirclesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.nearbyCirclesState.collectLatest { resource ->
                 pbNearby.isVisible = resource is Resource.Loading
-                rvNearbyCircles.isVisible = resource is Resource.Success
 
                 if (resource is Resource.Success) {
                     val circles = resource.data ?: emptyList()
                     nearbyCirclesAdapter.submitList(circles)
+
+                    val params = containerNearby.layoutParams as LinearLayout.LayoutParams
+
+                    when {
+                        circles.isEmpty() -> {
+                            // Minimise the section and show placeholder message if empty
+                            params.weight = 0f
+                            params.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                            textViewNoNearby.isVisible = true
+                            rvNearbyCircles.isVisible = false
+                        }
+                        circles.size <= 2 -> {
+                            // If there are only a few circles, let the section wrap its content
+                            // so it doesn't take up unnecessary space on the screen.
+                            params.weight = 0f
+                            params.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                            textViewNoNearby.isVisible = false
+                            rvNearbyCircles.isVisible = true
+                        }
+                        else -> {
+                            // For a larger list, use weight to share screen space (50/50 split)
+                            // and keep the section scrollable.
+                            params.weight = 1f
+                            params.height = 0
+                            textViewNoNearby.isVisible = false
+                            rvNearbyCircles.isVisible = true
+                        }
+                    }
+                    containerNearby.layoutParams = params
                 }
             }
         }
