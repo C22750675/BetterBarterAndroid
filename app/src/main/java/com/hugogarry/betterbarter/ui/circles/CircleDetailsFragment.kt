@@ -77,7 +77,6 @@ class CircleDetailsFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Refresh data when returning to this screen (e.g., after applying for a trade)
         viewModel.fetchScreenData()
     }
 
@@ -86,12 +85,17 @@ class CircleDetailsFragment : Fragment() {
         availableTradesAdapter = AvailableTradesAdapter(currentUserId)
 
         availableTradesAdapter.onProposeClick = { trade: Trade ->
-            val action = CircleDetailsFragmentDirections
-                .actionCircleDetailsFragmentToApplyTradeFragment(
-                    tradeId = trade.id,
-                    existingApplication = trade.myApplication
-                )
-            findNavController().navigate(action)
+            // Use the top-level isMember flag from the UI State
+            if (viewModel.uiState.value.isMember) {
+                val action = CircleDetailsFragmentDirections
+                    .actionCircleDetailsFragmentToApplyTradeFragment(
+                        tradeId = trade.id,
+                        existingApplication = trade.myApplication
+                    )
+                findNavController().navigate(action)
+            } else {
+                Toast.makeText(requireContext(), "Join this circle to propose trades!", Toast.LENGTH_SHORT).show()
+            }
         }
 
         availableTradesAdapter.onItemClick = { trade: Trade ->
@@ -134,14 +138,8 @@ class CircleDetailsFragment : Fragment() {
                         error(R.drawable.ic_circles)
                     }
 
-                    // Membership check for FAB visibility
-                    fabAddTrade.isVisible = !state.isLoading && circle.isMember
-
-                    if (!circle.isMember) {
-                        availableTradesAdapter.onProposeClick = {
-                            Toast.makeText(context, "Join this circle to propose trades!", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+                    // Use the isMember flag calculated in the ViewModel
+                    fabAddTrade.isVisible = !state.isLoading && state.isMember
                 }
 
                 availableTradesAdapter.submitList(state.availableTrades)

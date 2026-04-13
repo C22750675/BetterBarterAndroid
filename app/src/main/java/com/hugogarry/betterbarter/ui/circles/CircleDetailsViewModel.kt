@@ -7,7 +7,6 @@ import com.hugogarry.betterbarter.data.model.Circle
 import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.repository.AuthRepository
 import com.hugogarry.betterbarter.data.repository.CircleRepository
-import com.hugogarry.betterbarter.data.repository.ItemRepository
 import com.hugogarry.betterbarter.data.repository.TradeRepository
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.async
@@ -20,6 +19,7 @@ data class CircleDetailsUiState(
     val circle: Circle? = null,
     val availableTrades: List<Trade> = emptyList(),
     val isUserAdmin: Boolean = false,
+    val isMember: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -29,9 +29,7 @@ class CircleDetailsViewModel(
 ) : ViewModel() {
 
     private val circleRepository = CircleRepository()
-    private val itemRepository = ItemRepository()
     private val tradeRepository = TradeRepository()
-    // Initialize AuthRepository as a property inside the class
     private val authRepository: AuthRepository = AuthRepository()
 
     val circleId: String = savedStateHandle.get<String>("circleId")!!
@@ -49,40 +47,47 @@ class CircleDetailsViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
-            // Run all network calls in parallel
+            // Run all network calls in parallel for speed
             val circleDetailsDeferred = async { circleRepository.getCircleDetails(circleId) }
             val tradesDeferred = async { tradeRepository.getTradesForCircle(circleId) }
             val userProfileDeferred = async { authRepository.getProfile() }
+            val myCirclesDeferred = async { circleRepository.getMyCircles() } // Verify membership explicitly
 
-            // Await the results
             val circleResult = circleDetailsDeferred.await()
-            val tradesResult = tradesDeferred.await() // <-- Use new result
+            val tradesResult = tradesDeferred.await()
             val profileResult = userProfileDeferred.await()
+            val myCirclesResult = myCirclesDeferred.await()
 
-            // Check for errors
-            val error = if (circleResult is Resource.Error) circleResult.message
-            else if (tradesResult is Resource.Error) tradesResult.message // <-- Check new result
-            else if (profileResult is Resource.Error) profileResult.message
-            else null
+            val error = when {
+                circleResult is Resource.Error -> circleResult.message
+                tradesResult is Resource.Error -> tradesResult.message
+                profileResult is Resource.Error -> profileResult.message
+                myCirclesResult is Resource.Error -> myCirclesResult.message
+                else -> null
+            }
 
             if (error != null) {
                 _uiState.value = _uiState.value.copy(isLoading = false, error = error)
                 return@launch
             }
 
-            // We can assume success if no errors
             val circle = (circleResult as Resource.Success).data!!
-            val availableTrades = (tradesResult as Resource.Success).data ?: emptyList() // <-- Get trades
+            val availableTrades = (tradesResult as Resource.Success).data ?: emptyList()
             val user = (profileResult as Resource.Success).data!!
+            val myCircles = (myCirclesResult as Resource.Success).data ?: emptyList()
 
-            // Simplified Admin Check
-            val adminIds = circle.admins?.map { it.id }?.toSet() ?: emptySet()
-            val isUserAdmin = user.id in adminIds
+            // Robust membership check:
+            // 1. Is user an admin?
+            // 2. Does the API explicitly say they are a member?
+            // 3. Is this circle ID present in the user's "My Circles" list?
+            val isUserAdmin = circle.admins?.any { it.id == user.id } ?: false
+            val isMember = isUserAdmin || circle.isMember || myCircles.any { it.id == circleId }
 
             _uiState.value = CircleDetailsUiState(
                 circle = circle,
                 availableTrades = availableTrades,
                 isUserAdmin = isUserAdmin,
+                isMember = isMember,
                 isLoading = false
             )
         }

@@ -91,8 +91,7 @@ class TradeDetailsFragment : Fragment() {
         setupClickListeners()
         observeViewModel()
 
-        // Fetch data
-        viewModel.fetchTrade(args.tradeId)
+        viewModel.fetchTradeDetails(args.tradeId)
     }
 
     private fun setupClickListeners() {
@@ -108,22 +107,17 @@ class TradeDetailsFragment : Fragment() {
     private fun observeViewModel() {
         // Observe Trade Data
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.tradeState.collectLatest { resource ->
-                when (resource) {
-                    is Resource.Success -> {
-                        resource.data?.let { trade ->
-                            bindTradeData(trade)
-                        }
-                    }
-                    is Resource.Error -> {
-                        Toast.makeText(context, resource.message, Toast.LENGTH_SHORT).show()
-                    }
-                    else -> {}
+            viewModel.uiState.collectLatest { state ->
+                if (state.error != null) {
+                    Toast.makeText(context, state.error, Toast.LENGTH_SHORT).show()
+                }
+
+                state.trade?.let { trade ->
+                    bindTradeData(trade)
                 }
             }
         }
 
-        // Observe Rating Submission State
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.ratingState.collectLatest { state ->
                 when (state) {
@@ -145,20 +139,18 @@ class TradeDetailsFragment : Fragment() {
                         submitRatingButton.text = "Submit Review"
                         Toast.makeText(requireContext(), state.message ?: "Failed to submit rating", Toast.LENGTH_LONG).show()
                     }
-                    is Resource.Idle -> {}
+                    else -> {}
                 }
             }
         }
     }
 
     private fun bindTradeData(trade: Trade) {
-        val item = trade.offeredItem
         val currentUserId = getUserIdFromToken()
-
         val currentApiUrl = SessionManager.getServerUrl()
         val baseUrl = currentApiUrl.removeSuffix("api/")
 
-        // Bind Item
+        val item = trade.offeredItem
         val itemPicUrl = item?.imageUrl?.let { "${baseUrl}api/uploads$it" }
         itemImageView.load(itemPicUrl) {
             placeholder(R.drawable.ic_launcher_background)
@@ -186,19 +178,12 @@ class TradeDetailsFragment : Fragment() {
             transformations(CircleCropTransformation())
         }
         otherPartyNameTextView.text = partyToShow.username
+        otherPartyReputationTextView.text = "%.1f ★".format(partyToShow.reputationScore ?: 0.0)
 
-        otherPartyReputationTextView.isVisible = true
-        val score = partyToShow.reputationScore ?: 0.0
-        // Use the badge format compatible with the modernised UI
-        otherPartyReputationTextView.text = "%.1f ★".format(score)
-
-        // Bind Trade
         tradeDescriptionTextView.text = trade.description ?: "No specific trade details provided."
 
-        // --- RATING SECTION LOGIC ---
         val isProposer = trade.proposerId == currentUserId
         val hasRated = if (isProposer) trade.isRatedByProposer else trade.isRatedByRecipient
-
         ratingSection.isVisible = (trade.status == TradeStatus.completed && !hasRated)
 
         // Button Logic
@@ -206,8 +191,6 @@ class TradeDetailsFragment : Fragment() {
             // Check if trade is already accepted/active/completed
             if (trade.status == TradeStatus.accepted || trade.status == TradeStatus.completed) {
                 actionButton.text = "Go to Chat"
-                actionButton.isEnabled = true
-                actionButton.isVisible = true
                 actionButton.setOnClickListener {
                     val action = TradeDetailsFragmentDirections.actionTradeDetailsFragmentToChatFragment(trade.id)
                     findNavController().navigate(action)
@@ -215,34 +198,23 @@ class TradeDetailsFragment : Fragment() {
             } else {
                 // Trade is pending, view applications
                 actionButton.text = "View Applications"
-                actionButton.isEnabled = true
-                actionButton.isVisible = true
                 actionButton.setOnClickListener {
-                    val action = TradeDetailsFragmentDirections
-                        .actionTradeDetailsFragmentToTradeApplicationsFragment(trade.id)
+                    val action = TradeDetailsFragmentDirections.actionTradeDetailsFragmentToTradeApplicationsFragment(trade.id)
                     findNavController().navigate(action)
                 }
             }
         } else {
-            // Check if user has already applied
-            if (trade.myApplication != null) {
-                actionButton.text = "Edit Trade Application"
-            } else {
-                actionButton.text = "Apply for Trade"
-            }
+            actionButton.text = if (trade.myApplication != null) "Edit Trade Application" else "Apply for Trade"
 
             // Disable apply button if trade is no longer pending
             if (trade.status != TradeStatus.pending) {
-                actionButton.isEnabled = false
                 actionButton.isVisible = false
-                actionButton.text = "Trade Unavailable"
             } else {
-                actionButton.isEnabled = true
                 actionButton.isVisible = true
-                actionButton.alpha = 1.0f
                 actionButton.setOnClickListener {
-                    // Check membership status from the Trade model
-                    if (trade.isMember) {
+                    // Always check the latest membership status from the ViewModel state
+                    // This ensures that if the user joins while navigating, we pick it up.
+                    if (viewModel.uiState.value.isMember) {
                         val action = TradeDetailsFragmentDirections
                             .actionTradeDetailsFragmentToApplyTradeFragment(
                                 tradeId = trade.id,

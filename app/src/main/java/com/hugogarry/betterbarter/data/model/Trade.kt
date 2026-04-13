@@ -18,6 +18,5 @@ data class Trade(
     val circleId: String,
     val isRatedByProposer: Boolean = false,
     val isRatedByRecipient: Boolean = false,
-    val myApplication: TradeApplication? = null,
-    val isMember: Boolean = false
+    val myApplication: TradeApplication? = null
 )
