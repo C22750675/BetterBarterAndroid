@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -124,12 +123,12 @@ class CirclesFragment : Fragment() {
                 rvMyCircles.isVisible = resource is Resource.Success
 
                 if (resource is Resource.Success) {
-                    myCirclesAdapter.submitList(resource.data)
-                    if (resource.data.isNullOrEmpty()) {
-                        errorTextView.isVisible = true
+                    val circles = resource.data ?: emptyList()
+                    myCirclesAdapter.submitList(circles)
+
+                    errorTextView.isVisible = circles.isEmpty()
+                    if (circles.isEmpty()) {
                         errorTextView.text = "You haven't joined any circles yet."
-                    } else {
-                        errorTextView.isVisible = false
                     }
                 } else if (resource is Resource.Error) {
                     errorTextView.isVisible = true
@@ -147,7 +146,6 @@ class CirclesFragment : Fragment() {
                 if (resource is Resource.Success) {
                     val circles = resource.data ?: emptyList()
                     nearbyCirclesAdapter.submitList(circles)
-                    adjustNearbyCirclesHeight(circles.size)
                 }
             }
         }
@@ -163,37 +161,6 @@ class CirclesFragment : Fragment() {
                     viewModel.clearJoinState()
                 }
             }
-        }
-    }
-
-    /**
-     * Dynamically adjusts the height of the nearby circles RecyclerView.
-     * It wraps content for small lists and caps height at 1/3 screen height for large lists.
-     */
-    private fun adjustNearbyCirclesHeight(itemCount: Int) {
-        rvNearbyCircles.post {
-            val parentHeight = (view?.height ?: 0)
-            val maxAllowedHeight = parentHeight / 3
-
-            val layoutParams = rvNearbyCircles.layoutParams
-
-            if (itemCount <= 2) {
-                if (layoutParams is LinearLayout.LayoutParams) {
-                    layoutParams.weight = 0f
-                    layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
-                } else {
-                    layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
-                }
-            } else {
-                // For many items, restrict to 1/3 screen height
-                if (layoutParams is LinearLayout.LayoutParams) {
-                    layoutParams.weight = 0f // Disable weight to enforce explicit height
-                    layoutParams.height = maxAllowedHeight
-                } else {
-                    layoutParams.height = maxAllowedHeight
-                }
-            }
-            rvNearbyCircles.layoutParams = layoutParams
         }
     }
 
