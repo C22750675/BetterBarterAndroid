@@ -156,7 +156,6 @@
                 android:layout_marginTop="16dp"
                 android:alpha="0.6"
                 android:gravity="center"
-                android:text="By proposing, you agree to follow the circle's trading guidelines."
                 style="@style/TextAppearance.Material3.BodySmall"
                 app:layout_constraintTop_toBottomOf="@id/buttonSubmitTrade" />
 
