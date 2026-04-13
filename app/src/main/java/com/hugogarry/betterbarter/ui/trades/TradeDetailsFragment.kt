@@ -241,12 +241,18 @@ class TradeDetailsFragment : Fragment() {
                 actionButton.isVisible = true
                 actionButton.alpha = 1.0f
                 actionButton.setOnClickListener {
-                    val action = TradeDetailsFragmentDirections
-                        .actionTradeDetailsFragmentToApplyTradeFragment(
-                            tradeId = trade.id,
-                            existingApplication = trade.myApplication
-                        )
-                    findNavController().navigate(action)
+                    // Check membership status from the Trade model
+                    if (trade.isMember) {
+                        val action = TradeDetailsFragmentDirections
+                            .actionTradeDetailsFragmentToApplyTradeFragment(
+                                tradeId = trade.id,
+                                existingApplication = trade.myApplication
+                            )
+                        findNavController().navigate(action)
+                    } else {
+                        // User is not a member of the circle this trade belongs to
+                        Toast.makeText(context, "Join this circle to propose trades!", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }

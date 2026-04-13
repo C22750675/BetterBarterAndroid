@@ -18,6 +18,7 @@ import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Trade
@@ -31,6 +32,7 @@ class CircleDetailsFragment : Fragment() {
     private val viewModel: CircleDetailsViewModel by viewModels()
 
     private lateinit var toolbar: Toolbar
+    private lateinit var collapsingToolbar: CollapsingToolbarLayout
     private lateinit var fabAddTrade: FloatingActionButton
     private lateinit var descriptionText: TextView
     private lateinit var adminText: TextView
@@ -53,6 +55,7 @@ class CircleDetailsFragment : Fragment() {
         descriptionText = view.findViewById(R.id.textViewCircleDescription)
         adminText = view.findViewById(R.id.textViewAdmins)
         toolbar = view.findViewById(R.id.toolbar)
+        collapsingToolbar = view.findViewById(R.id.collapsingToolbar)
         fabAddTrade = view.findViewById(R.id.fabAddTrade)
         headerImageView = view.findViewById(R.id.imageViewCircleHeader)
 
@@ -113,15 +116,15 @@ class CircleDetailsFragment : Fragment() {
                 }
 
                 state.circle?.let { circle ->
-                    toolbar.title = circle.name
+                    // Dynamically set the title to the circle name
+                    collapsingToolbar.title = circle.name
+
                     descriptionText.text = circle.description
                     adminText.text = "Admins: ${circle.admins?.joinToString { it.username }}"
 
                     // Load the header image
                     val currentApiUrl = SessionManager.getServerUrl()
                     val baseUrl = currentApiUrl.removeSuffix("api/")
-
-                    // Backend returns imageUrl starting with / per logs
                     val path = circle.imageUrl?.removePrefix("/")
                     val fullImageUrl = path?.let { "${baseUrl}api/uploads/$it" }
 
@@ -130,10 +133,18 @@ class CircleDetailsFragment : Fragment() {
                         placeholder(R.drawable.ic_circles)
                         error(R.drawable.ic_circles)
                     }
+
+                    // Membership check for FAB visibility
+                    fabAddTrade.isVisible = !state.isLoading && circle.isMember
+
+                    if (!circle.isMember) {
+                        availableTradesAdapter.onProposeClick = {
+                            Toast.makeText(context, "Join this circle to propose trades!", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
 
                 availableTradesAdapter.submitList(state.availableTrades)
-                fabAddTrade.isVisible = !state.isLoading
             }
         }
     }

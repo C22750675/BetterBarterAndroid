@@ -92,7 +92,7 @@ class CirclesFragment : Fragment() {
     }
 
     private fun setupRecyclerViews() {
-        // My Circles (Standard adapter)
+        // My Circles
         myCirclesAdapter = CirclesAdapter(showJoinButton = false)
         myCirclesAdapter.onItemClick = { circle ->
             val action = CirclesFragmentDirections
@@ -104,10 +104,16 @@ class CirclesFragment : Fragment() {
             layoutManager = LinearLayoutManager(context)
         }
 
-        // Nearby Circles (With Join Button)
+        // Nearby Circles
         nearbyCirclesAdapter = CirclesAdapter(showJoinButton = true)
         nearbyCirclesAdapter.onJoinClick = { circle ->
             viewModel.joinCircle(circle)
+        }
+        // Allow clicking on a nearby circle to see its details before joining
+        nearbyCirclesAdapter.onItemClick = { circle ->
+            val action = CirclesFragmentDirections
+                .actionCirclesFragmentToCircleDetailsFragment(circle.id)
+            findNavController().navigate(action)
         }
         rvNearbyCircles.apply {
             adapter = nearbyCirclesAdapter
