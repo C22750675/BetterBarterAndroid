@@ -1,14 +1,19 @@
-<!-- In: res/drawable/ic_user_location_dot.xml -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-
-    <solid android:color="#848484" />
-
-    <stroke
-        android:width="2dp"
-        android:color="@android:color/white" />
-
-    <size
-        android:width="16dp"
-        android:height="16dp" />
-</shape>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Outer glowing ring -->
+    <path
+        android:fillColor="#402196F3"
+        android:pathData="M12,12m-10,0a10,10 0,1 1,20 0a10,10 0,1 1,-20 0"/>
+    <!-- Inner blue dot -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M12,12m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0"/>
+    <!-- White border for contrast -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:pathData="M12,12m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0"/>
+</vector>
