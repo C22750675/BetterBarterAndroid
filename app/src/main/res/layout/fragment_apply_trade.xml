@@ -131,12 +131,12 @@
                         android:layout_height="48dp"
                         android:layout_marginTop="16dp">
 
-                        <!-- Background Track -->
+                        <!-- Symmetrical Fairness Spectrum -->
                         <com.google.android.material.card.MaterialCardView
                             android:layout_width="match_parent"
-                            android:layout_height="12dp"
+                            android:layout_height="14dp"
                             android:layout_gravity="center_vertical"
-                            app:cardCornerRadius="6dp"
+                            app:cardCornerRadius="7dp"
                             app:cardElevation="0dp"
                             app:strokeWidth="0dp">
 
@@ -146,69 +146,87 @@
                                 android:orientation="horizontal"
                                 android:weightSum="10">
 
+                                <!-- Red: Very Low Offer (20%) -->
                                 <View
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
-                                    android:layout_weight="3"
-                                    android:background="?attr/colorErrorContainer" />
+                                    android:layout_weight="2"
+                                    android:background="#F44336" />
 
+                                <!-- Orange: Low Offer (15%) -->
                                 <View
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
                                     android:layout_weight="1.5"
-                                    android:background="#FFE0B2" /> <!-- Soft Orange -->
+                                    android:background="#FF9800" />
 
+                                <!-- Yellow: Slightly Low (10%) -->
                                 <View
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
                                     android:layout_weight="1"
-                                    android:background="?attr/colorTertiaryContainer" />
+                                    android:background="#FFEB3B" />
 
+                                <!-- Green: Fair Match (10% wide, centered at 5.0) -->
+                                <View
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:background="#4CAF50" />
+
+                                <!-- Yellow: Slightly High (10%) -->
+                                <View
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:background="#FFEB3B" />
+
+                                <!-- Orange: High Offer (15%) -->
                                 <View
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
                                     android:layout_weight="1.5"
-                                    android:background="#FFE0B2" />
+                                    android:background="#FF9800" />
 
+                                <!-- Red: Very High Offer (20%) -->
                                 <View
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
-                                    android:layout_weight="3"
-                                    android:background="?attr/colorErrorContainer" />
+                                    android:layout_weight="2"
+                                    android:background="#F44336" />
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
 
-                        <!-- Center Marker (Perfect Match) -->
+                        <!-- Static Center Marker -->
                         <View
                             android:layout_width="2dp"
-                            android:layout_height="20dp"
+                            android:layout_height="24dp"
                             android:layout_gravity="center"
-                            android:alpha="0.3"
+                            android:alpha="0.2"
                             android:background="?attr/colorOnSurface" />
 
-                        <!-- Indicator Pill -->
+                        <!-- Floating Indicator Pill -->
                         <com.google.android.material.card.MaterialCardView
                             android:id="@+id/viewValueIndicator"
-                            android:layout_width="8dp"
+                            android:layout_width="10dp"
                             android:layout_height="32dp"
                             android:layout_gravity="center_vertical|start"
-                            app:cardBackgroundColor="?attr/colorPrimary"
-                            app:cardCornerRadius="4dp"
-                            app:cardElevation="4dp"
-                            app:strokeColor="?attr/colorSurface"
-                            app:strokeWidth="1dp" />
+                            app:cardBackgroundColor="?attr/colorSurface"
+                            app:cardCornerRadius="5dp"
+                            app:cardElevation="6dp"
+                            app:strokeColor="?attr/colorOutline"
+                            app:strokeWidth="1.5dp" />
 
                     </FrameLayout>
 
                     <TextView
                         android:id="@+id/textViewValueFeedback"
-                        style="@style/TextAppearance.Material3.BodySmall"
+                        style="@style/TextAppearance.Material3.LabelLarge"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:alpha="0.8"
-                        android:textStyle="italic"
-                        tools:text="This is a great value match!" />
+                        android:layout_marginTop="12dp"
+                        android:fontFamily="sans-serif-medium"
+                        tools:text="Fair Match! (Green Zone)" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

@@ -15,6 +15,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -119,7 +120,7 @@ class ApplyTradeFragment : Fragment() {
             viewModel.myItems.collectLatest { resource ->
                 if (resource is Resource.Success) {
                     myItemsList = resource.data ?: emptyList()
-                    val itemNames = myItemsList.map { "${it.name} (Stock: ${it.stock}, Val: €${it.estimatedValue})" }
+                    val itemNames = myItemsList.map { "${it.name} (Val: €${it.estimatedValue})" }
                     val adapter = ArrayAdapter(
                         requireContext(),
                         android.R.layout.simple_dropdown_item_1line,
@@ -181,48 +182,41 @@ class ApplyTradeFragment : Fragment() {
         if (targetValue <= 0) return // Avoid division by zero
 
         // 2. Calculate Difference Percentage
-        // diff > 0 means offer is higher. diff < 0 means lower.
-        // e.g. target 100, recipient's 110 -> 110/100 = 1.1 -> diff +0.1 (+10%)
         val diff = (myValue / targetValue) - 1.0
 
         // 3. Map Difference to Bar Position
-        // The bar represents a range of roughly -50% (-0.5) to +50% (+0.5).
-        // Center is 0.
-        // If diff is -0.5, we want position 0.0 (Left edge)
-        // If diff is 0.0, we want position 0.5 (Center)
-        // If diff is +0.5, we want position 1.0 (Right edge)
-
-        // Clamp diff to the visual range [-0.5, 0.5] for the UI
+        // Symmetrical scale: -50% to +50% mapped to 0.0 to 1.0
         val visualRange = 0.5
-        val clampedDiff = diff.coerceIn(-visualRange, visualRange) // Coerce in makes sure it's within range
+        val clampedDiff = diff.coerceIn(-visualRange, visualRange)
 
-        // Normalize to 0..1 scale
-        // positionFraction = (diff + 0.5) / 1.0 -> diff + 0.5
+        // positionFraction = 0.0 (Left/Red), 0.5 (Center/Green), 1.0 (Right/Red)
         val positionFraction = clampedDiff + 0.5
 
         valueBarContainer.post {
             val barWidth = valueBarContainer.width.toFloat()
             val indicatorWidth = valueIndicator.width.toFloat()
 
-            // Calculate translation X
+            // Calculate translation X based on the center of the indicator
             val xPos = (barWidth * positionFraction) - (indicatorWidth / 2)
 
             valueIndicator.visibility = View.VISIBLE
             valueIndicator.translationX = xPos.toFloat()
         }
 
-        // 4. Update Feedback Text
+        // 4. Update Feedback Text & Colors matching the 7-segment XML layout
         val diffPercent = (diff * 100).toInt()
         val absPercent = abs(diffPercent)
 
-        val zoneText = when {
-            absPercent <= 10 -> "Perfect Match! (Green Zone)"
-            absPercent <= 20 -> "Fair Trade (Orange Zone)"
-            else -> "Value Mismatch (Red Zone)"
+        val (zoneText, colorRes) = when {
+            absPercent <= 5 -> "Fair Match!" to android.R.color.holo_green_dark
+            absPercent <= 15 -> "Minor Value Gap" to android.R.color.darker_gray
+            absPercent <= 30 -> "Significant Gap" to android.R.color.holo_orange_dark
+            else -> "High Value Mismatch" to android.R.color.holo_red_dark
         }
 
         val direction = if (diff > 0) "+" else ""
         valueFeedbackText.text = "Difference: $direction$diffPercent% • $zoneText"
+        valueFeedbackText.setTextColor(ContextCompat.getColor(requireContext(), colorRes))
     }
 
     private fun observeApplyState() {
