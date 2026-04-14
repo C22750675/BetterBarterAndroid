@@ -3,6 +3,7 @@ package com.hugogarry.betterbarter.ui.trades
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hugogarry.betterbarter.data.model.TradeApplication
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.TradeRepository
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +17,7 @@ sealed class TradeActionResult {
 }
 
 class TradeApplicationsViewModel(
-    private val tradeRepository: TradeRepository = TradeRepository()
+    private val tradeRepository: TradeRepository = TradeRepository(ApiClient.apiService)
 ) : ViewModel() {
 
     private val _applications = MutableStateFlow<Resource<List<TradeApplication>>>(Resource.Idle())

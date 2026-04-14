@@ -2,8 +2,11 @@ package com.hugogarry.betterbarter.ui.trades
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hugogarry.betterbarter.data.model.CreateTradeRequest
 import com.hugogarry.betterbarter.data.model.Item
 import com.hugogarry.betterbarter.data.model.Trade
+import com.hugogarry.betterbarter.data.model.UpdateTradeRequest
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.ItemRepository
 import com.hugogarry.betterbarter.data.repository.TradeRepository
 import com.hugogarry.betterbarter.util.Resource
@@ -12,8 +15,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class CreateTradeViewModel(
-    private val itemRepository: ItemRepository = ItemRepository(),
-    private val tradeRepository: TradeRepository = TradeRepository()
+    private val itemRepository: ItemRepository = ItemRepository(ApiClient.apiService),
+    private val tradeRepository: TradeRepository = TradeRepository(ApiClient.apiService)
 ) : ViewModel() {
 
     private val _myItems = MutableStateFlow<Resource<List<Item>>>(Resource.Idle())
@@ -48,12 +51,13 @@ class CreateTradeViewModel(
 
         viewModelScope.launch {
             _actionState.value = Resource.Loading()
-            _actionState.value = tradeRepository.createTrade(
-                circleId = circleId,
+            val request = CreateTradeRequest(
                 itemId = selectedItem!!.id,
+                circleId = circleId,
                 quantity = quantityText.toInt(),
                 description = description
             )
+            _actionState.value = tradeRepository.createTrade(request)
         }
     }
 
@@ -62,12 +66,12 @@ class CreateTradeViewModel(
 
         viewModelScope.launch {
             _actionState.value = Resource.Loading()
-            _actionState.value = tradeRepository.updateTrade(
-                tradeId = tradeId,
+            val request = UpdateTradeRequest(
                 itemId = selectedItem!!.id,
                 quantity = quantityText.toInt(),
                 description = description
             )
+            _actionState.value = tradeRepository.updateTrade(tradeId, request)
         }
     }
 

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.hugogarry.betterbarter.data.model.Circle
 import com.hugogarry.betterbarter.data.model.CreateCircleRequest
 import com.hugogarry.betterbarter.data.model.RequestPoint
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.CircleRepository
 import com.hugogarry.betterbarter.data.repository.UploadRepository
 import com.hugogarry.betterbarter.util.Resource
@@ -14,8 +15,8 @@ import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 
 class CreateCircleViewModel(
-    private val circleRepository: CircleRepository = CircleRepository(),
-    private val uploadRepository: UploadRepository = UploadRepository()
+    private val circleRepository: CircleRepository = CircleRepository(ApiClient.apiService),
+    private val uploadRepository: UploadRepository = UploadRepository(ApiClient.apiService)
 ) : ViewModel() {
 
     private val _createState = MutableStateFlow<Resource<Circle>>(Resource.Idle())

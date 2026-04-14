@@ -3,6 +3,7 @@ package com.hugogarry.betterbarter.ui.map
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hugogarry.betterbarter.data.model.Circle
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.CircleRepository
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +12,7 @@ import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 
 class MapViewModel(
-    private val circleRepository: CircleRepository = CircleRepository()
+    private val circleRepository: CircleRepository = CircleRepository(ApiClient.apiService)
 ) : ViewModel() {
 
     // Default location (Dublin)

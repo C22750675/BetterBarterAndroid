@@ -2,8 +2,11 @@ package com.hugogarry.betterbarter.ui.trades
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hugogarry.betterbarter.data.model.CreateRatingRequest
 import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.model.TradeStatus
+import com.hugogarry.betterbarter.data.model.UpdateTradeStatusRequest
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.TradeRepository
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class TradesViewModel(
-    private val tradeRepository: TradeRepository = TradeRepository()
+    private val tradeRepository: TradeRepository = TradeRepository(ApiClient.apiService)
 ) : ViewModel() {
 
     private val _trades = MutableStateFlow<Resource<List<Trade>>>(Resource.Idle())
@@ -30,7 +33,9 @@ class TradesViewModel(
     fun updateStatus(trade: Trade, newStatus: TradeStatus) {
         viewModelScope.launch {
             _actionStatus.value = Resource.Loading()
-            val result = tradeRepository.updateStatus(trade.id, newStatus)
+            val request = UpdateTradeStatusRequest(newStatus)
+            val result = tradeRepository.updateTradeStatus(trade.id, request)
+
             if (result is Resource.Success) {
                 _actionStatus.value = Resource.Success("Trade Updated!")
                 fetchMyTrades()
@@ -59,7 +64,9 @@ class TradesViewModel(
     fun submitRating(trade: Trade, score: Int, comment: String) {
         viewModelScope.launch {
             _actionStatus.value = Resource.Loading()
-            val result = tradeRepository.rateTrade(trade.id, score, comment)
+            val request = CreateRatingRequest(score, comment)
+            val result = tradeRepository.rateTrade(trade.id, request)
+
             if (result is Resource.Success) {
                 _actionStatus.value = Resource.Success("Review Submitted!")
                 fetchMyTrades()

@@ -6,6 +6,7 @@ import com.hugogarry.betterbarter.data.model.Category
 import com.hugogarry.betterbarter.data.model.CreateItemRequest
 import com.hugogarry.betterbarter.data.model.Item
 import com.hugogarry.betterbarter.data.model.UploadResponse
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.ItemRepository
 import com.hugogarry.betterbarter.data.repository.UploadRepository
 import com.hugogarry.betterbarter.util.Resource
@@ -22,8 +23,8 @@ sealed class CategoryState {
 }
 
 class AddItemViewModel(
-    private val itemRepository: ItemRepository = ItemRepository(),
-    private val uploadRepository: UploadRepository = UploadRepository()
+    private val itemRepository: ItemRepository = ItemRepository(ApiClient.apiService),
+    private val uploadRepository: UploadRepository = UploadRepository(ApiClient.apiService)
 ) : ViewModel() {
 
     private val _addItemState = MutableStateFlow<Resource<Item>>(Resource.Idle())

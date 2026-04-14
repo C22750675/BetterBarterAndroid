@@ -3,6 +3,7 @@ package com.hugogarry.betterbarter.ui.item
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hugogarry.betterbarter.data.model.Item
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.ItemRepository
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ItemListViewModel(
-    private val itemRepository: ItemRepository = ItemRepository()
+    private val itemRepository: ItemRepository = ItemRepository(ApiClient.apiService)
 ) : ViewModel() {
 
     // Private MutableStateFlow that can be updated within the ViewModel

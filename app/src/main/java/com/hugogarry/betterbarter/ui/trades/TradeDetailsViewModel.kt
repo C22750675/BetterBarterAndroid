@@ -3,7 +3,9 @@ package com.hugogarry.betterbarter.ui.trades
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hugogarry.betterbarter.data.model.Circle
+import com.hugogarry.betterbarter.data.model.CreateRatingRequest
 import com.hugogarry.betterbarter.data.model.Trade
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.AuthRepository
 import com.hugogarry.betterbarter.data.repository.CircleRepository
 import com.hugogarry.betterbarter.data.repository.TradeRepository
@@ -22,16 +24,16 @@ data class TradeDetailsUiState(
 )
 
 class TradeDetailsViewModel(
-    private val tradeRepository: TradeRepository = TradeRepository(),
-    private val circleRepository: CircleRepository = CircleRepository(),
+    private val tradeRepository: TradeRepository = TradeRepository(ApiClient.apiService),
+    private val circleRepository: CircleRepository = CircleRepository(ApiClient.apiService),
     private val authRepository: AuthRepository = AuthRepository()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TradeDetailsUiState())
     val uiState: StateFlow<TradeDetailsUiState> = _uiState
 
-    private val _ratingState = MutableStateFlow<Resource<Boolean>>(Resource.Idle())
-    val ratingState: StateFlow<Resource<Boolean>> = _ratingState
+    private val _ratingState = MutableStateFlow<Resource<Unit>>(Resource.Idle())
+    val ratingState: StateFlow<Resource<Unit>> = _ratingState
 
     fun fetchTradeDetails(tradeId: String) {
         viewModelScope.launch {
@@ -85,7 +87,8 @@ class TradeDetailsViewModel(
             }
 
             _ratingState.value = Resource.Loading()
-            val result = tradeRepository.rateTrade(tradeId, score, comment)
+            val request = CreateRatingRequest(score, comment)
+            val result = tradeRepository.rateTrade(tradeId, request)
             _ratingState.value = result
 
             if (result is Resource.Success) {

@@ -22,7 +22,7 @@ class MyTradesAdapter(
     private val onAction: (Trade, ActionType) -> Unit
 ) : ListAdapter<Trade, MyTradesAdapter.ViewHolder>(DiffCallback()) {
 
-    enum class ActionType { ACCEPT, REJECT, COMPLETE, EDIT_PROPOSAL, DELETE }
+    enum class ActionType { ACCEPT, CANCEL, COMPLETE, EDIT_PROPOSAL, DELETE }
 
     var onItemClick: ((Trade) -> Unit)? = null
 

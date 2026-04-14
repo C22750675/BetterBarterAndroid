@@ -4,13 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hugogarry.betterbarter.data.model.LoginResponse
 import com.hugogarry.betterbarter.data.model.RegisterRequest
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.AuthRepository
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class RegisterViewModel(private val authRepository: AuthRepository = AuthRepository()) : ViewModel() {
+class RegisterViewModel(private val authRepository: AuthRepository = AuthRepository(ApiClient.apiService)) : ViewModel() {
 
     private val _registerState = MutableStateFlow<Resource<LoginResponse>>(Resource.Idle())
     val registerState: StateFlow<Resource<LoginResponse>> = _registerState

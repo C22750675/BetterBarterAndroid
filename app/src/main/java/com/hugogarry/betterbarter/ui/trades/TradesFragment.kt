@@ -43,7 +43,7 @@ class TradesFragment : Fragment() {
         adapter = MyTradesAdapter(userId) { trade, action ->
             when (action) {
                 MyTradesAdapter.ActionType.ACCEPT -> viewModel.updateStatus(trade, TradeStatus.accepted)
-                MyTradesAdapter.ActionType.REJECT -> viewModel.updateStatus(trade, TradeStatus.rejected)
+                MyTradesAdapter.ActionType.CANCEL -> viewModel.updateStatus(trade, TradeStatus.cancelled)
                 MyTradesAdapter.ActionType.COMPLETE -> viewModel.updateStatus(trade, TradeStatus.completed)
                 MyTradesAdapter.ActionType.EDIT_PROPOSAL -> {
                     // Navigate to CreateTradeFragment with tradeId to trigger edit mode

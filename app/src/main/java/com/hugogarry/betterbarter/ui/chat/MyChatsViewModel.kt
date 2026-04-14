@@ -3,6 +3,7 @@ package com.hugogarry.betterbarter.ui.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hugogarry.betterbarter.data.model.Chat
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.ChatRepository
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class MyChatsViewModel(
-    private val chatRepository: ChatRepository = ChatRepository()
+    private val chatRepository: ChatRepository = ChatRepository(ApiClient.apiService)
 ) : ViewModel() {
 
     private val _chats = MutableStateFlow<Resource<List<Chat>>>(Resource.Idle())

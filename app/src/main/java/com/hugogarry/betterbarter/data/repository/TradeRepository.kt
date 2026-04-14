@@ -1,133 +1,166 @@
 package com.hugogarry.betterbarter.data.repository
 
-import com.hugogarry.betterbarter.data.model.CreateTradeRequest
-import com.hugogarry.betterbarter.data.model.UpdateTradeRequest
-import com.hugogarry.betterbarter.data.model.Trade
-import com.hugogarry.betterbarter.data.model.TradeStatus
-import com.hugogarry.betterbarter.data.remote.ApiClient
+import com.hugogarry.betterbarter.data.model.*
 import com.hugogarry.betterbarter.data.remote.ApiService
 import com.hugogarry.betterbarter.util.Resource
-import com.hugogarry.betterbarter.data.model.UpdateTradeStatusRequest
-import com.hugogarry.betterbarter.data.model.CreateRatingRequest
-import com.hugogarry.betterbarter.data.model.ApplyTradeRequest
-import com.hugogarry.betterbarter.data.model.TradeApplication
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class TradeRepository(private val apiService: ApiService = ApiClient.apiService) {
+class TradeRepository(private val apiService: ApiService) {
 
-    suspend fun createTrade(circleId: String, itemId: String, quantity: Int, description: String): Resource<Trade> {
-        return try {
-            val request = CreateTradeRequest(itemId, circleId, quantity, description)
-            val trade = apiService.createTrade(request)
-            Resource.Success(trade)
+    suspend fun createTrade(request: CreateTradeRequest): Resource<Trade> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.createTrade(request)
+            if (response.isSuccessful && response.body() != null) {
+                Resource.Success(response.body()!!)
+            } else {
+                Resource.Error(response.message() ?: "Failed to create trade")
+            }
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to create trade")
+            Resource.Error(e.message ?: "An error occurred")
         }
     }
 
-    /**
-     * Updates an existing trade proposal.
-     */
-    suspend fun updateTrade(tradeId: String, itemId: String, quantity: Int, description: String): Resource<Trade> {
-        return try {
-            val request = UpdateTradeRequest(itemId, quantity, description)
-            val trade = apiService.updateTrade(tradeId, request)
-            Resource.Success(trade)
+    suspend fun updateTrade(tradeId: String, request: UpdateTradeRequest): Resource<Trade> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.updateTrade(tradeId, request)
+            if (response.isSuccessful && response.body() != null) {
+                Resource.Success(response.body()!!)
+            } else {
+                Resource.Error(response.message() ?: "Failed to update trade")
+            }
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to update trade proposal")
+            Resource.Error(e.message ?: "An error occurred")
         }
     }
 
-    /**
-     * Deletes a trade proposal and returns stock to the user's inventory.
-     */
-    suspend fun deleteTrade(tradeId: String): Resource<Unit> {
-        return try {
-            apiService.deleteTrade(tradeId)
-            Resource.Success(Unit)
+    suspend fun deleteTrade(tradeId: String): Resource<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.deleteTrade(tradeId)
+            if (response.isSuccessful) {
+                Resource.Success(Unit)
+            } else {
+                Resource.Error(response.message() ?: "Failed to delete trade")
+            }
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to delete trade proposal")
+            Resource.Error(e.message ?: "An error occurred")
         }
     }
 
-    suspend fun getTradesForCircle(circleId: String): Resource<List<Trade>> {
-        return try {
-            val trades = apiService.getTradesForCircle(circleId)
-            Resource.Success(trades)
+    suspend fun getTradesForCircle(circleId: String): Resource<List<Trade>> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.getTradesForCircle(circleId)
+            if (response.isSuccessful) {
+                Resource.Success(response.body() ?: emptyList())
+            } else {
+                Resource.Error(response.message() ?: "Failed to fetch trades")
+            }
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to load trades")
+            Resource.Error(e.message ?: "An error occurred")
         }
     }
 
-    suspend fun getMyTrades(): Resource<List<Trade>> {
-        return try {
-            val trades = apiService.getMyTrades()
-            Resource.Success(trades)
+    suspend fun getMyTrades(): Resource<List<Trade>> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.getMyTrades()
+            if (response.isSuccessful) {
+                Resource.Success(response.body() ?: emptyList())
+            } else {
+                Resource.Error(response.message() ?: "Failed to fetch your trades")
+            }
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to load your trades")
+            Resource.Error(e.message ?: "An error occurred")
         }
     }
 
-    suspend fun updateStatus(tradeId: String, status: TradeStatus): Resource<Trade> {
-        return try {
-            val trade = apiService.updateTradeStatus(tradeId, UpdateTradeStatusRequest(status))
-            Resource.Success(trade)
+    suspend fun updateTradeStatus(tradeId: String, request: UpdateTradeStatusRequest): Resource<Trade> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.updateTradeStatus(tradeId, request)
+            if (response.isSuccessful && response.body() != null) {
+                Resource.Success(response.body()!!)
+            } else {
+                Resource.Error(response.message() ?: "Failed to update trade status")
+            }
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to update status")
+            Resource.Error(e.message ?: "An error occurred")
         }
     }
 
-    suspend fun rateTrade(tradeId: String, score: Int, comment: String): Resource<Boolean> {
-        return try {
-            apiService.rateTrade(tradeId, CreateRatingRequest(score, comment))
-            Resource.Success(true)
+    suspend fun rateTrade(tradeId: String, request: CreateRatingRequest): Resource<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.rateTrade(tradeId, request)
+            if (response.isSuccessful) {
+                Resource.Success(Unit)
+            } else {
+                Resource.Error(response.message() ?: "Failed to submit rating")
+            }
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to submit review")
+            Resource.Error(e.message ?: "An error occurred")
         }
     }
 
-    suspend fun getTrade(tradeId: String): Resource<Trade> {
-        return try {
-            val trade = apiService.getTrade(tradeId)
-            Resource.Success(trade)
+    suspend fun getTrade(tradeId: String): Resource<Trade> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.getTrade(tradeId)
+            if (response.isSuccessful && response.body() != null) {
+                Resource.Success(response.body()!!)
+            } else {
+                Resource.Error(response.message() ?: "Failed to fetch trade details")
+            }
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to load trade details")
+            Resource.Error(e.message ?: "An error occurred")
         }
     }
 
-    suspend fun applyForTrade(tradeId: String, itemId: String, quantity: Int, message: String): Resource<TradeApplication> {
-        return try {
-            val request = ApplyTradeRequest(itemId, quantity, message)
+    suspend fun applyForTrade(tradeId: String, request: ApplyTradeRequest): Resource<TradeApplication> = withContext(Dispatchers.IO) {
+        try {
             val response = apiService.applyForTrade(tradeId, request)
-            Resource.Success(response)
+            if (response.isSuccessful && response.body() != null) {
+                Resource.Success(response.body()!!)
+            } else {
+                Resource.Error(response.message() ?: "Failed to apply for trade")
+            }
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to apply for trade")
+            Resource.Error(e.message ?: "An error occurred")
         }
     }
 
-    suspend fun getTradeApplications(tradeId: String): Resource<List<TradeApplication>> {
-        return try {
-            val applications = apiService.getTradeApplications(tradeId)
-            Resource.Success(applications)
+    suspend fun getTradeApplications(tradeId: String): Resource<List<TradeApplication>> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.getTradeApplications(tradeId)
+            if (response.isSuccessful) {
+                Resource.Success(response.body() ?: emptyList())
+            } else {
+                Resource.Error(response.message() ?: "Failed to fetch applications")
+            }
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to load applications")
+            Resource.Error(e.message ?: "An error occurred")
         }
     }
 
-    suspend fun acceptApplication(applicationId: String): Resource<Boolean> {
-        return try {
-            apiService.acceptApplication(applicationId)
-            Resource.Success(true)
+    suspend fun acceptApplication(applicationId: String): Resource<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.acceptApplication(applicationId)
+            if (response.isSuccessful) {
+                Resource.Success(Unit)
+            } else {
+                Resource.Error(response.message() ?: "Failed to accept application")
+            }
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to accept application")
+            Resource.Error(e.message ?: "An error occurred")
         }
     }
 
-    suspend fun declineApplication(applicationId: String): Resource<Boolean> {
-        return try {
-            apiService.declineApplication(applicationId)
-            Resource.Success(true)
+    suspend fun declineApplication(applicationId: String): Resource<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.declineApplication(applicationId)
+            if (response.isSuccessful) {
+                Resource.Success(Unit)
+            } else {
+                Resource.Error(response.message() ?: "Failed to decline application")
+            }
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to decline application")
+            Resource.Error(e.message ?: "An error occurred")
         }
     }
 }

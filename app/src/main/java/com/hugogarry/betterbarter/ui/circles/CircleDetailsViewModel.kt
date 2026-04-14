@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hugogarry.betterbarter.data.model.Circle
 import com.hugogarry.betterbarter.data.model.Trade
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.AuthRepository
 import com.hugogarry.betterbarter.data.repository.CircleRepository
 import com.hugogarry.betterbarter.data.repository.TradeRepository
@@ -28,9 +29,9 @@ class CircleDetailsViewModel(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val circleRepository = CircleRepository()
-    private val tradeRepository = TradeRepository()
-    private val authRepository: AuthRepository = AuthRepository()
+    private val circleRepository = CircleRepository(ApiClient.apiService)
+    private val tradeRepository = TradeRepository(ApiClient.apiService)
+    private val authRepository: AuthRepository = AuthRepository(ApiClient.apiService)
 
     val circleId: String = savedStateHandle.get<String>("circleId")!!
 

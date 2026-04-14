@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.hugogarry.betterbarter.data.model.Item
 import com.hugogarry.betterbarter.data.model.UpdateProfileRequest
 import com.hugogarry.betterbarter.data.model.User
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.AuthRepository
 import com.hugogarry.betterbarter.data.repository.ItemRepository
 import com.hugogarry.betterbarter.data.repository.UploadRepository
@@ -25,9 +26,9 @@ data class ProfileUiState(
 )
 
 class ProfileViewModel(
-    private val authRepository: AuthRepository = AuthRepository(),
-    private val itemRepository: ItemRepository = ItemRepository(),
-    private val uploadRepository: UploadRepository = UploadRepository()
+    private val authRepository: AuthRepository = AuthRepository(ApiClient.apiService),
+    private val itemRepository: ItemRepository = ItemRepository(ApiClient.apiService),
+    private val uploadRepository: UploadRepository = UploadRepository(ApiClient.apiService)
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())

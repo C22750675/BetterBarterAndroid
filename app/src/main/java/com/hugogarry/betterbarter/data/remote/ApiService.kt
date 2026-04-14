@@ -9,125 +9,120 @@ interface ApiService {
 
     // Auth
     @POST("auth/register")
-    suspend fun registerUser(@Body registerRequest: RegisterRequest): LoginResponse
+    suspend fun registerUser(@Body registerRequest: RegisterRequest): Response<LoginResponse>
 
     @POST("auth/login")
-    suspend fun loginUser(@Body loginRequest: LoginRequest): LoginResponse
+    suspend fun loginUser(@Body loginRequest: LoginRequest): Response<LoginResponse>
 
     @GET("auth/profile")
-    suspend fun getProfile(): User
+    suspend fun getProfile(): Response<User>
 
     @PATCH("auth/profile")
-    suspend fun updateProfile(@Body updateProfileDto: UpdateProfileRequest): User
+    suspend fun updateProfile(@Body updateProfileDto: UpdateProfileRequest): Response<User>
 
     // Items
     @GET("circles/{circleId}/items")
-    suspend fun getItemsForCircle(@Path("circleId") circleId: String): List<Item>
+    suspend fun getItemsForCircle(@Path("circleId") circleId: String): Response<List<Item>>
 
     @GET("items/my-items")
-    suspend fun getMyItems(): List<Item>
+    suspend fun getMyItems(): Response<List<Item>>
 
     @POST("items")
-    suspend fun createItem(@Body createItemRequest: CreateItemRequest): Item
+    suspend fun createItem(@Body createItemRequest: CreateItemRequest): Response<Item>
 
     @GET("items/categories")
-    suspend fun getCategories(): List<Category>
+    suspend fun getCategories(): Response<List<Category>>
 
     // Circles
     @GET("circles/{circleId}")
-    suspend fun getCircleDetails(@Path("circleId") circleId: String): Circle
+    suspend fun getCircleDetails(@Path("circleId") circleId: String): Response<Circle>
 
     @GET("circles/my-circles")
-    suspend fun getMyCircles(): List<Circle>
+    suspend fun getMyCircles(): Response<List<Circle>>
 
     @POST("circles")
-    suspend fun createCircle(@Body createCircleRequest: CreateCircleRequest): Circle
+    suspend fun createCircle(@Body createCircleRequest: CreateCircleRequest): Response<Circle>
 
     @GET("circles/near")
     suspend fun findNearbyCircles(
         @Query("lat") latitude: Double,
         @Query("lon") longitude: Double,
         @Query("radius") radius: Int = 25000
-    ): List<Circle>
+    ): Response<List<Circle>>
 
     @POST("circles/{id}/join")
-    suspend fun joinCircle(@Path("id") circleId: String)
+    suspend fun joinCircle(@Path("id") circleId: String): Response<Unit>
 
     // Trades
     @POST("trades")
-    suspend fun createTrade(@Body createTradeRequest: CreateTradeRequest): Trade
+    suspend fun createTrade(@Body createTradeRequest: CreateTradeRequest): Response<Trade>
 
-    /**
-     * Updates the content of an existing trade proposal.
-    */
     @PATCH("trades/{tradeId}")
     suspend fun updateTrade(
         @Path("tradeId") tradeId: String,
         @Body updateTradeRequest: UpdateTradeRequest
-    ): Trade
+    ): Response<Trade>
 
-    /**
-     * Permanently deletes a trade listing.
-     */
     @DELETE("trades/{tradeId}")
-    suspend fun deleteTrade(@Path("tradeId") tradeId: String)
+    suspend fun deleteTrade(@Path("tradeId") tradeId: String): Response<Unit>
 
     @GET("trades/circle/{circleId}")
-    suspend fun getTradesForCircle(@Path("circleId") circleId: String): List<Trade>
+    suspend fun getTradesForCircle(@Path("circleId") circleId: String): Response<List<Trade>>
 
     @GET("trades/my-trades")
-    suspend fun getMyTrades(): List<Trade>
+    suspend fun getMyTrades(): Response<List<Trade>>
 
     @PATCH("trades/{id}/status")
     suspend fun updateTradeStatus(
         @Path("id") tradeId: String,
         @Body statusDto: UpdateTradeStatusRequest
-    ): Trade
+    ): Response<Trade>
 
     @POST("trades/{id}/rate")
     suspend fun rateTrade(
         @Path("id") tradeId: String,
         @Body ratingDto: CreateRatingRequest
-    )
+    ): Response<Unit>
 
     @GET("trades/{id}")
-    suspend fun getTrade(@Path("id") tradeId: String): Trade
+    suspend fun getTrade(@Path("id") tradeId: String): Response<Trade>
 
     @POST("trades/{id}/apply")
     suspend fun applyForTrade(
         @Path("id") tradeId: String,
         @Body applyRequest: ApplyTradeRequest
-    ): TradeApplication
+    ): Response<TradeApplication>
 
     @GET("trades/{id}/applications")
-    suspend fun getTradeApplications(@Path("id") tradeId: String): List<TradeApplication>
+    suspend fun getTradeApplications(@Path("id") tradeId: String): Response<List<TradeApplication>>
 
     @POST("trades/applications/{id}/accept")
-    suspend fun acceptApplication(@Path("id") applicationId: String)
+    suspend fun acceptApplication(@Path("id") applicationId: String): Response<Unit>
 
     @DELETE("trades/applications/{id}")
-    suspend fun declineApplication(@Path("id") applicationId: String)
+    suspend fun declineApplication(@Path("id") applicationId: String): Response<Unit>
 
     // Upload
     @Multipart
     @POST("uploads")
     suspend fun uploadImage(
         @Part file: MultipartBody.Part
-    ): UploadResponse
+    ): Response<UploadResponse>
 
     // Chat Endpoints
     @GET("chats")
-    suspend fun getMyChats(): List<Chat>
+    suspend fun getMyChats(): Response<List<Chat>>
 
     @GET("chats/{tradeId}/messages")
-    suspend fun getMessages(@Path("tradeId") tradeId: String): List<Message>
+    suspend fun getMessages(@Path("tradeId") tradeId: String): Response<List<Message>>
 
     @POST("chats/{tradeId}/messages")
     suspend fun sendMessage(
         @Path("tradeId") tradeId: String,
-        @Body message: Map<String, String> // { "text": "hello" }
-    ): Message
+        @Body message: Map<String, String>
+    ): Response<Message>
 
+    // Disputes
     @GET("disputes")
     suspend fun getAdminDisputes(
         @Query("circleId") circleId: String? = null,

@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.hugogarry.betterbarter.data.model.Message
 import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.model.TradeStatus
+import com.hugogarry.betterbarter.data.model.UpdateTradeStatusRequest
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.ChatRepository
 import com.hugogarry.betterbarter.data.repository.TradeRepository
 import com.hugogarry.betterbarter.util.Resource
@@ -13,15 +15,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ChatViewModel(
-    private val chatRepository: ChatRepository = ChatRepository(),
-    private val tradeRepository: TradeRepository = TradeRepository()
+    private val chatRepository: ChatRepository = ChatRepository(ApiClient.apiService),
+    private val tradeRepository: TradeRepository = TradeRepository(ApiClient.apiService)
 ) : ViewModel() {
 
     private val _messages = MutableStateFlow<Resource<List<Message>>>(Resource.Idle())
     val messages: StateFlow<Resource<List<Message>>> = _messages
-
-    private val _sendMessageState = MutableStateFlow<Resource<Message>>(Resource.Idle())
-    val sendMessageState: StateFlow<Resource<Message>> = _sendMessageState
 
     private val _tradeDetails = MutableStateFlow<Resource<Trade>>(Resource.Idle())
     val tradeDetails: StateFlow<Resource<Trade>> = _tradeDetails
@@ -48,9 +47,7 @@ class ChatViewModel(
         if (text.isBlank()) return
 
         viewModelScope.launch {
-            _sendMessageState.value = Resource.Loading()
             val result = chatRepository.sendMessage(tradeId, text)
-            _sendMessageState.value = result
 
             if (result is Resource.Success) {
                 // Refresh messages or append locally
@@ -63,7 +60,7 @@ class ChatViewModel(
         viewModelScope.launch {
             _completeTradeState.value = Resource.Loading()
             // Using TradeRepository to update the status to completed
-            val result = tradeRepository.updateStatus(tradeId, TradeStatus.completed)
+            val result = tradeRepository.updateTradeStatus(tradeId, UpdateTradeStatusRequest(TradeStatus.completed))
             _completeTradeState.value = result
 
             // If successful, re-fetch trade details to update UI (hide the menu item, update status text)

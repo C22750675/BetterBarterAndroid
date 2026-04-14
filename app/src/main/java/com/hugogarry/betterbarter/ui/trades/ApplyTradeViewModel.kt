@@ -2,9 +2,11 @@ package com.hugogarry.betterbarter.ui.trades
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hugogarry.betterbarter.data.model.ApplyTradeRequest
 import com.hugogarry.betterbarter.data.model.Item
 import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.model.TradeApplication
+import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.ItemRepository
 import com.hugogarry.betterbarter.data.repository.TradeRepository
 import com.hugogarry.betterbarter.util.Resource
@@ -14,8 +16,8 @@ import kotlinx.coroutines.launch
 
 
 class ApplyTradeViewModel(
-    private val itemRepository: ItemRepository = ItemRepository(),
-    private val tradeRepository: TradeRepository = TradeRepository()
+    private val itemRepository: ItemRepository = ItemRepository(ApiClient.apiService),
+    private val tradeRepository: TradeRepository = TradeRepository(ApiClient.apiService)
 ) : ViewModel() {
 
     private val _myItems = MutableStateFlow<Resource<List<Item>>>(Resource.Idle())
@@ -65,7 +67,8 @@ class ApplyTradeViewModel(
 
         viewModelScope.launch {
             _applyState.value = Resource.Loading()
-            _applyState.value = tradeRepository.applyForTrade(tradeId, selectedItem.id, quantity, message)
+            val request = ApplyTradeRequest(selectedItem.id, quantity, message)
+            _applyState.value = tradeRepository.applyForTrade(tradeId, request)
         }
     }
 }
