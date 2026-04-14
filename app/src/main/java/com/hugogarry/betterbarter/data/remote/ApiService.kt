@@ -50,7 +50,7 @@ interface ApiService {
     ): List<Circle>
 
     @POST("circles/{id}/join")
-    suspend fun joinCircle(@Path("id") circleId: String): Unit
+    suspend fun joinCircle(@Path("id") circleId: String)
 
     // Trades
     @POST("trades")
