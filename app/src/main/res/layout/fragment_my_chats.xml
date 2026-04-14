@@ -76,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:alpha="0.6"
-                android:text="No active chats yet." />
+                android:text="No chats available" />
 
             <TextView
                 style="@style/TextAppearance.Material3.BodySmall"
@@ -84,7 +84,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:alpha="0.5"
-                android:text="Propose a trade to start a conversation!" />
+                android:text="Propose a trade to get started." />
         </LinearLayout>
 
         <!-- Error State -->

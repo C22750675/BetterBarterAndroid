@@ -24,8 +24,9 @@ class MyChatsFragment : Fragment() {
     private lateinit var adapter: MyChatsAdapter
 
     private lateinit var progressBar: ProgressBar
-    private lateinit var emptyView: TextView
-    private lateinit var errorView: TextView
+    private lateinit var emptyStateLayout: View
+    private lateinit var errorStateLayout: View
+    private lateinit var errorTextView: TextView
     private lateinit var recyclerView: RecyclerView
 
     override fun onCreateView(
@@ -39,8 +40,9 @@ class MyChatsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         progressBar = view.findViewById(R.id.progressBarChats)
-        emptyView = view.findViewById(R.id.textViewNoChats)
-        errorView = view.findViewById(R.id.textViewError)
+        emptyStateLayout = view.findViewById(R.id.emptyState)
+        errorStateLayout = view.findViewById(R.id.errorState)
+        errorTextView = view.findViewById(R.id.textViewError)
         recyclerView = view.findViewById(R.id.recyclerViewChats)
 
         adapter = MyChatsAdapter { chat ->
@@ -60,14 +62,14 @@ class MyChatsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.chats.collectLatest { resource ->
                 progressBar.isVisible = resource is Resource.Loading
-                errorView.isVisible = resource is Resource.Error
-                emptyView.isVisible = resource is Resource.Success && resource.data.isNullOrEmpty()
+                errorStateLayout.isVisible = resource is Resource.Error
+                emptyStateLayout.isVisible = resource is Resource.Success && resource.data.isNullOrEmpty()
                 recyclerView.isVisible = resource is Resource.Success && !resource.data.isNullOrEmpty()
 
                 if (resource is Resource.Success) {
                     adapter.submitList(resource.data)
                 } else if (resource is Resource.Error) {
-                    errorView.text = resource.message
+                    errorTextView.text = resource.message
                 }
             }
         }
