@@ -22,7 +22,7 @@ class MyTradesAdapter(
     private val onAction: (Trade, ActionType) -> Unit
 ) : ListAdapter<Trade, MyTradesAdapter.ViewHolder>(DiffCallback()) {
 
-    enum class ActionType { ACCEPT, REJECT, COMPLETE }
+    enum class ActionType { ACCEPT, REJECT, COMPLETE, EDIT_PROPOSAL }
 
     var onItemClick: ((Trade) -> Unit)? = null
 
@@ -38,24 +38,20 @@ class MyTradesAdapter(
         fun bind(trade: Trade) {
             val currentApiUrl = SessionManager.getServerUrl()
             val baseUrl = currentApiUrl.removeSuffix("api/")
-
             val item = trade.offeredItem
 
-            // 1. Set Text Data
-            ownerName.text = trade.proposer.username
+            ownerName.text = trade.proposer?.username
             itemName.text = item?.name ?: "Unknown Item"
             itemStock.text = "${trade.offeredItemQuantity} units available"
             itemStatus.text = trade.status.name.uppercase()
 
-            // 2. Load Owner Profile Pic
-            val profilePicUrl = trade.proposer.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
+            val profilePicUrl = trade.proposer?.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
             ownerProfilePic.load(profilePicUrl) {
                 placeholder(R.drawable.ic_profile)
                 error(R.drawable.ic_profile)
                 transformations(CircleCropTransformation())
             }
 
-            // 3. Load Item Image
             val itemPicUrl = item?.imageUrl?.let { "${baseUrl}api/uploads$it" }
             itemImage.load(itemPicUrl) {
                 placeholder(R.drawable.ic_launcher_background)
@@ -63,7 +59,6 @@ class MyTradesAdapter(
                 crossfade(true)
             }
 
-            // 4. Button Logic
             btnAction.isVisible = true
             btnAction.isEnabled = true
 
@@ -73,8 +68,9 @@ class MyTradesAdapter(
                         btnAction.text = "Accept Offer"
                         btnAction.setOnClickListener { onAction(trade, ActionType.ACCEPT) }
                     } else {
-                        btnAction.text = "Pending..."
-                        btnAction.isEnabled = false
+                        // FIX: Enable editing for the owner's own pending trades
+                        btnAction.text = "Edit Trade Proposal"
+                        btnAction.setOnClickListener { onAction(trade, ActionType.EDIT_PROPOSAL) }
                     }
                 }
                 TradeStatus.accepted -> {
@@ -82,7 +78,6 @@ class MyTradesAdapter(
                     btnAction.setOnClickListener { onAction(trade, ActionType.COMPLETE) }
                 }
                 else -> {
-                    // Hide button for COMPLETED or REJECTED statuses
                     btnAction.isVisible = false
                 }
             }

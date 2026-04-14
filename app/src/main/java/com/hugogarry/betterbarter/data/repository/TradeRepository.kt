@@ -1,6 +1,7 @@
 package com.hugogarry.betterbarter.data.repository
 
 import com.hugogarry.betterbarter.data.model.CreateTradeRequest
+import com.hugogarry.betterbarter.data.model.UpdateTradeRequest
 import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.model.TradeStatus
 import com.hugogarry.betterbarter.data.remote.ApiClient
@@ -13,12 +14,26 @@ import com.hugogarry.betterbarter.data.model.TradeApplication
 
 class TradeRepository(private val apiService: ApiService = ApiClient.apiService) {
 
-    suspend fun createTrade(createTradeRequest: CreateTradeRequest): Resource<Trade> {
+    suspend fun createTrade(circleId: String, itemId: String, quantity: Int, description: String): Resource<Trade> {
         return try {
-            val trade = apiService.createTrade(createTradeRequest)
+            val request = CreateTradeRequest(itemId, circleId, quantity, description)
+            val trade = apiService.createTrade(request)
             Resource.Success(trade)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to create trade")
+        }
+    }
+
+    /**
+     * Updates an existing trade proposal.
+     */
+    suspend fun updateTrade(tradeId: String, itemId: String, quantity: Int, description: String): Resource<Trade> {
+        return try {
+            val request = UpdateTradeRequest(itemId, quantity, description)
+            val trade = apiService.updateTrade(tradeId, request)
+            Resource.Success(trade)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to update trade proposal")
         }
     }
 
@@ -58,7 +73,6 @@ class TradeRepository(private val apiService: ApiService = ApiClient.apiService)
         }
     }
 
-    // Get Single Trade
     suspend fun getTrade(tradeId: String): Resource<Trade> {
         return try {
             val trade = apiService.getTrade(tradeId)

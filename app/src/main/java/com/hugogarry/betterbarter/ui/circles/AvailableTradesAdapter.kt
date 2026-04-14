@@ -32,15 +32,8 @@ class AvailableTradesAdapter(
         val trade = getItem(position)
         holder.bind(trade, currentUserId)
 
-        if (trade.proposerId != currentUserId) {
-            holder.proposeButton.setOnClickListener {
-                onProposeClick?.invoke(trade)
-            }
-        } else {
-            // Logic for when it's the user's own trade
-            holder.proposeButton.setOnClickListener {
-                onProposeClick?.invoke(trade)
-            }
+        holder.proposeButton.setOnClickListener {
+            onProposeClick?.invoke(trade)
         }
 
         holder.itemView.setOnClickListener {
@@ -60,23 +53,20 @@ class AvailableTradesAdapter(
         fun bind(trade: Trade, currentUserId: String) {
             val currentApiUrl = SessionManager.getServerUrl()
             val baseUrl = currentApiUrl.removeSuffix("api/")
-
             val item = trade.offeredItem
 
-            ownerName.text = trade.proposer.username
+            ownerName.text = trade.proposer?.username
             itemName.text = item?.name ?: "Unknown Item"
             itemStock.text = "${trade.offeredItemQuantity} units available"
             itemStatus.text = trade.status.toString().uppercase()
 
-            // Load owner profile pic
-            val profilePicUrl = trade.proposer.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
+            val profilePicUrl = trade.proposer?.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
             ownerProfilePic.load(profilePicUrl) {
                 placeholder(R.drawable.ic_profile)
                 error(R.drawable.ic_profile)
                 transformations(CircleCropTransformation())
             }
 
-            // Load item image
             val itemPicUrl = item?.imageUrl?.let { "${baseUrl}api/uploads$it" }
             itemImage.load(itemPicUrl) {
                 placeholder(R.drawable.ic_launcher_background)
@@ -86,13 +76,10 @@ class AvailableTradesAdapter(
             if (trade.proposerId == currentUserId) {
                 proposeButton.text = "Edit Trade Proposal"
                 proposeButton.isEnabled = true
-                proposeButton.alpha = 0.5f
+                // Removed the 0.5f alpha to indicate it is an active action
+                proposeButton.alpha = 1.0f
             } else {
-                if (trade.myApplication != null) {
-                    proposeButton.text = "Edit Application"
-                } else {
-                    proposeButton.text = "Apply for Trade"
-                }
+                proposeButton.text = if (trade.myApplication != null) "Edit Application" else "Apply for Trade"
                 proposeButton.isEnabled = true
                 proposeButton.alpha = 1.0f
             }
@@ -101,11 +88,6 @@ class AvailableTradesAdapter(
 }
 
 class TradeDiffCallback : DiffUtil.ItemCallback<Trade>() {
-    override fun areItemsTheSame(oldItem: Trade, newItem: Trade): Boolean {
-        return oldItem.id == newItem.id
-    }
-
-    override fun areContentsTheSame(oldItem: Trade, newItem: Trade): Boolean {
-        return oldItem == newItem
-    }
+    override fun areItemsTheSame(oldItem: Trade, newItem: Trade) = oldItem.id == newItem.id
+    override fun areContentsTheSame(oldItem: Trade, newItem: Trade) = oldItem == newItem
 }

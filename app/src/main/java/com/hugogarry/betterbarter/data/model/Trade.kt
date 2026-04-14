@@ -10,7 +10,7 @@ data class Trade(
     val completionDate: String?,
     val description: String?,
     val proposerId: String,
-    val proposer: UserSummary,
+    val proposer: UserSummary?,
     val recipientId: String?,
     val recipient: UserSummary?,
     val offeredItemQuantity: Int,

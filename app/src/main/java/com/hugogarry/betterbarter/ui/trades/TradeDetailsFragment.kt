@@ -171,14 +171,14 @@ class TradeDetailsFragment : Fragment() {
         }
 
         // Bind Other Party
-        val profilePicUrl = partyToShow.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
+        val profilePicUrl = partyToShow?.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
         otherPartyImageView.load(profilePicUrl) {
             placeholder(R.drawable.ic_profile)
             error(R.drawable.ic_profile)
             transformations(CircleCropTransformation())
         }
-        otherPartyNameTextView.text = partyToShow.username
-        otherPartyReputationTextView.text = "%.1f ★".format(partyToShow.reputationScore ?: 0.0)
+        otherPartyNameTextView.text = partyToShow?.username
+        otherPartyReputationTextView.text = "%.1f ★".format(partyToShow?.reputationScore ?: 0.0)
 
         tradeDescriptionTextView.text = trade.description ?: "No specific trade details provided."
 

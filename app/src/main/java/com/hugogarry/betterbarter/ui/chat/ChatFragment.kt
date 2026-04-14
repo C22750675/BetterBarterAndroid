@@ -138,7 +138,7 @@ class ChatFragment : Fragment() {
                     val otherUserName = if (trade.proposerId == currentUserId) {
                         trade.recipient?.username
                     } else {
-                        trade.proposer.username
+                        trade.proposer?.username
                     }
                     toolbar.title = otherUserName ?: "Chat"
 

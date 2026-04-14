@@ -33,12 +33,16 @@ class CreateTradeFragment : Fragment() {
     private var myItemsList: List<Item> = emptyList()
     private var selectedItem: Item? = null
 
+    // Track if we are in edit mode
+    private val isEditMode get() = args.tradeId != null
+
     private lateinit var itemDropdown: AutoCompleteTextView
     private lateinit var quantityEditText: EditText
     private lateinit var descriptionEditText: EditText
     private lateinit var submitButton: Button
     private lateinit var progressBar: ProgressBar
     private lateinit var errorTextView: TextView
+    private lateinit var toolbar: Toolbar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,7 +54,7 @@ class CreateTradeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbarCreateTrade)
+        toolbar = view.findViewById(R.id.toolbarCreateTrade)
         NavigationUI.setupWithNavController(toolbar, findNavController())
 
         itemDropdown = view.findViewById(R.id.autoCompleteTextViewMyItem)
@@ -60,24 +64,40 @@ class CreateTradeFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBarCreateTrade)
         errorTextView = view.findViewById(R.id.textViewCreateTradeError)
 
+        // UI Adjustments for Edit Mode
+        if (isEditMode) {
+            toolbar.title = "Edit Trade Proposal"
+            submitButton.text = "Update Trade Proposal"
+            viewModel.fetchTradeForEditing(args.tradeId!!)
+        }
+
         submitButton.setOnClickListener {
-            viewModel.createTrade(
-                selectedItem = selectedItem,
-                circleId = args.circleId,
-                quantityText = quantityEditText.text.toString(),
-                description = descriptionEditText.text.toString().trim()
-            )
+            if (isEditMode) {
+                viewModel.updateTrade(
+                    tradeId = args.tradeId!!,
+                    selectedItem = selectedItem,
+                    quantityText = quantityEditText.text.toString(),
+                    description = descriptionEditText.text.toString().trim()
+                )
+            } else {
+                viewModel.createTrade(
+                    selectedItem = selectedItem,
+                    circleId = args.circleId,
+                    quantityText = quantityEditText.text.toString(),
+                    description = descriptionEditText.text.toString().trim()
+                )
+            }
         }
 
         observeMyItems()
-        observeCreateState()
+        observeExistingTrade()
+        observeActionState()
     }
 
     private fun observeMyItems() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.myItems.collectLatest { resource ->
                 progressBar.isVisible = resource is Resource.Loading
-                errorTextView.isVisible = resource is Resource.Error
 
                 if (resource is Resource.Success) {
                     myItemsList = resource.data ?: emptyList()
@@ -90,24 +110,48 @@ class CreateTradeFragment : Fragment() {
                     itemDropdown.setAdapter(adapter)
                     itemDropdown.setOnItemClickListener { _, _, position, _ ->
                         selectedItem = myItemsList[position]
-                        // Auto-fill quantity to 1
-                        quantityEditText.setText("1")
+                        if (!isEditMode) quantityEditText.setText("1")
                     }
-                } else if (resource is Resource.Error) {
-                    errorTextView.text = resource.message
+
+                    // If editing, re-trigger the pre-fill once items are loaded
+                    viewModel.existingTrade.value.data?.let { preFillTradeData(it) }
                 }
             }
         }
     }
 
-    private fun observeCreateState() {
+    private fun observeExistingTrade() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.createState.collectLatest { resource ->
+            viewModel.existingTrade.collectLatest { resource ->
+                if (resource is Resource.Success) {
+                    resource.data?.let { preFillTradeData(it) }
+                }
+            }
+        }
+    }
+
+    private fun preFillTradeData(trade: com.hugogarry.betterbarter.data.model.Trade) {
+        descriptionEditText.setText(trade.description)
+        quantityEditText.setText(trade.offeredItemQuantity.toString())
+
+        // Find and select the item in the list
+        val itemIndex = myItemsList.indexOfFirst { it.id == trade.offeredItem?.id }
+        if (itemIndex != -1) {
+            selectedItem = myItemsList[itemIndex]
+            val itemNames = myItemsList.map { "${it.name} (Stock: ${it.stock})" }
+            itemDropdown.setText(itemNames[itemIndex], false)
+        }
+    }
+
+    private fun observeActionState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.actionState.collectLatest { resource ->
                 progressBar.isVisible = resource is Resource.Loading
                 errorTextView.isVisible = resource is Resource.Error
 
                 if (resource is Resource.Success) {
-                    Toast.makeText(context, "Trade proposal created!", Toast.LENGTH_LONG).show()
+                    val msg = if (isEditMode) "Trade proposal updated!" else "Trade proposal created!"
+                    Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
                     findNavController().popBackStack()
                 } else if (resource is Resource.Error) {
                     errorTextView.text = resource.message

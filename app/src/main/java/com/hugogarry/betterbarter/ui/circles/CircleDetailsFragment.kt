@@ -85,8 +85,18 @@ class CircleDetailsFragment : Fragment() {
         availableTradesAdapter = AvailableTradesAdapter(currentUserId)
 
         availableTradesAdapter.onProposeClick = { trade: Trade ->
-            // Use the top-level isMember flag from the UI State
-            if (viewModel.uiState.value.isMember) {
+            val isMember = viewModel.uiState.value.isMember
+
+            if (trade.proposerId == currentUserId) {
+                // Owner: Navigate to CreateTradeFragment and pass the tradeId for editing
+                val action = CircleDetailsFragmentDirections
+                    .actionCircleDetailsFragmentToCreateTradeFragment(
+                        circleId = trade.circleId,
+                        tradeId = trade.id
+                    )
+                findNavController().navigate(action)
+            } else if (isMember) {
+                // Member: Navigate to ApplyTradeFragment
                 val action = CircleDetailsFragmentDirections
                     .actionCircleDetailsFragmentToApplyTradeFragment(
                         tradeId = trade.id,

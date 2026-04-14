@@ -43,6 +43,15 @@ class TradesFragment : Fragment() {
                 MyTradesAdapter.ActionType.ACCEPT -> viewModel.updateStatus(trade, TradeStatus.accepted)
                 MyTradesAdapter.ActionType.REJECT -> viewModel.updateStatus(trade, TradeStatus.rejected)
                 MyTradesAdapter.ActionType.COMPLETE -> viewModel.updateStatus(trade, TradeStatus.completed)
+                MyTradesAdapter.ActionType.EDIT_PROPOSAL -> {
+                    // Navigate to CreateTradeFragment with tradeId to trigger edit mode
+                    val navAction = TradesFragmentDirections
+                        .actionTradesFragmentToCreateTradeFragment(
+                            circleId = trade.circleId,
+                            tradeId = trade.id
+                        )
+                    findNavController().navigate(navAction)
+                }
             }
         }
 
@@ -66,7 +75,6 @@ class TradesFragment : Fragment() {
     private fun observeState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.trades.collectLatest { resource ->
-                // Basic loading handling
                 if (resource is Resource.Loading) {
                     progressBar.visibility = View.VISIBLE
                 } else {

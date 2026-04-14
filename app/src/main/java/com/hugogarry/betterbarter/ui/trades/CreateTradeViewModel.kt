@@ -2,7 +2,6 @@ package com.hugogarry.betterbarter.ui.trades
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hugogarry.betterbarter.data.model.CreateTradeRequest
 import com.hugogarry.betterbarter.data.model.Item
 import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.repository.ItemRepository
@@ -17,13 +16,14 @@ class CreateTradeViewModel(
     private val tradeRepository: TradeRepository = TradeRepository()
 ) : ViewModel() {
 
-    // Holds the user's items for the dropdown
     private val _myItems = MutableStateFlow<Resource<List<Item>>>(Resource.Idle())
     val myItems: StateFlow<Resource<List<Item>>> = _myItems
 
-    // Holds the state of the trade creation
-    private val _createState = MutableStateFlow<Resource<Trade>>(Resource.Idle())
-    val createState: StateFlow<Resource<Trade>> = _createState
+    private val _existingTrade = MutableStateFlow<Resource<Trade>>(Resource.Idle())
+    val existingTrade: StateFlow<Resource<Trade>> = _existingTrade
+
+    private val _actionState = MutableStateFlow<Resource<Trade>>(Resource.Idle())
+    val actionState: StateFlow<Resource<Trade>> = _actionState
 
     init {
         fetchMyItems()
@@ -36,38 +36,55 @@ class CreateTradeViewModel(
         }
     }
 
-    fun createTrade(
-        selectedItem: Item?,
-        circleId: String,
-        quantityText: String,
-        description: String
-    ) {
-        if (selectedItem == null) {
-            _createState.value = Resource.Error("Please select an item to trade.")
-            return
+    fun fetchTradeForEditing(tradeId: String) {
+        viewModelScope.launch {
+            _existingTrade.value = Resource.Loading()
+            _existingTrade.value = tradeRepository.getTrade(tradeId)
         }
+    }
 
-        val quantity = quantityText.toIntOrNull()
-        if (quantity == null || quantity <= 0) {
-            _createState.value = Resource.Error("Please enter a valid quantity.")
-            return
-        }
-
-        if (quantity > selectedItem.stock) {
-            _createState.value = Resource.Error("Quantity cannot be more than your available stock (${selectedItem.stock}).")
-            return
-        }
-
-        val request = CreateTradeRequest(
-            itemId = selectedItem.id,
-            circleId = circleId,
-            quantity = quantity,
-            description = description.takeIf { it.isNotBlank() }
-        )
+    fun createTrade(selectedItem: Item?, circleId: String, quantityText: String, description: String) {
+        if (!validate(selectedItem, quantityText)) return
 
         viewModelScope.launch {
-            _createState.value = Resource.Loading()
-            _createState.value = tradeRepository.createTrade(request)
+            _actionState.value = Resource.Loading()
+            _actionState.value = tradeRepository.createTrade(
+                circleId = circleId,
+                itemId = selectedItem!!.id,
+                quantity = quantityText.toInt(),
+                description = description
+            )
         }
+    }
+
+    fun updateTrade(tradeId: String, selectedItem: Item?, quantityText: String, description: String) {
+        if (!validate(selectedItem, quantityText)) return
+
+        viewModelScope.launch {
+            _actionState.value = Resource.Loading()
+            _actionState.value = tradeRepository.updateTrade(
+                tradeId = tradeId,
+                itemId = selectedItem!!.id,
+                quantity = quantityText.toInt(),
+                description = description
+            )
+        }
+    }
+
+    private fun validate(selectedItem: Item?, quantityText: String): Boolean {
+        if (selectedItem == null) {
+            _actionState.value = Resource.Error("Please select an item.")
+            return false
+        }
+        val q = quantityText.toIntOrNull()
+        if (q == null || q <= 0) {
+            _actionState.value = Resource.Error("Enter a valid quantity.")
+            return false
+        }
+        if (q > selectedItem.stock) {
+            _actionState.value = Resource.Error("Insufficient stock.")
+            return false
+        }
+        return true
     }
 }

@@ -56,6 +56,15 @@ interface ApiService {
     @POST("trades")
     suspend fun createTrade(@Body createTradeRequest: CreateTradeRequest): Trade
 
+    /**
+     * Updates the content of an existing trade proposal.
+    */
+    @PATCH("trades/{tradeId}")
+    suspend fun updateTrade(
+        @Path("tradeId") tradeId: String,
+        @Body updateTradeRequest: UpdateTradeRequest
+    ): Trade
+
     @GET("trades/circle/{circleId}")
     suspend fun getTradesForCircle(@Path("circleId") circleId: String): List<Trade>
 
