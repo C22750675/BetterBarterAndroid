@@ -2,6 +2,7 @@ package com.hugogarry.betterbarter.ui.trades
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hugogarry.betterbarter.data.model.Circle
 import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.repository.AuthRepository
 import com.hugogarry.betterbarter.data.repository.CircleRepository
@@ -14,6 +15,7 @@ import kotlinx.coroutines.launch
 
 data class TradeDetailsUiState(
     val trade: Trade? = null,
+    val circle: Circle? = null, // ADDED: To hold the circle details
     val isMember: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null
@@ -28,7 +30,6 @@ class TradeDetailsViewModel(
     private val _uiState = MutableStateFlow(TradeDetailsUiState())
     val uiState: StateFlow<TradeDetailsUiState> = _uiState
 
-    // Dedicated state for rating submissions
     private val _ratingState = MutableStateFlow<Resource<Boolean>>(Resource.Idle())
     val ratingState: StateFlow<Resource<Boolean>> = _ratingState
 
@@ -40,7 +41,7 @@ class TradeDetailsViewModel(
             if (tradeResult is Resource.Success) {
                 val trade = tradeResult.data!!
 
-                // Parallel calls to verify membership status robustly
+                // Parallel calls to verify membership status and get circle details robustly
                 val circleResultDeferred = async { circleRepository.getCircleDetails(trade.circleId) }
                 val myCirclesResultDeferred = async { circleRepository.getMyCircles() }
                 val profileResultDeferred = async { authRepository.getProfile() }
@@ -49,20 +50,21 @@ class TradeDetailsViewModel(
                 val myCirclesResult = myCirclesResultDeferred.await()
                 val profileResult = profileResultDeferred.await()
 
-                // Calculate membership using the same logic as the Circle screen
+                // Capture circle details
                 val circleData = (circleResult as? Resource.Success)?.data
                 val myCircles = (myCirclesResult as? Resource.Success)?.data ?: emptyList()
                 val user = (profileResult as? Resource.Success)?.data
 
+                // Calculate membership using the same logic as the Circle screen
                 val isUserAdmin = circleData?.admins?.any { it.id == user?.id } ?: false
                 val isExplicitMember = circleData?.isMember ?: false
                 val isInMyCirclesList = myCircles.any { it.id == trade.circleId }
 
-                // The robust check
                 val isMember = isUserAdmin || isExplicitMember || isInMyCirclesList
 
                 _uiState.value = TradeDetailsUiState(
                     trade = trade,
+                    circle = circleData, // ASSIGNED: Passing the circle data to the UI
                     isMember = isMember,
                     isLoading = false
                 )
@@ -83,13 +85,9 @@ class TradeDetailsViewModel(
             }
 
             _ratingState.value = Resource.Loading()
-
-            // Call the repository to submit the rating
             val result = tradeRepository.rateTrade(tradeId, score, comment)
             _ratingState.value = result
 
-            // Refresh the trade if the rating was successful,
-            // fetching updated rep scores and status
             if (result is Resource.Success) {
                 fetchTradeDetails(tradeId)
             }

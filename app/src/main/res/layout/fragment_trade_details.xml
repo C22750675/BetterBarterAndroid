@@ -104,96 +104,159 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Proposer Section -->
+            <!-- Unified Trade Context Card -->
             <TextView
-                android:id="@+id/headerProposer"
+                android:id="@+id/headerContext"
                 style="@style/TextAppearance.Material3.TitleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="24dp"
-                android:text="Listed by"
+                android:text="Trade Context"
                 android:textColor="?attr/colorPrimary"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/cardItemHero" />
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardProposer"
+                android:id="@+id/cardCircleContext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                app:cardCornerRadius="20dp"
+                app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
-                app:layout_constraintTop_toBottomOf="@id/headerProposer"
+                app:layout_constraintTop_toBottomOf="@id/headerContext"
                 app:strokeColor="?attr/colorOutlineVariant"
                 app:strokeWidth="1dp">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:padding="16dp">
 
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/imageViewOtherPartyProfile"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:scaleType="centerCrop"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle"
-                        app:strokeColor="?attr/colorOutlineVariant"
-                        app:strokeWidth="1dp"
-                        tools:src="@drawable/ic_profile" />
-
+                    <!-- User Section -->
                     <TextView
-                        android:id="@+id/textViewOtherPartyName"
-                        style="@style/TextAppearance.Material3.TitleMedium"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        app:layout_constraintEnd_toStartOf="@+id/reputationBadge"
-                        app:layout_constraintStart_toEndOf="@id/imageViewOtherPartyProfile"
-                        app:layout_constraintTop_toTopOf="@id/imageViewOtherPartyProfile"
-                        tools:text="Hugo Garry" />
-
-                    <!-- Reputation Badge -->
-                    <LinearLayout
-                        android:id="@+id/reputationBadge"
+                        android:id="@+id/headerProposer"
+                        style="@style/TextAppearance.Material3.LabelMedium"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_status_badge"
-                        android:backgroundTint="?attr/colorTertiaryContainer"
-                        android:gravity="center"
-                        android:paddingHorizontal="10dp"
-                        android:paddingVertical="4dp"
-                        app:layout_constraintBottom_toBottomOf="@id/imageViewOtherPartyProfile"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/imageViewOtherPartyProfile">
+                        android:layout_marginBottom="8dp"
+                        android:alpha="0.6"
+                        android:textColor="?attr/colorOnSurface"
+                        tools:text="Trade Proposer" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/imageViewOtherPartyProfile"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:scaleType="centerCrop"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle"
+                            app:strokeColor="?attr/colorOutlineVariant"
+                            app:strokeWidth="1dp"
+                            tools:src="@drawable/ic_profile" />
 
                         <TextView
-                            android:id="@+id/textViewOtherPartyReputation"
-                            style="@style/TextAppearance.Material3.LabelSmall"
+                            android:id="@+id/textViewOtherPartyName"
+                            style="@style/TextAppearance.Material3.TitleMedium"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            app:layout_constraintEnd_toStartOf="@+id/reputationBadge"
+                            app:layout_constraintStart_toEndOf="@id/imageViewOtherPartyProfile"
+                            app:layout_constraintTop_toTopOf="@id/imageViewOtherPartyProfile"
+                            tools:text="Hugo Garry" />
+
+                        <LinearLayout
+                            android:id="@+id/reputationBadge"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="?attr/colorOnTertiaryContainer"
-                            android:textStyle="bold"
-                            tools:text="5.0 ★" />
-                    </LinearLayout>
+                            android:background="@drawable/bg_status_badge"
+                            android:backgroundTint="?attr/colorTertiaryContainer"
+                            android:gravity="center"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="2dp"
+                            app:layout_constraintBottom_toBottomOf="@id/imageViewOtherPartyProfile"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="@id/imageViewOtherPartyProfile">
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                            <TextView
+                                android:id="@+id/textViewOtherPartyReputation"
+                                style="@style/TextAppearance.Material3.LabelSmall"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="?attr/colorOnTertiaryContainer"
+                                android:textStyle="bold"
+                                tools:text="5.0 ★" />
+                        </LinearLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="8dp"
+                        android:alpha="0.5" />
+
+                    <!-- Circle Section -->
+                    <TextView
+                        style="@style/TextAppearance.Material3.LabelMedium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:alpha="0.6"
+                        android:text="Listed in"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/imageViewCircleIconDetails"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/ic_circles"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle"
+                            app:strokeColor="?attr/colorOutlineVariant"
+                            app:strokeWidth="1dp" />
+
+                        <TextView
+                            android:id="@+id/textViewCircleNameDetails"
+                            style="@style/TextAppearance.Material3.TitleMedium"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/imageViewCircleIconDetails"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="Local Growers Circle" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Trade Context Section (Visible only if description is present) -->
+            <!-- Trade Description Section (Visible only if description is present) -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardTradeDetails"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                app:cardCornerRadius="20dp"
+                app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
-                app:layout_constraintTop_toBottomOf="@id/cardProposer">
+                app:layout_constraintTop_toBottomOf="@id/cardCircleContext">
 
                 <LinearLayout
                     android:layout_width="match_parent"

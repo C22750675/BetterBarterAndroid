@@ -21,6 +21,7 @@ import androidx.navigation.ui.NavigationUI
 import coil.load
 import coil.transform.CircleCropTransformation
 import com.hugogarry.betterbarter.R
+import com.hugogarry.betterbarter.data.model.Circle
 import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.model.TradeStatus
 import com.hugogarry.betterbarter.util.Resource
@@ -39,7 +40,12 @@ class TradeDetailsFragment : Fragment() {
     private lateinit var itemQuantityTextView: TextView
     private lateinit var itemDescriptionTextView: TextView
 
-    // Other Party Views (Dynamic based on who is viewing)
+    // Circle Information Views
+    private lateinit var circleNameTextView: TextView
+    private lateinit var circleIconImageView: ImageView
+    private lateinit var cardCircleContext: View
+
+    // Other Party Views
     private lateinit var headerProposerTextView: TextView
     private lateinit var otherPartyImageView: ImageView
     private lateinit var otherPartyNameTextView: TextView
@@ -74,6 +80,11 @@ class TradeDetailsFragment : Fragment() {
         itemNameTextView = view.findViewById(R.id.textViewItemNameDetails)
         itemQuantityTextView = view.findViewById(R.id.textViewItemQuantityDetails)
         itemDescriptionTextView = view.findViewById(R.id.textViewItemDescriptionDetails)
+
+        // Bind Circle Views
+        circleNameTextView = view.findViewById(R.id.textViewCircleNameDetails)
+        circleIconImageView = view.findViewById(R.id.imageViewCircleIconDetails)
+        cardCircleContext = view.findViewById(R.id.cardCircleContext)
 
         // Bind Other Party Views
         headerProposerTextView = view.findViewById(R.id.headerProposer)
@@ -117,7 +128,8 @@ class TradeDetailsFragment : Fragment() {
                 }
 
                 state.trade?.let { trade ->
-                    bindTradeData(trade)
+                    // Pass both the trade and the populated circle object to the binder
+                    bindTradeData(trade, state.circle)
                 }
             }
         }
@@ -149,7 +161,7 @@ class TradeDetailsFragment : Fragment() {
         }
     }
 
-    private fun bindTradeData(trade: Trade) {
+    private fun bindTradeData(trade: Trade, circle: Circle?) {
         val currentUserId = getUserIdFromToken()
         val currentApiUrl = SessionManager.getServerUrl()
         val baseUrl = currentApiUrl.removeSuffix("api/")
@@ -165,7 +177,17 @@ class TradeDetailsFragment : Fragment() {
         itemQuantityTextView.text = "Quantity: ${trade.offeredItemQuantity}"
         itemDescriptionTextView.text = item?.description ?: "No description"
 
-        // Determine which user to display in the "Other Party" section
+        // Display the Circle Name and Load the Circle Icon correctly
+        circleNameTextView.text = circle?.name ?: "Unknown Circle"
+
+        val circleIconPath = circle?.imageUrl?.removePrefix("/")
+        val circleIconUrl = circleIconPath?.let { "${baseUrl}api/uploads/$it" }
+        circleIconImageView.load(circleIconUrl) {
+            placeholder(R.drawable.ic_circles)
+            error(R.drawable.ic_circles)
+            transformations(CircleCropTransformation())
+        }
+
         val partyToShow = if (trade.proposerId == currentUserId && trade.recipient != null) {
             headerProposerTextView.text = "Trade Recipient"
             trade.recipient
@@ -181,7 +203,7 @@ class TradeDetailsFragment : Fragment() {
             error(R.drawable.ic_profile)
             transformations(CircleCropTransformation())
         }
-        otherPartyNameTextView.text = partyToShow?.username
+        otherPartyNameTextView.text = partyToShow?.username ?: "Unknown User"
         otherPartyReputationTextView.text = "%.1f ★".format(partyToShow?.reputationScore ?: 0.0)
 
         // Logic to hide the description box if there is no description
