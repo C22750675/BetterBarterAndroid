@@ -9,22 +9,25 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import coil.transform.CircleCropTransformation
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Item
 import com.hugogarry.betterbarter.util.SessionManager
 
 class ProfileItemsAdapter : ListAdapter<Item, ProfileItemsAdapter.ItemViewHolder>(ItemDiffCallback()) {
 
-    // ViewHolder holds the views for a single list item
     class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val itemName: TextView = itemView.findViewById(R.id.textViewItemName)
         private val itemDescription: TextView = itemView.findViewById(R.id.textViewItemDescription)
         private val itemImage: ImageView = itemView.findViewById(R.id.imageViewItem)
+        // Added the stock view reference
+        private val itemStock: TextView = itemView.findViewById(R.id.textViewItemStock)
 
         fun bind(item: Item) {
             itemName.text = item.name
             itemDescription.text = item.description
+
+            // Display the stock count clearly
+            itemStock.text = "In Stock: ${item.stock}"
 
             val currentApiUrl = SessionManager.getServerUrl()
             val baseUrl = currentApiUrl.removeSuffix("api/")
@@ -33,6 +36,7 @@ class ProfileItemsAdapter : ListAdapter<Item, ProfileItemsAdapter.ItemViewHolder
             itemImage.load(fullImageUrl) {
                 placeholder(R.drawable.ic_profile)
                 error(R.drawable.ic_profile)
+                crossfade(true)
             }
         }
     }
