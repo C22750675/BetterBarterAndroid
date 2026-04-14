@@ -45,6 +45,8 @@ class TradeDetailsFragment : Fragment() {
     private lateinit var otherPartyNameTextView: TextView
     private lateinit var otherPartyReputationTextView: TextView
 
+    // Trade Context
+    private lateinit var tradeDetailsCard: View
     private lateinit var tradeDescriptionTextView: TextView
     private lateinit var actionButton: Button
 
@@ -79,6 +81,8 @@ class TradeDetailsFragment : Fragment() {
         otherPartyNameTextView = view.findViewById(R.id.textViewOtherPartyName)
         otherPartyReputationTextView = view.findViewById(R.id.textViewOtherPartyReputation)
 
+        // Bind Context Views
+        tradeDetailsCard = view.findViewById(R.id.cardTradeDetails)
         tradeDescriptionTextView = view.findViewById(R.id.textViewTradeDescriptionDetails)
         actionButton = view.findViewById(R.id.buttonTradeActionDetails)
 
@@ -180,7 +184,13 @@ class TradeDetailsFragment : Fragment() {
         otherPartyNameTextView.text = partyToShow?.username
         otherPartyReputationTextView.text = "%.1f ★".format(partyToShow?.reputationScore ?: 0.0)
 
-        tradeDescriptionTextView.text = trade.description ?: "No specific trade details provided."
+        // Logic to hide the description box if there is no description
+        if (trade.description.isNullOrBlank()) {
+            tradeDetailsCard.isVisible = false
+        } else {
+            tradeDetailsCard.isVisible = true
+            tradeDescriptionTextView.text = trade.description
+        }
 
         val isProposer = trade.proposerId == currentUserId
         val hasRated = if (isProposer) trade.isRatedByProposer else trade.isRatedByRecipient

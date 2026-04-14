@@ -157,7 +157,7 @@
                         app:layout_constraintTop_toTopOf="@id/imageViewOtherPartyProfile"
                         tools:text="Hugo Garry" />
 
-                    <!-- Reputation Badge (Consistent with Inbox/Circles) -->
+                    <!-- Reputation Badge -->
                     <LinearLayout
                         android:id="@+id/reputationBadge"
                         android:layout_width="wrap_content"
@@ -184,7 +184,7 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Trade Context Section -->
+            <!-- Trade Context Section (Visible only if description is present) -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardTradeDetails"
                 android:layout_width="match_parent"
@@ -205,7 +205,7 @@
                         style="@style/TextAppearance.Material3.TitleSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Looking for in exchange"
+                        android:text="Description:"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
                     <TextView
