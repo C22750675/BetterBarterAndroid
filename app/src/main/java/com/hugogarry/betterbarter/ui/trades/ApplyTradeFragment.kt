@@ -120,7 +120,7 @@ class ApplyTradeFragment : Fragment() {
             viewModel.myItems.collectLatest { resource ->
                 if (resource is Resource.Success) {
                     myItemsList = resource.data ?: emptyList()
-                    val itemNames = myItemsList.map { "${it.name} (Val: €${it.estimatedValue})" }
+                    val itemNames = myItemsList.map { "${it.name} (Stock: ${it.stock}, Val: €${it.estimatedValue})" }
                     val adapter = ArrayAdapter(
                         requireContext(),
                         android.R.layout.simple_dropdown_item_1line,
