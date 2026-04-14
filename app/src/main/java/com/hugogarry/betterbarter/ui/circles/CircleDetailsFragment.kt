@@ -78,7 +78,7 @@ class CircleDetailsFragment : Fragment() {
 
         btnAdminDisputes.setOnClickListener {
             val action = CircleDetailsFragmentDirections
-                .actionCircleDetailsFragmentToAdminDisputesFragment(viewModel.circleId)
+                .actionCircleDetailsFragmentToDisputesFragment(viewModel.circleId)
             findNavController().navigate(action)
         }
 

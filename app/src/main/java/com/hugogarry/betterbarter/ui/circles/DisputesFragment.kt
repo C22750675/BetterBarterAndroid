@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.view.isVisible
@@ -25,9 +26,6 @@ class DisputesFragment : Fragment() {
 
     private val viewModel: DisputesViewModel by viewModels()
     private lateinit var adapter: DisputesAdapter
-
-    // Note: If you eventually rename the fragment in nav_graph.xml,
-    // you may also need to update AdminDisputesFragmentArgs to DisputesFragmentArgs
     private val args: DisputesFragmentArgs by navArgs()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -43,11 +41,11 @@ class DisputesFragment : Fragment() {
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewDisputes)
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
-        val emptyText = view.findViewById<TextView>(R.id.textEmpty)
+        val emptyStateLayout = view.findViewById<LinearLayout>(R.id.emptyState)
 
         adapter = DisputesAdapter { dispute ->
             // Update this NavDirection too if the ID changes in nav_graph.xml
-            val action = DisputesFragmentDirections.actionAdminDisputesFragmentToAdminDisputeDetailsFragment(dispute.id)
+            val action = DisputesFragmentDirections.actionDisputesFragmentToDisputeDetailsFragment(dispute.id)
             findNavController().navigate(action)
         }
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -58,7 +56,7 @@ class DisputesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.disputes.collectLatest { resource ->
                 progressBar.isVisible = resource is Resource.Loading
-                emptyText.isVisible = resource is Resource.Success && resource.data.isNullOrEmpty()
+                emptyStateLayout.isVisible = resource is Resource.Success && resource.data.isNullOrEmpty()
                 recyclerView.isVisible = resource is Resource.Success && !resource.data.isNullOrEmpty()
 
                 if (resource is Resource.Success) {
