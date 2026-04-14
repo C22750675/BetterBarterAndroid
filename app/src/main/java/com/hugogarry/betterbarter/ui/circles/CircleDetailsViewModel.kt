@@ -51,7 +51,7 @@ class CircleDetailsViewModel(
             val circleDetailsDeferred = async { circleRepository.getCircleDetails(circleId) }
             val tradesDeferred = async { tradeRepository.getTradesForCircle(circleId) }
             val userProfileDeferred = async { authRepository.getProfile() }
-            val myCirclesDeferred = async { circleRepository.getMyCircles() } // Verify membership explicitly
+            val myCirclesDeferred = async { circleRepository.getMyCircles() }
 
             val circleResult = circleDetailsDeferred.await()
             val tradesResult = tradesDeferred.await()
@@ -90,6 +90,22 @@ class CircleDetailsViewModel(
                 isMember = isMember,
                 isLoading = false
             )
+        }
+    }
+
+    /**
+     * ADDED: Logic to delete a trade proposal and refresh the listing.
+     */
+    fun deleteTrade(tradeId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            val result = tradeRepository.deleteTrade(tradeId)
+            if (result is Resource.Success) {
+                // Refresh data to show the item is gone and stock is potentially restored
+                fetchScreenData()
+            } else {
+                _uiState.value = _uiState.value.copy(isLoading = false, error = result.message)
+            }
         }
     }
 }

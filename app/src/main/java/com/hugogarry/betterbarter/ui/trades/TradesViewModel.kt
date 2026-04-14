@@ -33,9 +33,25 @@ class TradesViewModel(
             val result = tradeRepository.updateStatus(trade.id, newStatus)
             if (result is Resource.Success) {
                 _actionStatus.value = Resource.Success("Trade Updated!")
-                fetchMyTrades() // Refresh list
+                fetchMyTrades()
             } else {
                 _actionStatus.value = Resource.Error(result.message ?: "Error")
+            }
+        }
+    }
+
+    /**
+     * ADDED: Logic to delete a trade proposal from the user's trade list.
+     */
+    fun deleteTrade(tradeId: String) {
+        viewModelScope.launch {
+            _actionStatus.value = Resource.Loading()
+            val result = tradeRepository.deleteTrade(tradeId)
+            if (result is Resource.Success) {
+                _actionStatus.value = Resource.Success("Trade proposal deleted.")
+                fetchMyTrades() // Refresh list
+            } else {
+                _actionStatus.value = Resource.Error(result.message ?: "Failed to delete trade")
             }
         }
     }

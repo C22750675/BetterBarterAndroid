@@ -65,6 +65,12 @@ interface ApiService {
         @Body updateTradeRequest: UpdateTradeRequest
     ): Trade
 
+    /**
+     * Permanently deletes a trade listing.
+     */
+    @DELETE("trades/{tradeId}")
+    suspend fun deleteTrade(@Path("tradeId") tradeId: String)
+
     @GET("trades/circle/{circleId}")
     suspend fun getTradesForCircle(@Path("circleId") circleId: String): List<Trade>
 

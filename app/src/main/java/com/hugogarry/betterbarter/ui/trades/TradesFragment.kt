@@ -12,7 +12,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hugogarry.betterbarter.R
+import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.model.TradeStatus
 import com.hugogarry.betterbarter.util.Resource
 import com.hugogarry.betterbarter.util.SessionManager
@@ -52,6 +54,9 @@ class TradesFragment : Fragment() {
                         )
                     findNavController().navigate(navAction)
                 }
+                MyTradesAdapter.ActionType.DELETE -> {
+                    showDeleteConfirmation(trade)
+                }
             }
         }
 
@@ -70,6 +75,17 @@ class TradesFragment : Fragment() {
 
         viewModel.fetchMyTrades()
         observeState()
+    }
+
+    private fun showDeleteConfirmation(trade: Trade) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Delete Trade Proposal?")
+            .setMessage("Are you sure you want to delete your proposal for '${trade.offeredItem?.name}'? This action cannot be undone.")
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Delete") { _, _ ->
+                viewModel.deleteTrade(trade.id)
+            }
+            .show()
     }
 
     private fun observeState() {

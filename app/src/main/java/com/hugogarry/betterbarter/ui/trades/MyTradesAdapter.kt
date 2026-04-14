@@ -22,7 +22,7 @@ class MyTradesAdapter(
     private val onAction: (Trade, ActionType) -> Unit
 ) : ListAdapter<Trade, MyTradesAdapter.ViewHolder>(DiffCallback()) {
 
-    enum class ActionType { ACCEPT, REJECT, COMPLETE, EDIT_PROPOSAL }
+    enum class ActionType { ACCEPT, REJECT, COMPLETE, EDIT_PROPOSAL, DELETE }
 
     var onItemClick: ((Trade) -> Unit)? = null
 
@@ -34,13 +34,14 @@ class MyTradesAdapter(
         val itemStatus: TextView = itemView.findViewById(R.id.textViewStatus)
         val itemImage: ImageView = itemView.findViewById(R.id.imageViewItem)
         val btnAction: Button = itemView.findViewById(R.id.buttonProposeTrade)
+        val btnDelete: Button = itemView.findViewById(R.id.buttonDeleteTrade)
 
         fun bind(trade: Trade) {
             val currentApiUrl = SessionManager.getServerUrl()
             val baseUrl = currentApiUrl.removeSuffix("api/")
             val item = trade.offeredItem
 
-            ownerName.text = trade.proposer?.username
+            ownerName.text = trade.proposer?.username ?: "Unknown"
             itemName.text = item?.name ?: "Unknown Item"
             itemStock.text = "${trade.offeredItemQuantity} units available"
             itemStatus.text = trade.status.name.uppercase()
@@ -62,13 +63,16 @@ class MyTradesAdapter(
             btnAction.isVisible = true
             btnAction.isEnabled = true
 
+            // Delete button logic
+            btnDelete.isVisible = trade.proposerId == currentUserId && trade.status == TradeStatus.pending
+            btnDelete.setOnClickListener { onAction(trade, ActionType.DELETE) }
+
             when (trade.status) {
                 TradeStatus.pending -> {
                     if (trade.proposerId != currentUserId) {
                         btnAction.text = "Accept Offer"
                         btnAction.setOnClickListener { onAction(trade, ActionType.ACCEPT) }
                     } else {
-                        // FIX: Enable editing for the owner's own pending trades
                         btnAction.text = "Edit Trade Proposal"
                         btnAction.setOnClickListener { onAction(trade, ActionType.EDIT_PROPOSAL) }
                     }
@@ -76,9 +80,11 @@ class MyTradesAdapter(
                 TradeStatus.accepted -> {
                     btnAction.text = "Mark Complete"
                     btnAction.setOnClickListener { onAction(trade, ActionType.COMPLETE) }
+                    btnDelete.isVisible = false
                 }
                 else -> {
                     btnAction.isVisible = false
+                    btnDelete.isVisible = false
                 }
             }
         }

@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Trade
@@ -108,6 +109,10 @@ class CircleDetailsFragment : Fragment() {
             }
         }
 
+        availableTradesAdapter.onDeleteClick = { trade ->
+            showDeleteConfirmation(trade)
+        }
+
         availableTradesAdapter.onItemClick = { trade: Trade ->
             val action = CircleDetailsFragmentDirections
                 .actionCircleDetailsFragmentToTradeDetailsFragment(trade.id)
@@ -118,6 +123,17 @@ class CircleDetailsFragment : Fragment() {
             adapter = availableTradesAdapter
             layoutManager = LinearLayoutManager(context)
         }
+    }
+
+    private fun showDeleteConfirmation(trade: Trade) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Delete Trade Proposal?")
+            .setMessage("Are you sure you want to delete your proposal for '${trade.offeredItem?.name}'? This cannot be undone.")
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Delete") { _, _ ->
+                viewModel.deleteTrade(trade.id)
+            }
+            .show()
     }
 
     private fun observeUiState() {

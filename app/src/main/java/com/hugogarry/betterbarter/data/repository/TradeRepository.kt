@@ -37,6 +37,18 @@ class TradeRepository(private val apiService: ApiService = ApiClient.apiService)
         }
     }
 
+    /**
+     * Deletes a trade proposal and returns stock to the user's inventory.
+     */
+    suspend fun deleteTrade(tradeId: String): Resource<Unit> {
+        return try {
+            apiService.deleteTrade(tradeId)
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to delete trade proposal")
+        }
+    }
+
     suspend fun getTradesForCircle(circleId: String): Resource<List<Trade>> {
         return try {
             val trades = apiService.getTradesForCircle(circleId)

@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +21,7 @@ class AvailableTradesAdapter(
 ) : ListAdapter<Trade, AvailableTradesAdapter.TradeViewHolder>(TradeDiffCallback()) {
 
     var onProposeClick: ((Trade) -> Unit)? = null
+    var onDeleteClick: ((Trade) -> Unit)? = null
     var onItemClick: ((Trade) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TradeViewHolder {
@@ -36,6 +38,10 @@ class AvailableTradesAdapter(
             onProposeClick?.invoke(trade)
         }
 
+        holder.deleteButton.setOnClickListener {
+            onDeleteClick?.invoke(trade)
+        }
+
         holder.itemView.setOnClickListener {
             onItemClick?.invoke(trade)
         }
@@ -49,13 +55,14 @@ class AvailableTradesAdapter(
         private val itemStatus: TextView = itemView.findViewById(R.id.textViewStatus)
         private val itemImage: ImageView = itemView.findViewById(R.id.imageViewItem)
         val proposeButton: Button = itemView.findViewById(R.id.buttonProposeTrade)
+        val deleteButton: Button = itemView.findViewById(R.id.buttonDeleteTrade)
 
         fun bind(trade: Trade, currentUserId: String) {
             val currentApiUrl = SessionManager.getServerUrl()
             val baseUrl = currentApiUrl.removeSuffix("api/")
             val item = trade.offeredItem
 
-            ownerName.text = trade.proposer?.username
+            ownerName.text = trade.proposer?.username ?: "Unknown"
             itemName.text = item?.name ?: "Unknown Item"
             itemStock.text = "${trade.offeredItemQuantity} units available"
             itemStatus.text = trade.status.toString().uppercase()
@@ -75,13 +82,10 @@ class AvailableTradesAdapter(
 
             if (trade.proposerId == currentUserId) {
                 proposeButton.text = "Edit Trade Proposal"
-                proposeButton.isEnabled = true
-                // Removed the 0.5f alpha to indicate it is an active action
-                proposeButton.alpha = 1.0f
+                deleteButton.isVisible = true
             } else {
                 proposeButton.text = if (trade.myApplication != null) "Edit Application" else "Apply for Trade"
-                proposeButton.isEnabled = true
-                proposeButton.alpha = 1.0f
+                deleteButton.isVisible = false
             }
         }
     }
