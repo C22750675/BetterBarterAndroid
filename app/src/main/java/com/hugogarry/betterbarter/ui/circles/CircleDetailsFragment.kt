@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -38,6 +39,7 @@ class CircleDetailsFragment : Fragment() {
     private lateinit var descriptionText: TextView
     private lateinit var adminText: TextView
     private lateinit var headerImageView: ImageView
+    private lateinit var btnAdminDisputes: Button
 
     private lateinit var availableTradesAdapter: AvailableTradesAdapter
     private lateinit var recyclerViewActiveTrades: RecyclerView
@@ -59,6 +61,7 @@ class CircleDetailsFragment : Fragment() {
         collapsingToolbar = view.findViewById(R.id.collapsingToolbar)
         fabAddTrade = view.findViewById(R.id.fabAddTrade)
         headerImageView = view.findViewById(R.id.imageViewCircleHeader)
+        btnAdminDisputes = view.findViewById(R.id.btnAdminDisputes)
 
         recyclerViewActiveTrades = view.findViewById(R.id.recyclerViewAvailableTrades)
         progressBarActiveTrades = view.findViewById(R.id.progressBarAvailableTrades)
@@ -70,6 +73,12 @@ class CircleDetailsFragment : Fragment() {
         fabAddTrade.setOnClickListener {
             val action = CircleDetailsFragmentDirections
                 .actionCircleDetailsFragmentToCreateTradeFragment(viewModel.circleId)
+            findNavController().navigate(action)
+        }
+
+        btnAdminDisputes.setOnClickListener {
+            val action = CircleDetailsFragmentDirections
+                .actionCircleDetailsFragmentToAdminDisputesFragment(viewModel.circleId)
             findNavController().navigate(action)
         }
 
@@ -146,7 +155,7 @@ class CircleDetailsFragment : Fragment() {
                 }
 
                 state.circle?.let { circle ->
-                    // Dynamically set the title to the circle name
+                    // Set the title on the CollapsingToolbar to handle large expanded text and small collapsed text
                     collapsingToolbar.title = circle.name
 
                     descriptionText.text = circle.description
@@ -164,7 +173,11 @@ class CircleDetailsFragment : Fragment() {
                         error(R.drawable.ic_circles)
                     }
 
-                    // Use the isMember flag calculated in the ViewModel
+                    // Toggle Visibility based on Membership / Admin status
+                    val currentUserId = getUserIdFromToken()
+                    val isAdmin = circle.admins?.any { it.id == currentUserId } == true
+
+                    btnAdminDisputes.isVisible = isAdmin
                     fabAddTrade.isVisible = !state.isLoading && state.isMember
                 }
 

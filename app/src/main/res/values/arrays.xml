@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="dispute_severities">
+        <item>Pending</item>
+        <item>Accepted</item>
+        <item>Cancelled</item>
+        <item>Completed</item>
+        <item>Disputed</item>
+    </string-array>
+</resources>

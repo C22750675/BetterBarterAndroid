@@ -20,7 +20,6 @@
             android:layout_height="?attr/actionBarSize"
             app:layout_anchor="@+id/appBarLayout2"
             app:layout_anchorGravity="center"
-            app:navigationIcon="@android:drawable/ic_menu_revert"
             app:title="Trade Details"
             app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge" />
 

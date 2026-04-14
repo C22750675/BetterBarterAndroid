@@ -138,18 +138,18 @@
             <!-- Delete Button (Visible only for owner) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonDeleteTrade"
-                style="@style/Widget.Material3.Button.IconButton.Outlined"
+                style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
                 android:padding="0dp"
                 android:visibility="gone"
+                app:backgroundTint="?attr/colorErrorContainer"
                 app:cornerRadius="12dp"
                 app:icon="@android:drawable/ic_menu_delete"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
-                app:iconTint="@android:color/holo_red_dark"
-                app:strokeColor="@android:color/holo_red_dark"
+                app:iconTint="?attr/colorError"
                 tools:visibility="visible" />
 
         </LinearLayout>

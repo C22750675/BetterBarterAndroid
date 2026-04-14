@@ -2,6 +2,7 @@ package com.hugogarry.betterbarter.data.remote
 
 import com.hugogarry.betterbarter.data.model.*
 import okhttp3.MultipartBody
+import retrofit2.Response
 import retrofit2.http.*
 
 interface ApiService {
@@ -126,4 +127,21 @@ interface ApiService {
         @Path("tradeId") tradeId: String,
         @Body message: Map<String, String> // { "text": "hello" }
     ): Message
+
+    @GET("disputes")
+    suspend fun getAdminDisputes(
+        @Query("circleId") circleId: String? = null,
+        @Query("status") status: String? = null
+    ): Response<List<Dispute>>
+
+    @GET("disputes/{id}")
+    suspend fun getDisputeDetails(
+        @Path("id") id: String
+    ): Response<Dispute>
+
+    @PATCH("disputes/{id}/resolve")
+    suspend fun resolveDispute(
+        @Path("id") id: String,
+        @Body request: ResolveDisputeRequest
+    ): Response<Dispute>
 }

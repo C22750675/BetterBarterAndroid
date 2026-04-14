@@ -129,9 +129,14 @@
             <action
                 android:id="@+id/action_circleDetailsFragment_to_tradeDetailsFragment"
                 app:destination="@id/tradeDetailsFragment" />
+
             <action
                 android:id="@+id/action_circleDetailsFragment_to_applyTradeFragment"
                 app:destination="@id/applyTradeFragment" />
+
+            <action
+                android:id="@+id/action_circleDetailsFragment_to_disputesFragment"
+                app:destination="@id/disputesFragment" />
         </fragment>
 
         <fragment
@@ -202,6 +207,34 @@
             <action
                 android:id="@+id/action_chatFragment_to_tradeDetailsFragment"
                 app:destination="@id/tradeDetailsFragment" />
+        </fragment>
+
+        <!-- NEW DISPUTES FRAGMENTS -->
+        <fragment
+            android:id="@+id/disputesFragment"
+            android:name="com.hugogarry.betterbarter.ui.circles.DisputesFragment"
+            android:label="Manage Disputes"
+            tools:layout="@layout/fragment_disputes">
+            <argument
+                android:name="circleId"
+                app:argType="string"
+                app:nullable="true" />
+            <action
+                android:id="@+id/action_disputesFragment_to_disputeDetailsFragment"
+                app:destination="@id/disputeDetailsFragment" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/disputeDetailsFragment"
+            android:name="com.hugogarry.betterbarter.ui.circles.DisputeDetailsFragment"
+            android:label="Dispute Details"
+            tools:layout="@layout/fragment_dispute_details">
+            <argument
+                android:name="disputeId"
+                app:argType="string" />
+            <action
+                android:id="@+id/action_disputeDetailsFragment_to_chatFragment"
+                app:destination="@id/chatFragment" />
         </fragment>
 
     </navigation>

@@ -17,7 +17,6 @@
             android:id="@+id/toolbarCreateCircle"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@android:drawable/ic_menu_revert"
             app:title="Create a New Circle"
             app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge" />
 
