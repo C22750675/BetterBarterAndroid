@@ -80,7 +80,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Choose Community Photo" />
+                        android:text="Choose Circle Photo" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -106,7 +106,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:text="Community Details"
+                        android:text="Circle Details"
                         android:textColor="?attr/colorPrimary" />
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -248,7 +248,7 @@
                 android:layout_height="60dp"
                 android:layout_marginTop="32dp"
                 android:layout_marginBottom="24dp"
-                android:text="Launch Circle"
+                android:text="Create Circle"
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 app:cornerRadius="16dp"
