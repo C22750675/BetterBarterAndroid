@@ -223,14 +223,18 @@ class MapFragment : Fragment() {
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
             }
             pulsePolygon = Polygon(mapView).apply {
+                // Initialize points BEFORE adding to the map to prevent NullPointerException
+                points = Polygon.pointsAsCircle(position, 1.0)
                 fillColor = Color.argb(50, 200, 200, 100)
                 strokeWidth = 0f
             }
             mapView.overlays.add(pulsePolygon)
             mapView.overlays.add(myLocationMarker)
+        } else {
+            // Safely update the points if it already exists
+            pulsePolygon?.points = Polygon.pointsAsCircle(position, 1.0)
         }
         myLocationMarker?.position = position
-        pulsePolygon?.let { it.points = Polygon.pointsAsCircle(position, 1.0) }
         mapView.invalidate()
     }
 
