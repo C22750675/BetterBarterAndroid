@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,7 @@ import androidx.navigation.ui.NavigationUI
 import coil.load
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.material.card.MaterialCardView
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +40,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import androidx.core.graphics.toColorInt
 
 class CreateCircleFragment : Fragment() {
 
@@ -62,7 +65,7 @@ class CreateCircleFragment : Fragment() {
 
     // Color Picker State
     private var selectedColor: String = "#3498DB" // Default blue
-    private var colorSwatches = mutableListOf<View>()
+    private var colorSwatches = mutableListOf<MaterialCardView>()
 
     // Image Picker Launcher
     private val imagePickerLauncher = registerForActivityResult(
@@ -274,36 +277,72 @@ class CreateCircleFragment : Fragment() {
         colorSwatchLayout.removeAllViews()
         colorSwatches.clear()
 
+        // Array of raw hex colors instead of drawable resources
         val colors = listOf(
-            Pair("#3498DB", R.drawable.color_swatch_blue),
-            Pair("#E74C3C", R.drawable.color_swatch_red),
-            Pair("#2ECC71", R.drawable.color_swatch_green),
-            Pair("#9B59B6", R.drawable.color_swatch_purple),
-            Pair("#E67E22", R.drawable.color_swatch_orange)
+            "#3498DB", // Blue
+            "#E74C3C", // Red
+            "#2ECC71", // Green
+            "#9B59B6", // Purple
+            "#E67E22"  // Orange
         )
 
         val swatchSize = (48 * resources.displayMetrics.density).toInt()
         val margin = (8 * resources.displayMetrics.density).toInt()
 
-        colors.forEach { (hex, drawableRes) ->
-            val swatch = View(context).apply {
+        colors.forEach { hex ->
+            // Use a programmatic MaterialCardView for perfectly shapeable, border-ready swatches
+            val swatch = MaterialCardView(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(swatchSize, swatchSize).apply {
                     leftMargin = margin
                     rightMargin = margin
+                    topMargin = margin
+                    bottomMargin = margin
                 }
-                setBackgroundResource(drawableRes)
+                radius = (swatchSize / 2).toFloat()
+                setCardBackgroundColor(hex.toColorInt())
+                cardElevation = 0f
+                strokeWidth = 0
                 tag = hex
                 setOnClickListener {
-                    // Update the selection state
                     selectedColor = it.tag as String
-                    colorSwatches.forEach { sw -> sw.isSelected = (sw.tag == selectedColor) }
+                    updateSwatchVisuals()
                 }
             }
             colorSwatches.add(swatch)
             colorSwatchLayout.addView(swatch)
         }
 
-        // Select the first one by default
-        colorSwatches.firstOrNull()?.isSelected = true
+        // Set initial selection visually
+        colorSwatches.firstOrNull()?.let {
+            selectedColor = it.tag as String
+            updateSwatchVisuals()
+        }
+    }
+
+    private fun updateSwatchVisuals() {
+        // Resolve the theme's colorOnSurface (Black in Light mode, White in Dark mode)
+        val typedValue = TypedValue()
+        requireContext().theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValue, true)
+        val indicatorColor = typedValue.data
+
+        colorSwatches.forEach { sw ->
+            val isSelected = (sw.tag == selectedColor)
+            sw.isSelected = isSelected
+
+            if (isSelected) {
+                sw.scaleX = 1.1f
+                sw.scaleY = 1.1f
+                sw.alpha = 1.0f
+                sw.cardElevation = 8f
+                sw.strokeWidth = (3 * resources.displayMetrics.density).toInt()
+                sw.strokeColor = indicatorColor // Use theme-aware color for the border
+            } else {
+                sw.scaleX = 0.9f
+                sw.scaleY = 0.9f
+                sw.alpha = 0.5f // Dim unselected swatches
+                sw.cardElevation = 0f
+                sw.strokeWidth = 0
+            }
+        }
     }
 }
