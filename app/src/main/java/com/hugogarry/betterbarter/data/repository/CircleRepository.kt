@@ -41,7 +41,12 @@ class CircleRepository(private val apiService: ApiService) {
             if (response.isSuccessful && response.body() != null) {
                 Resource.Success(response.body()!!)
             } else {
-                Resource.Error(response.message() ?: "Failed to create circle")
+                // Check for the 409 Conflict status code and return our custom message
+                if (response.code() == 409) {
+                    Resource.Error("A circle with this name already exists. Please choose another.")
+                } else {
+                    Resource.Error(response.message() ?: "Failed to create circle")
+                }
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
