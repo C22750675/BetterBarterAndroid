@@ -169,7 +169,6 @@ class AddItemFragment : Fragment() {
                 bestBeforeDateText = bestBeforeDateText,
                 useByDateText = useByDateText,
                 stockText = stockText
-                // imageUrl is now handled by the ViewModel
             )
         }
 
@@ -192,7 +191,7 @@ class AddItemFragment : Fragment() {
                         val month = parts[1].toInt() - 1 // Calendar months are 0-indexed
                         val day = parts[2].toInt()
                         calendar.set(year, month, day)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         // Ignore parsing errors and use current date
                     }
                 }
@@ -339,7 +338,7 @@ class AddItemFragment : Fragment() {
                         selectImageButton.isEnabled = true
                     }
                     is Resource.Idle -> {
-                        selectImageButton.text = "Select Item Image (Optional)"
+                        selectImageButton.text = "Select Item Image (Required)"
                         selectImageButton.isEnabled = true
                     }
                 }

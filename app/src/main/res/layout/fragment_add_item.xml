@@ -33,21 +33,6 @@
             android:layout_height="wrap_content"
             android:padding="24dp">
 
-            <TextView
-                android:id="@+id/textViewErrorAddItem"
-                style="@style/TextAppearance.Material3.BodyMedium"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:gravity="center"
-                android:textColor="?attr/colorError"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="An error occurred while listing item"
-                tools:visibility="visible" />
-
             <!-- Section 1: Item Media -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardMedia"
@@ -55,7 +40,7 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
-                app:layout_constraintTop_toBottomOf="@id/textViewErrorAddItem"
+                app:layout_constraintTop_toTopOf="parent"
                 app:strokeColor="?attr/colorOutlineVariant"
                 app:strokeWidth="1dp">
 
@@ -327,19 +312,35 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Moved Error TextView down here! -->
+            <TextView
+                android:id="@+id/textViewErrorAddItem"
+                style="@style/TextAppearance.Material3.BodyMedium"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:textColor="?attr/colorError"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cardPerishability"
+                tools:text="An error occurred while listing item"
+                tools:visibility="visible" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonAddItem"
                 style="@style/Widget.Material3.Button"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="40dp"
                 android:text="Add Item to Profile"
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 app:cornerRadius="16dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cardPerishability" />
+                app:layout_constraintTop_toBottomOf="@id/textViewErrorAddItem" />
 
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/progressBarAddItem"

@@ -36,7 +36,6 @@ class AddItemViewModel(
     private val _imageUploadState = MutableStateFlow<Resource<UploadResponse>>(Resource.Idle())
     val imageUploadState: StateFlow<Resource<UploadResponse>> = _imageUploadState
 
-
     private val _uploadedImageUrl = MutableStateFlow<String?>(null)
 
     init {
@@ -82,18 +81,35 @@ class AddItemViewModel(
         useByDateText: String?,
         stockText: String
     ) {
-        if (name.isBlank() || description.isBlank() || estimatedValueText.isBlank()) {
-            _addItemState.value = Resource.Error("Please fill in all required fields.")
+        // Individual field validation for clear error messages
+        if (name.isBlank()) {
+            _addItemState.value = Resource.Error("Please enter an item name.")
             return
         }
+
+        if (description.isBlank()) {
+            _addItemState.value = Resource.Error("Please enter a description for the item.")
+            return
+        }
+
         if (categoryId.isNullOrBlank()) {
-            _addItemState.value = Resource.Error("Please select an item category.")
+            _addItemState.value = Resource.Error("Please select a specific item category.")
+            return
+        }
+
+        if (estimatedValueText.isBlank()) {
+            _addItemState.value = Resource.Error("Please enter an estimated value.")
             return
         }
 
         val estimatedValue = estimatedValueText.toDoubleOrNull()
         if (estimatedValue == null || estimatedValue <= 0) {
-            _addItemState.value = Resource.Error("Please enter a valid estimated value.")
+            _addItemState.value = Resource.Error("Please enter a valid estimated value greater than 0.")
+            return
+        }
+
+        if (stockText.isBlank()) {
+            _addItemState.value = Resource.Error("Please enter the stock quantity.")
             return
         }
 
@@ -103,11 +119,16 @@ class AddItemViewModel(
             return
         }
 
+        // Validate that an image was successfully uploaded
+        val imageUrl = _uploadedImageUrl.value
+        if (imageUrl.isNullOrBlank()) {
+            _addItemState.value = Resource.Error("Please upload an image for this item.")
+            return
+        }
+
         // Clean up optional date strings: trim whitespace and set to null if blank
         val bestBeforeDate = bestBeforeDateText?.trim()?.takeIf { it.isNotBlank() }
         val useByDate = useByDateText?.trim()?.takeIf { it.isNotBlank() }
-
-        val imageUrl = _uploadedImageUrl.value
 
         viewModelScope.launch {
             _addItemState.value = Resource.Loading()
