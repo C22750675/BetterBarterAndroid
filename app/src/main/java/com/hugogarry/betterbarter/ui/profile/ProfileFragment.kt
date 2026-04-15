@@ -46,6 +46,11 @@ class ProfileFragment : Fragment() {
     private lateinit var bioTextView: TextView
     private lateinit var profileImageView: ShapeableImageView
 
+    // UI Layouts for visibility toggling
+    private lateinit var cardBio: View
+    private lateinit var layoutEmptyInventory: View
+    private lateinit var recyclerView: RecyclerView
+
     // Image Picker Launcher
     private val imagePickerLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -78,8 +83,13 @@ class ProfileFragment : Fragment() {
         bioTextView = view.findViewById(R.id.textViewBio)
         profileImageView = view.findViewById(R.id.imageViewProfile)
         val fabAddItem = view.findViewById<FloatingActionButton>(R.id.fabAddItem)
-        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewProfileItems)
         val toolbar = view.findViewById<Toolbar>(R.id.toolbarProfile)
+        val editProfileImageBadge = view.findViewById<View>(R.id.editProfileImageBadge)
+
+        // Find layouts for visibility logic
+        cardBio = view.findViewById(R.id.cardBio)
+        layoutEmptyInventory = view.findViewById(R.id.layoutEmptyInventory)
+        recyclerView = view.findViewById(R.id.recyclerViewProfileItems)
 
         // Setup Toolbar Menu for Logout
         toolbar.setOnMenuItemClickListener { menuItem ->
@@ -107,8 +117,11 @@ class ProfileFragment : Fragment() {
             findNavController().navigate(R.id.action_profileFragment_to_addItemFragment)
         }
 
-        // Click listener for profile image
+        // Click listeners for profile image and its edit badge
         profileImageView.setOnClickListener {
+            requestPermissionAndPickImage()
+        }
+        editProfileImageBadge.setOnClickListener {
             requestPermissionAndPickImage()
         }
 
@@ -137,11 +150,15 @@ class ProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
                 if (state.user != null) {
-                    // Call new function to update UI
                     updateProfileUI(state.user)
                 }
 
                 itemsAdapter.submitList(state.items)
+
+                // Toggle empty inventory state
+                val isEmpty = state.items.isNullOrEmpty()
+                layoutEmptyInventory.isVisible = isEmpty
+                recyclerView.isVisible = !isEmpty
 
                 if (state.error != null) {
                     Toast.makeText(context, "Error: ${state.error}", Toast.LENGTH_LONG).show()
@@ -156,12 +173,12 @@ class ProfileFragment : Fragment() {
         // Format reputation score
         reputationTextView.text = getString(R.string.reputation_score_format, user.reputationScore)
 
-        // Handle nullable bio
+        // Hide the entire card if the bio is empty
         if (!user.bio.isNullOrBlank()) {
             bioTextView.text = user.bio
-            bioTextView.isVisible = true
+            cardBio.isVisible = true
         } else {
-            bioTextView.isVisible = false
+            cardBio.isVisible = false
         }
 
         // Use SessionManager for URL
