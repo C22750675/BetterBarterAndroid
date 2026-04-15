@@ -22,5 +22,5 @@ data class CreateCircleRequest(
     val radius: Int,
     val color: String,
     val description: String,
-    val imageUrl: String? = null
+    val imageUrl: String
 )

@@ -47,12 +47,36 @@ class CreateCircleViewModel(
         color: String,
         description: String
     ) {
-        if (name.isBlank() || description.isBlank() || radiusMeters == null || latitude == null || longitude == null) {
-            _createState.value = Resource.Error("Please fill in all fields and set a location.")
+        // Individual field validation for clear error messages
+        if (name.isBlank()) {
+            _createState.value = Resource.Error("Please enter a circle name.")
             return
         }
+
+        if (description.isBlank()) {
+            _createState.value = Resource.Error("Please enter a description and guidelines for the circle.")
+            return
+        }
+
+        if (radiusMeters == null) {
+            _createState.value = Resource.Error("Please enter a discovery radius.")
+            return
+        }
+
         if (radiusMeters <= 0) {
             _createState.value = Resource.Error("Radius must be a positive number.")
+            return
+        }
+
+        if (latitude == null || longitude == null) {
+            _createState.value = Resource.Error("Please set the circle's location using the button above.")
+            return
+        }
+
+        // Validate that an image was successfully uploaded
+        val imageUrl = currentImageUrl
+        if (imageUrl.isNullOrBlank()) {
+            _createState.value = Resource.Error("Please upload a photo for the circle.")
             return
         }
 
@@ -65,7 +89,7 @@ class CreateCircleViewModel(
             radius = radiusMeters,
             color = color,
             description = description,
-            imageUrl = currentImageUrl // Send the image URL to backend
+            imageUrl = imageUrl
         )
 
         viewModelScope.launch {
