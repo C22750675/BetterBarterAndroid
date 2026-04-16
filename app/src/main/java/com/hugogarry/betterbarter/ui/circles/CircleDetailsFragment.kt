@@ -39,7 +39,7 @@ class CircleDetailsFragment : Fragment() {
     private lateinit var descriptionText: TextView
     private lateinit var adminText: TextView
     private lateinit var headerImageView: ImageView
-    private lateinit var btnAdminDisputes: Button
+    private lateinit var btnDisputes: Button
 
     private lateinit var availableTradesAdapter: AvailableTradesAdapter
     private lateinit var recyclerViewActiveTrades: RecyclerView
@@ -61,7 +61,7 @@ class CircleDetailsFragment : Fragment() {
         collapsingToolbar = view.findViewById(R.id.collapsingToolbar)
         fabAddTrade = view.findViewById(R.id.fabAddTrade)
         headerImageView = view.findViewById(R.id.imageViewCircleHeader)
-        btnAdminDisputes = view.findViewById(R.id.btnAdminDisputes)
+        btnDisputes = view.findViewById(R.id.btnDisputes)
 
         recyclerViewActiveTrades = view.findViewById(R.id.recyclerViewAvailableTrades)
         progressBarActiveTrades = view.findViewById(R.id.progressBarAvailableTrades)
@@ -76,7 +76,7 @@ class CircleDetailsFragment : Fragment() {
             findNavController().navigate(action)
         }
 
-        btnAdminDisputes.setOnClickListener {
+        btnDisputes.setOnClickListener {
             val action = CircleDetailsFragmentDirections
                 .actionCircleDetailsFragmentToDisputesFragment(viewModel.circleId)
             findNavController().navigate(action)
@@ -177,7 +177,7 @@ class CircleDetailsFragment : Fragment() {
                     val currentUserId = getUserIdFromToken()
                     val isAdmin = circle.admins?.any { it.id == currentUserId } == true
 
-                    btnAdminDisputes.isVisible = isAdmin
+                    btnDisputes.isVisible = isAdmin
                     fabAddTrade.isVisible = !state.isLoading && state.isMember
                 }
 

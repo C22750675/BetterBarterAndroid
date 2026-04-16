@@ -11,8 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class DisputeDetailsViewModel : ViewModel() {
-    private val repository = DisputeRepository(ApiClient.apiService)
+class DisputeDetailsViewModel(
+    private val repository: DisputeRepository = DisputeRepository(ApiClient.apiService)
+) : ViewModel() {
 
     private val _disputeDetails = MutableStateFlow<Resource<Dispute>>(Resource.Loading())
     val disputeDetails: StateFlow<Resource<Dispute>> = _disputeDetails

@@ -55,6 +55,7 @@ class TradeDetailsFragment : Fragment() {
     private lateinit var tradeDetailsCard: View
     private lateinit var tradeDescriptionTextView: TextView
     private lateinit var actionButton: Button
+    private lateinit var raiseDisputeButton: Button
 
     // Rating Views
     private lateinit var ratingSection: View
@@ -96,6 +97,7 @@ class TradeDetailsFragment : Fragment() {
         tradeDetailsCard = view.findViewById(R.id.cardTradeDetails)
         tradeDescriptionTextView = view.findViewById(R.id.textViewTradeDescriptionDetails)
         actionButton = view.findViewById(R.id.buttonTradeActionDetails)
+        raiseDisputeButton = view.findViewById(R.id.buttonRaiseDispute) // Initialize it
 
         // Bind Rating Views
         ratingSection = view.findViewById(R.id.layoutRatingSection)
@@ -215,14 +217,14 @@ class TradeDetailsFragment : Fragment() {
         }
 
         val isProposer = trade.proposerId == currentUserId
+        val isRecipient = trade.recipient?.id == currentUserId
         val hasRated = if (isProposer) trade.isRatedByProposer else trade.isRatedByRecipient
         ratingSection.isVisible = (trade.status == TradeStatus.completed && !hasRated)
 
-        // Button Logic
-        actionButton.isVisible = true // Reset visibility
+        // Action Button Logic
+        actionButton.isVisible = true
 
-        if (trade.proposerId == currentUserId) {
-            // Check if trade is already accepted/active/completed
+        if (isProposer) {
             if (trade.status == TradeStatus.accepted || trade.status == TradeStatus.completed) {
                 actionButton.text = "Go to Chat"
                 actionButton.setOnClickListener {
@@ -230,7 +232,6 @@ class TradeDetailsFragment : Fragment() {
                     findNavController().navigate(action)
                 }
             } else {
-                // Trade is pending, view applications
                 actionButton.text = "View Applications"
                 actionButton.setOnClickListener {
                     val action = TradeDetailsFragmentDirections.actionTradeDetailsFragmentToTradeApplicationsFragment(trade.id)
@@ -238,10 +239,8 @@ class TradeDetailsFragment : Fragment() {
                 }
             }
         } else {
-            // User is not the proposer
             if (trade.status == TradeStatus.accepted || trade.status == TradeStatus.completed) {
-                // Display Go to Chat button if this user is the accepted recipient
-                if (trade.recipient?.id == currentUserId) {
+                if (isRecipient) {
                     actionButton.isVisible = true
                     actionButton.text = "Go to Chat"
                     actionButton.setOnClickListener {
@@ -249,20 +248,15 @@ class TradeDetailsFragment : Fragment() {
                         findNavController().navigate(action)
                     }
                 } else {
-                    // Trade is closed and this user is not the recipient
                     actionButton.isVisible = false
                 }
             } else {
                 actionButton.text = if (trade.myApplication != null) "Edit Trade Application" else "Apply for Trade"
-
-                // Disable apply button if trade is no longer pending
                 if (trade.status != TradeStatus.pending) {
                     actionButton.isVisible = false
                 } else {
                     actionButton.isVisible = true
                     actionButton.setOnClickListener {
-                        // Always check the latest membership status from the ViewModel state
-                        // This ensures that if the user joins while navigating, we pick it up.
                         if (viewModel.uiState.value.isMember) {
                             val action = TradeDetailsFragmentDirections
                                 .actionTradeDetailsFragmentToApplyTradeFragment(
@@ -271,12 +265,23 @@ class TradeDetailsFragment : Fragment() {
                                 )
                             findNavController().navigate(action)
                         } else {
-                            // User is not a member of the circle this trade belongs to
                             Toast.makeText(context, "Join this circle to propose trades!", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
             }
+        }
+
+        // Raise Dispute Button Logic
+        // Only show if trade is in progress or completed AND the current user is part of the transaction
+        if ((trade.status == TradeStatus.accepted || trade.status == TradeStatus.completed) && (isProposer || isRecipient)) {
+            raiseDisputeButton.isVisible = true
+            raiseDisputeButton.setOnClickListener {
+                val action = TradeDetailsFragmentDirections.actionTradeDetailsFragmentToRaiseDisputeFragment(trade.id)
+                findNavController().navigate(action)
+            }
+        } else {
+            raiseDisputeButton.isVisible = false
         }
     }
 

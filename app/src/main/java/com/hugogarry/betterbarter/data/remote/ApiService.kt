@@ -130,8 +130,12 @@ interface ApiService {
     ): Response<Message>
 
     // Disputes
+
+    @POST("disputes")
+    suspend fun createDispute(@Body request: CreateDisputeRequest): Response<Void>
+
     @GET("disputes")
-    suspend fun getAdminDisputes(
+    suspend fun getDisputes(
         @Query("circleId") circleId: String? = null,
         @Query("status") status: String? = null
     ): Response<List<Dispute>>

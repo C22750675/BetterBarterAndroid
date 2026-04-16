@@ -123,7 +123,7 @@
 
                     <!-- Admin Disputes Button -->
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAdminDisputes"
+                        android:id="@+id/btnDisputes"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

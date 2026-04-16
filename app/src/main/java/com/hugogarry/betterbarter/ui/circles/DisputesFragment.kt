@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -44,10 +44,10 @@ class DisputesFragment : Fragment() {
         val emptyStateLayout = view.findViewById<LinearLayout>(R.id.emptyState)
 
         adapter = DisputesAdapter { dispute ->
-            // Update this NavDirection too if the ID changes in nav_graph.xml
             val action = DisputesFragmentDirections.actionDisputesFragmentToDisputeDetailsFragment(dispute.id)
             findNavController().navigate(action)
         }
+
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
@@ -56,11 +56,23 @@ class DisputesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.disputes.collectLatest { resource ->
                 progressBar.isVisible = resource is Resource.Loading
-                emptyStateLayout.isVisible = resource is Resource.Success && resource.data.isNullOrEmpty()
-                recyclerView.isVisible = resource is Resource.Success && !resource.data.isNullOrEmpty()
 
-                if (resource is Resource.Success) {
-                    adapter.submitList(resource.data)
+                when (resource) {
+                    is Resource.Success -> {
+                        val isEmpty = resource.data.isNullOrEmpty()
+                        emptyStateLayout.isVisible = isEmpty
+                        recyclerView.isVisible = !isEmpty
+                        adapter.submitList(resource.data ?: emptyList())
+                    }
+                    is Resource.Error -> {
+                        emptyStateLayout.isVisible = true
+                        recyclerView.isVisible = false
+                        Toast.makeText(context, resource.message ?: "Failed to load disputes", Toast.LENGTH_SHORT).show()
+                    }
+                    is Resource.Loading, is Resource.Idle -> {
+                        emptyStateLayout.isVisible = false
+                        recyclerView.isVisible = false
+                    }
                 }
             }
         }

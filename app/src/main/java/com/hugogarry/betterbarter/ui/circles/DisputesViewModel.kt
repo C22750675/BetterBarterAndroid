@@ -19,7 +19,7 @@ class DisputesViewModel : ViewModel() {
     fun fetchDisputes(circleId: String?) {
         viewModelScope.launch {
             _disputes.value = Resource.Loading()
-            _disputes.value = repository.getAdminDisputes(circleId)
+            _disputes.value = repository.getDisputes(circleId)
         }
     }
 }

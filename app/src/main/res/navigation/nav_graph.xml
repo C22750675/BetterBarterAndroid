@@ -156,6 +156,9 @@
             <action
                 android:id="@+id/action_tradeDetailsFragment_to_chatFragment"
                 app:destination="@id/chatFragment" />
+            <action
+                android:id="@+id/action_tradeDetailsFragment_to_raiseDisputeFragment"
+                app:destination="@id/raiseDisputeFragment" />
         </fragment>
 
         <fragment
@@ -184,6 +187,16 @@
             <action
                 android:id="@+id/action_tradeApplicationsFragment_to_chatFragment"
                 app:destination="@id/chatFragment" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/raiseDisputeFragment"
+            android:name="com.hugogarry.betterbarter.ui.trades.RaiseDisputeFragment"
+            android:label="Raise Dispute"
+            tools:layout="@layout/fragment_raise_dispute">
+            <argument
+                android:name="tradeId"
+                app:argType="string" />
         </fragment>
 
         <fragment

@@ -4,81 +4,171 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="8dp"
-    android:layout_marginVertical="4dp"
-    app:cardElevation="2dp"
-    app:cardCornerRadius="12dp">
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="0dp"
+    app:strokeColor="?attr/colorOutlineVariant"
+    app:strokeWidth="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- Initiator -->
-        <ImageView
-            android:id="@+id/imageInitiator"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/ic_profile"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/textInitiatorName"
+        <!-- Status Badge -->
+        <LinearLayout
+            android:id="@+id/badgeStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/imageInitiator"
-            app:layout_constraintStart_toEndOf="@id/imageInitiator"
-            app:layout_constraintTop_toTopOf="@id/imageInitiator"
-            tools:text="User A" />
-
-        <!-- VS Badge -->
-        <TextView
-            android:id="@+id/textVs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="VS"
-            android:textColor="?attr/colorPrimary"
-            android:textStyle="bold"
-            android:layout_marginHorizontal="16dp"
-            app:layout_constraintBottom_toBottomOf="@id/imageInitiator"
-            app:layout_constraintEnd_toStartOf="@id/imageRespondent"
-            app:layout_constraintStart_toEndOf="@id/textInitiatorName"
-            app:layout_constraintTop_toTopOf="@id/imageInitiator" />
-
-        <!-- Respondent -->
-        <ImageView
-            android:id="@+id/imageRespondent"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/ic_profile"
-            app:layout_constraintEnd_toStartOf="@id/textRespondentName"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/textRespondentName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/imageRespondent"
+            android:background="@drawable/bg_status_badge"
+            android:backgroundTint="?attr/colorErrorContainer"
+            android:gravity="center"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/imageRespondent"
-            tools:text="User B" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/textViewStatus"
+                style="@style/TextAppearance.Material3.LabelSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/colorOnErrorContainer"
+                android:textStyle="bold"
+                tools:text="OPEN" />
+        </LinearLayout>
+
+        <!-- VS Container -->
+        <LinearLayout
+            android:id="@+id/layoutParties"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/badgeStatus">
+
+            <!-- Reporter -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imageReporter"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle"
+                    app:strokeColor="?attr/colorError"
+                    app:strokeWidth="2dp"
+                    tools:src="@drawable/ic_profile" />
+
+                <TextView
+                    android:id="@+id/textReporterName"
+                    style="@style/TextAppearance.Material3.TitleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="?attr/colorOnSurface"
+                    tools:text="Alice" />
+
+                <TextView
+                    style="@style/TextAppearance.Material3.LabelSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Reporter"
+                    android:textColor="?attr/colorError" />
+            </LinearLayout>
+
+            <!-- VS Badge -->
+            <TextView
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:alpha="0.4"
+                android:text="VS"
+                android:textStyle="bold" />
+
+            <!-- Other Party -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imageOtherParty"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp"
+                    tools:src="@drawable/ic_profile" />
+
+                <TextView
+                    android:id="@+id/textOtherPartyName"
+                    style="@style/TextAppearance.Material3.TitleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="?attr/colorOnSurface"
+                    tools:text="Bob" />
+
+                <TextView
+                    style="@style/TextAppearance.Material3.LabelSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:alpha="0.6"
+                    android:text="Respondent" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/layoutParties" />
+
+        <TextView
+            android:id="@+id/textReasonLabel"
+            style="@style/TextAppearance.Material3.LabelMedium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Issue Description:"
+            android:textColor="?attr/colorPrimary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider" />
 
         <TextView
             android:id="@+id/textReason"
+            style="@style/TextAppearance.Material3.BodyMedium"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:maxLines="2"
+            android:layout_marginTop="4dp"
+            android:alpha="0.8"
             android:ellipsize="end"
+            android:maxLines="3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imageInitiator"
-            tools:text="They never showed up to the trade location." />
+            app:layout_constraintTop_toBottomOf="@id/textReasonLabel"
+            tools:text="They never showed up to the trade location and stopped replying to my messages." />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>
