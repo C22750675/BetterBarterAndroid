@@ -93,6 +93,13 @@ interface ApiService {
         @Body applyRequest: ApplyTradeRequest
     ): Response<TradeApplication>
 
+    // Update existing trade application
+    @PATCH("trades/applications/{id}")
+    suspend fun updateApplication(
+        @Path("id") applicationId: String,
+        @Body applyRequest: ApplyTradeRequest
+    ): Response<TradeApplication>
+
     @GET("trades/{id}/applications")
     suspend fun getTradeApplications(@Path("id") tradeId: String): Response<List<TradeApplication>>
 

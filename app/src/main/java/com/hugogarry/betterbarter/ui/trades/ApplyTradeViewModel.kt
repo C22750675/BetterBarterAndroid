@@ -81,7 +81,13 @@ class ApplyTradeViewModel(
         viewModelScope.launch {
             _applyState.value = Resource.Loading()
             val request = ApplyTradeRequest(selectedItem.id, quantity, message)
-            _applyState.value = tradeRepository.applyForTrade(tradeId, request)
+
+            // Route to the correct endpoint based on whether we are updating or creating
+            if (existingApplication != null) {
+                _applyState.value = tradeRepository.updateApplication(existingApplication.id, request)
+            } else {
+                _applyState.value = tradeRepository.applyForTrade(tradeId, request)
+            }
         }
     }
 }

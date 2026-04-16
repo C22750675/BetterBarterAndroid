@@ -5,6 +5,8 @@ import com.hugogarry.betterbarter.data.remote.ApiService
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 
 class TradeRepository(private val apiService: ApiService) {
 
@@ -14,7 +16,7 @@ class TradeRepository(private val apiService: ApiService) {
             if (response.isSuccessful && response.body() != null) {
                 Resource.Success(response.body()!!)
             } else {
-                Resource.Error(response.message() ?: "Failed to create trade")
+                Resource.Error(extractErrorMessage(response, "Failed to create trade"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -27,7 +29,7 @@ class TradeRepository(private val apiService: ApiService) {
             if (response.isSuccessful && response.body() != null) {
                 Resource.Success(response.body()!!)
             } else {
-                Resource.Error(response.message() ?: "Failed to update trade")
+                Resource.Error(extractErrorMessage(response, "Failed to update trade"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -40,7 +42,7 @@ class TradeRepository(private val apiService: ApiService) {
             if (response.isSuccessful) {
                 Resource.Success(Unit)
             } else {
-                Resource.Error(response.message() ?: "Failed to delete trade")
+                Resource.Error(extractErrorMessage(response, "Failed to delete trade"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -53,7 +55,7 @@ class TradeRepository(private val apiService: ApiService) {
             if (response.isSuccessful) {
                 Resource.Success(response.body() ?: emptyList())
             } else {
-                Resource.Error(response.message() ?: "Failed to fetch trades")
+                Resource.Error(extractErrorMessage(response, "Failed to fetch trades"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -66,7 +68,7 @@ class TradeRepository(private val apiService: ApiService) {
             if (response.isSuccessful) {
                 Resource.Success(response.body() ?: emptyList())
             } else {
-                Resource.Error(response.message() ?: "Failed to fetch your trades")
+                Resource.Error(extractErrorMessage(response, "Failed to fetch your trades"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -79,7 +81,7 @@ class TradeRepository(private val apiService: ApiService) {
             if (response.isSuccessful && response.body() != null) {
                 Resource.Success(response.body()!!)
             } else {
-                Resource.Error(response.message() ?: "Failed to update trade status")
+                Resource.Error(extractErrorMessage(response, "Failed to update trade status"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -92,7 +94,7 @@ class TradeRepository(private val apiService: ApiService) {
             if (response.isSuccessful) {
                 Resource.Success(Unit)
             } else {
-                Resource.Error(response.message() ?: "Failed to submit rating")
+                Resource.Error(extractErrorMessage(response, "Failed to submit rating"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -105,7 +107,7 @@ class TradeRepository(private val apiService: ApiService) {
             if (response.isSuccessful && response.body() != null) {
                 Resource.Success(response.body()!!)
             } else {
-                Resource.Error(response.message() ?: "Failed to fetch trade details")
+                Resource.Error(extractErrorMessage(response, "Failed to fetch trade details"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -118,7 +120,20 @@ class TradeRepository(private val apiService: ApiService) {
             if (response.isSuccessful && response.body() != null) {
                 Resource.Success(response.body()!!)
             } else {
-                Resource.Error(response.message() ?: "Failed to apply for trade")
+                Resource.Error(extractErrorMessage(response, "Failed to apply for trade"))
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "An error occurred")
+        }
+    }
+
+    suspend fun updateApplication(applicationId: String, request: ApplyTradeRequest): Resource<TradeApplication> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.updateApplication(applicationId, request)
+            if (response.isSuccessful && response.body() != null) {
+                Resource.Success(response.body()!!)
+            } else {
+                Resource.Error(extractErrorMessage(response, "Failed to update application"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -131,7 +146,7 @@ class TradeRepository(private val apiService: ApiService) {
             if (response.isSuccessful) {
                 Resource.Success(response.body() ?: emptyList())
             } else {
-                Resource.Error(response.message() ?: "Failed to fetch applications")
+                Resource.Error(extractErrorMessage(response, "Failed to fetch applications"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -144,7 +159,7 @@ class TradeRepository(private val apiService: ApiService) {
             if (response.isSuccessful) {
                 Resource.Success(Unit)
             } else {
-                Resource.Error(response.message() ?: "Failed to accept application")
+                Resource.Error(extractErrorMessage(response, "Failed to accept application"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -157,10 +172,38 @@ class TradeRepository(private val apiService: ApiService) {
             if (response.isSuccessful) {
                 Resource.Success(Unit)
             } else {
-                Resource.Error(response.message() ?: "Failed to decline application")
+                Resource.Error(extractErrorMessage(response, "Failed to decline application"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
+        }
+    }
+
+    /**
+     * Helper function to extract detailed error messages from the backend's JSON response body.
+     * Retrofit's response.message() only returns the standard HTTP status text (e.g., "Bad Request").
+     */
+    private fun extractErrorMessage(response: retrofit2.Response<*>, fallbackMessage: String): String {
+        return try {
+            val errorBodyString = response.errorBody()?.string()
+            if (!errorBodyString.isNullOrEmpty()) {
+                val jsonObject = JSONObject(errorBodyString)
+                if (jsonObject.has("message")) {
+                    val messageOpt = jsonObject.get("message")
+                    // Sometimes backend validation errors return an array of strings
+                    if (messageOpt is JSONArray && messageOpt.length() > 0) {
+                        messageOpt.getString(0)
+                    } else {
+                        messageOpt.toString()
+                    }
+                } else {
+                    response.message().takeIf { it.isNotBlank() } ?: fallbackMessage
+                }
+            } else {
+                response.message().takeIf { it.isNotBlank() } ?: fallbackMessage
+            }
+        } catch (_: Exception) {
+            response.message().takeIf { it.isNotBlank() } ?: fallbackMessage
         }
     }
 }
