@@ -48,7 +48,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Empty State UI (Recommended for modern apps) -->
+        <!-- Modern Empty State UI -->
         <LinearLayout
             android:id="@+id/emptyState"
             android:layout_width="wrap_content"
@@ -70,12 +70,22 @@
                 app:tint="?attr/colorOnSurface" />
 
             <TextView
+                android:id="@+id/textViewNoTrades"
                 style="@style/TextAppearance.Material3.BodyLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:alpha="0.6"
-                android:text="No active trades found" />
+                android:text="No active trades" />
+
+            <TextView
+                style="@style/TextAppearance.Material3.BodySmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:alpha="0.5"
+                android:gravity="center"
+                android:text="Trades will appear here once your trade application is accepted." />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
