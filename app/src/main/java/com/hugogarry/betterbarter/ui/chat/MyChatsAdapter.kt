@@ -47,12 +47,12 @@ class MyChatsAdapter(
             timeText.text = chat.lastMessageTimestamp?.let {
                 try {
                     it.substring(11, 16)
-                } catch (e: Exception) { "" }
+                } catch (_: Exception) { "" }
             } ?: ""
 
             statusText.text = chat.tradeStatus.name
 
-            val profileUrl = chat.otherUser.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
+            val profileUrl = chat.otherUser.profilePictureUrl?.let { "${baseUrl}api/imageUploads$it" }
             profileImage.load(profileUrl) {
                 placeholder(R.drawable.ic_profile)
                 error(R.drawable.ic_profile)

@@ -50,7 +50,7 @@ class DisputesAdapter(private val onClick: (Dispute) -> Unit) :
             textViewStatus.text = dispute.status.uppercase()
 
             // Load Reporter Profile Picture
-            val reporterPicUrl = reporter?.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
+            val reporterPicUrl = reporter?.profilePictureUrl?.let { "${baseUrl}api/imageUploads$it" }
             imageReporter.load(reporterPicUrl) {
                 placeholder(R.drawable.ic_profile)
                 error(R.drawable.ic_profile)
@@ -58,7 +58,7 @@ class DisputesAdapter(private val onClick: (Dispute) -> Unit) :
             }
 
             // Load Other Party Profile Picture
-            val otherPartyPicUrl = otherParty?.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
+            val otherPartyPicUrl = otherParty?.profilePictureUrl?.let { "${baseUrl}api/imageUploads$it" }
             imageOtherParty.load(otherPartyPicUrl) {
                 placeholder(R.drawable.ic_profile)
                 error(R.drawable.ic_profile)

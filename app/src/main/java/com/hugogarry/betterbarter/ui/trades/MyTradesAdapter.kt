@@ -46,14 +46,14 @@ class MyTradesAdapter(
             itemStock.text = "${trade.offeredItemQuantity} units available"
             itemStatus.text = trade.status.name.uppercase()
 
-            val profilePicUrl = trade.proposer?.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
+            val profilePicUrl = trade.proposer?.profilePictureUrl?.let { "${baseUrl}api/imageUploads$it" }
             ownerProfilePic.load(profilePicUrl) {
                 placeholder(R.drawable.ic_profile)
                 error(R.drawable.ic_profile)
                 transformations(CircleCropTransformation())
             }
 
-            val itemPicUrl = item?.imageUrl?.let { "${baseUrl}api/uploads$it" }
+            val itemPicUrl = item?.imageUrl?.let { "${baseUrl}api/imageUploads$it" }
             itemImage.load(itemPicUrl) {
                 placeholder(R.drawable.ic_launcher_background)
                 error(R.drawable.ic_launcher_background)

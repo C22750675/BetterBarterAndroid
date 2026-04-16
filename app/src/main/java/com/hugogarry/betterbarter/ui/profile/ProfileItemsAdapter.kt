@@ -31,7 +31,7 @@ class ProfileItemsAdapter : ListAdapter<Item, ProfileItemsAdapter.ItemViewHolder
 
             val currentApiUrl = SessionManager.getServerUrl()
             val baseUrl = currentApiUrl.removeSuffix("api/")
-            val fullImageUrl = item.imageUrl?.let { "${baseUrl}api/uploads$it" }
+            val fullImageUrl = item.imageUrl?.let { "${baseUrl}api/imageUploads$it" }
 
             itemImage.load(fullImageUrl) {
                 placeholder(R.drawable.ic_profile)

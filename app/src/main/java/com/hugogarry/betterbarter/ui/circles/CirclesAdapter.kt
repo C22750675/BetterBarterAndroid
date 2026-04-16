@@ -41,7 +41,7 @@ class CirclesAdapter(
             // Backend returns 'imageUrl' with a leading slash
             // We ensure we don't end up with triple slashes (e.g. uploads///image.jpg)
             val path = circle.imageUrl?.removePrefix("/")
-            val fullImageUrl = path?.let { "${baseUrl}api/uploads/$it" }
+            val fullImageUrl = path?.let { "${baseUrl}api/imageUploads/$it" }
 
             // Clear the XML tint if we are loading a real photo.
             // list_item_circle.xml has a default tint for the icon that will cover the photo.

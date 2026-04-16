@@ -133,7 +133,7 @@ class ChatFragment : Fragment() {
                     tradeItemName.text = "${item?.name ?: "Unknown Item"} (${trade.offeredItemQuantity})"
                     tradeStatus.text = "Status: ${trade.status.name.uppercase()}"
 
-                    val itemUrl = item?.imageUrl?.let { "${baseUrl}api/uploads$it" }
+                    val itemUrl = item?.imageUrl?.let { "${baseUrl}api/imageUploads$it" }
                     tradeItemImage.load(itemUrl) {
                         placeholder(R.drawable.ic_launcher_background)
                         error(R.drawable.ic_launcher_background)

@@ -169,7 +169,7 @@ class TradeDetailsFragment : Fragment() {
         val baseUrl = currentApiUrl.removeSuffix("api/")
 
         val item = trade.offeredItem
-        val itemPicUrl = item?.imageUrl?.let { "${baseUrl}api/uploads$it" }
+        val itemPicUrl = item?.imageUrl?.let { "${baseUrl}api/imageUploads$it" }
         itemImageView.load(itemPicUrl) {
             placeholder(R.drawable.ic_launcher_background)
             error(R.drawable.ic_launcher_background)
@@ -183,7 +183,7 @@ class TradeDetailsFragment : Fragment() {
         circleNameTextView.text = circle?.name ?: "Unknown Circle"
 
         val circleIconPath = circle?.imageUrl?.removePrefix("/")
-        val circleIconUrl = circleIconPath?.let { "${baseUrl}api/uploads/$it" }
+        val circleIconUrl = circleIconPath?.let { "${baseUrl}api/imageUploads/$it" }
         circleIconImageView.load(circleIconUrl) {
             placeholder(R.drawable.ic_circles)
             error(R.drawable.ic_circles)
@@ -199,7 +199,7 @@ class TradeDetailsFragment : Fragment() {
         }
 
         // Bind Other Party
-        val profilePicUrl = partyToShow?.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
+        val profilePicUrl = partyToShow?.profilePictureUrl?.let { "${baseUrl}api/imageUploads$it" }
         otherPartyImageView.load(profilePicUrl) {
             placeholder(R.drawable.ic_profile)
             error(R.drawable.ic_profile)

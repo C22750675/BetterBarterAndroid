@@ -56,7 +56,7 @@ class TradeApplicationsAdapter(
             applicantName.text = applicant?.username ?: "Unknown User"
             applicantReputation.text = "Reputation: ${applicant?.reputationScore ?: 0.0} ★"
 
-            val profileUrl = applicant?.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
+            val profileUrl = applicant?.profilePictureUrl?.let { "${baseUrl}api/imageUploads$it" }
             applicantImage.load(profileUrl) {
                 placeholder(R.drawable.ic_profile)
                 error(R.drawable.ic_profile)
@@ -72,7 +72,7 @@ class TradeApplicationsAdapter(
             val totalValue = singleValue * app.offeredItemQuantity
             itemValue.text = "Est. Value: €%.2f".format(totalValue)
 
-            val itemUrl = item?.imageUrl?.let { "${baseUrl}api/uploads$it" }
+            val itemUrl = item?.imageUrl?.let { "${baseUrl}api/imageUploads$it" }
             itemImage.load(itemUrl) {
                 placeholder(R.drawable.ic_launcher_background)
                 error(R.drawable.ic_launcher_background)

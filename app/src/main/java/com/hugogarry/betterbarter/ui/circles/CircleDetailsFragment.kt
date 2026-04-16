@@ -165,7 +165,7 @@ class CircleDetailsFragment : Fragment() {
                     val currentApiUrl = SessionManager.getServerUrl()
                     val baseUrl = currentApiUrl.removeSuffix("api/")
                     val path = circle.imageUrl?.removePrefix("/")
-                    val fullImageUrl = path?.let { "${baseUrl}api/uploads/$it" }
+                    val fullImageUrl = path?.let { "${baseUrl}api/imageUploads/$it" }
 
                     headerImageView.load(fullImageUrl) {
                         crossfade(true)

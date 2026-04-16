@@ -156,7 +156,7 @@ class ProfileFragment : Fragment() {
                 itemsAdapter.submitList(state.items)
 
                 // Toggle empty inventory state
-                val isEmpty = state.items.isNullOrEmpty()
+                val isEmpty = state.items.isEmpty()
                 layoutEmptyInventory.isVisible = isEmpty
                 recyclerView.isVisible = !isEmpty
 
@@ -184,7 +184,7 @@ class ProfileFragment : Fragment() {
         // Use SessionManager for URL
         val currentApiUrl = SessionManager.getServerUrl()
         val baseUrl = currentApiUrl.removeSuffix("api/")
-        val fullImageUrl = user.profilePictureUrl?.let { "${baseUrl}api/uploads$it" }
+        val fullImageUrl = user.profilePictureUrl?.let { "${baseUrl}api/imageUploads$it" }
 
         profileImageView.load(fullImageUrl) {
             placeholder(R.drawable.ic_profile)
