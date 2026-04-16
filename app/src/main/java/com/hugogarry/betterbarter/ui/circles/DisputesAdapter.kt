@@ -41,12 +41,9 @@ class DisputesAdapter(private val onClick: (Dispute) -> Unit) :
 
             // Determine who reported the dispute based on IDs
             val isProposerReporter = dispute.trade?.proposerId == dispute.reporterId
-
-            // Extract the whole User object from the nested Trade object
             val reporter = if (isProposerReporter) dispute.trade.proposer else dispute.trade?.recipient
             val otherParty = if (isProposerReporter) dispute.trade.recipient else dispute.trade?.proposer
 
-            // Set Data
             textReporterName.text = reporter?.username ?: "Reporter"
             textOtherPartyName.text = otherParty?.username ?: "Other Party"
             textReason.text = dispute.description
@@ -68,7 +65,18 @@ class DisputesAdapter(private val onClick: (Dispute) -> Unit) :
                 transformations(CircleCropTransformation())
             }
 
-            itemView.setOnClickListener { onClick(dispute) }
+            // Logic to disable interaction for resolved disputes
+            val isResolved = dispute.status.lowercase() == "resolved"
+
+            if (isResolved) {
+                itemView.alpha = 0.6f // Visual indication that it is closed
+                itemView.setOnClickListener(null)
+                itemView.isClickable = false
+            } else {
+                itemView.alpha = 1.0f
+                itemView.setOnClickListener { onClick(dispute) }
+                itemView.isClickable = true
+            }
         }
     }
 

@@ -55,7 +55,6 @@ class DisputeRepository(private val apiService: ApiService) {
         }
     }
 
-    // Now returns Resource<Unit> because we ignore the response body
     suspend fun createDispute(request: CreateDisputeRequest): Resource<Unit> {
         return withContext(Dispatchers.IO) {
             try {

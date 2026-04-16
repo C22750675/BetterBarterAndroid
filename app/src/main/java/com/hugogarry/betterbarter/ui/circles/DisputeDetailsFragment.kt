@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -12,8 +13,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.textfield.TextInputLayout
 import com.hugogarry.betterbarter.R
 import com.hugogarry.betterbarter.data.model.Dispute
+import com.hugogarry.betterbarter.data.model.DisputeSeverity
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -25,6 +28,17 @@ class DisputeDetailsFragment : Fragment() {
 
     private var currentDispute: Dispute? = null
 
+    private lateinit var textReason: TextView
+    private lateinit var radioInitiator: RadioButton
+    private lateinit var radioRespondent: RadioButton
+    private lateinit var radioGroup: RadioGroup
+    private lateinit var spinnerSeverity: Spinner
+    private lateinit var editNote: EditText
+    private lateinit var inputLayoutNote: TextInputLayout
+    private lateinit var errorTextView: TextView
+    private lateinit var btnResolve: Button
+    private lateinit var progressBar: View
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_dispute_details, container, false)
     }
@@ -35,36 +49,28 @@ class DisputeDetailsFragment : Fragment() {
         val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbarDisputeDetails)
         NavigationUI.setupWithNavController(toolbar, findNavController())
 
-        val textReason = view.findViewById<TextView>(R.id.textDisputeReason)
+        textReason = view.findViewById(R.id.textDisputeReason)
         val btnGoToChat = view.findViewById<Button>(R.id.btnGoToChat)
-        val radioInitiator = view.findViewById<RadioButton>(R.id.radioInitiator)
-        val radioRespondent = view.findViewById<RadioButton>(R.id.radioRespondent)
-        val spinnerSeverity = view.findViewById<Spinner>(R.id.spinnerSeverity)
-        val editNote = view.findViewById<EditText>(R.id.editResolutionNote)
-        val btnResolve = view.findViewById<Button>(R.id.btnResolve)
+        radioInitiator = view.findViewById(R.id.radioInitiator)
+        radioRespondent = view.findViewById(R.id.radioRespondent)
+        radioGroup = view.findViewById(R.id.radioGroupCulprit)
+        spinnerSeverity = view.findViewById(R.id.spinnerSeverity)
+        editNote = view.findViewById(R.id.editResolutionNote)
+        inputLayoutNote = view.findViewById(R.id.textInputLayoutNote)
+        errorTextView = view.findViewById(R.id.textViewErrorDetails)
+        btnResolve = view.findViewById(R.id.btnResolve)
+        progressBar = view.findViewById(R.id.progressBarDetails)
 
-        // Fetch the dispute details using the nav argument
+        val severityOptions = DisputeSeverity.entries.map {
+            it.name.lowercase().replaceFirstChar { c -> c.uppercase() }
+        }
+        val spinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, severityOptions)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerSeverity.adapter = spinnerAdapter
+
         viewModel.getDispute(args.disputeId)
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.disputeDetails.collectLatest { resource ->
-                if (resource is Resource.Success) {
-                    currentDispute = resource.data
-                    textReason.text = currentDispute?.description
-
-                    // Determine reporter identity dynamically from the nested trade object
-                    val isProposerReporter = currentDispute?.trade?.proposerId == currentDispute?.reporterId
-
-                    val reporterName = if (isProposerReporter) currentDispute?.trade?.proposer?.username else currentDispute?.trade?.recipient?.username
-                    val otherPartyName = if (isProposerReporter) currentDispute?.trade?.recipient?.username else currentDispute?.trade?.proposer?.username
-
-                    radioInitiator.text = "Reporter: ${reporterName ?: "Unknown"}"
-                    radioRespondent.text = "Other Party: ${otherPartyName ?: "Unknown"}"
-                } else if (resource is Resource.Error) {
-                    Toast.makeText(context, resource.message, Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+        observeViewModel()
 
         btnGoToChat.setOnClickListener {
             currentDispute?.tradeId?.let { tradeId ->
@@ -74,31 +80,126 @@ class DisputeDetailsFragment : Fragment() {
         }
 
         btnResolve.setOnClickListener {
-            val isProposerReporter = currentDispute?.trade?.proposerId == currentDispute?.reporterId
+            if (validateForm()) {
+                val isProposerReporter = currentDispute?.trade?.proposerId == currentDispute?.reporterId
+                val reporterId = currentDispute?.reporterId
+                val otherPartyId = if (isProposerReporter) currentDispute?.trade?.recipientId else currentDispute?.trade?.proposerId
 
-            val reporterId = currentDispute?.reporterId
-            val otherPartyId = if (isProposerReporter) currentDispute?.trade?.recipientId else currentDispute?.trade?.proposerId
+                val culpritId = if (radioInitiator.isChecked) reporterId else otherPartyId
+                val selectedSeverity = DisputeSeverity.entries[spinnerSeverity.selectedItemPosition]
+                val note = editNote.text.toString().trim()
 
-            val culpritId = if (radioInitiator.isChecked) reporterId else otherPartyId
-            val severity = spinnerSeverity.selectedItem.toString().uppercase()
-            val note = editNote.text.toString()
+                if (culpritId != null && currentDispute != null) {
+                    viewModel.resolveDispute(currentDispute!!.id, culpritId, selectedSeverity, note)
+                }
+            }
+        }
+    }
 
-            if (culpritId != null && currentDispute != null) {
-                viewModel.resolveDispute(currentDispute!!.id, culpritId, severity, note)
-            } else {
-                Toast.makeText(context, "Please select a culprit.", Toast.LENGTH_SHORT).show()
+    private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.disputeDetails.collectLatest { resource ->
+                progressBar.isVisible = resource is Resource.Loading
+
+                if (resource is Resource.Success) {
+                    // FIX: Safely handle the nullable data from the resource
+                    resource.data?.let { data ->
+                        currentDispute = data
+                        bindDisputeData(data)
+                    }
+                } else if (resource is Resource.Error) {
+                    errorTextView.text = resource.message
+                    errorTextView.isVisible = true
+                }
             }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.resolveResult.collectLatest { resource ->
-                if (resource is Resource.Success) {
-                    Toast.makeText(context, "Dispute Resolved!", Toast.LENGTH_SHORT).show()
-                    findNavController().navigateUp()
-                } else if (resource is Resource.Error) {
-                    Toast.makeText(context, resource.message, Toast.LENGTH_SHORT).show()
+                progressBar.isVisible = resource is Resource.Loading
+                btnResolve.isEnabled = resource !is Resource.Loading
+
+                when (resource) {
+                    is Resource.Success -> {
+                        Toast.makeText(context, "Dispute resolved successfully.", Toast.LENGTH_SHORT).show()
+                        findNavController().navigateUp()
+                    }
+                    is Resource.Error -> {
+                        errorTextView.text = resource.message
+                        errorTextView.isVisible = true
+                    }
+                    else -> {}
                 }
             }
         }
+    }
+
+    private fun bindDisputeData(dispute: Dispute) {
+        textReason.text = dispute.description
+
+        val isProposerReporter = dispute.trade?.proposerId == dispute.reporterId
+        val reporterName = if (isProposerReporter) dispute.trade.proposer?.username else dispute.trade?.recipient?.username
+        val otherPartyName = if (isProposerReporter) dispute.trade.recipient?.username else dispute.trade?.proposer?.username
+
+        radioInitiator.text = "Reporter: ${reporterName ?: "Unknown"}"
+        radioRespondent.text = "Other Party: ${otherPartyName ?: "Unknown"}"
+
+        // Handle Resolved State
+        if (dispute.status.lowercase() == "resolved") {
+            disableFormForResolvedDispute(dispute)
+        }
+    }
+
+    private fun disableFormForResolvedDispute(dispute: Dispute) {
+        // Disable all inputs
+        radioInitiator.isEnabled = false
+        radioRespondent.isEnabled = false
+        spinnerSeverity.isEnabled = false
+        editNote.isEnabled = false
+
+        // Hide the action button
+        btnResolve.isVisible = false
+
+        val reporterId = dispute.reporterId
+
+        if (dispute.culpritId == reporterId) {
+            radioInitiator.isChecked = true
+        } else {
+            radioRespondent.isChecked = true
+        }
+
+        // Set spinner to correct severity
+        dispute.severity?.let { severityStr ->
+            val index = DisputeSeverity.entries.toTypedArray().indexOfFirst {
+                it.name.equals(severityStr, ignoreCase = true)
+            }
+            if (index != -1) spinnerSeverity.setSelection(index)
+        }
+
+        // Update error text view to act as a "Resolution Status" banner
+        errorTextView.text = "This dispute was resolved on ${dispute.resolvedAt?.take(10) ?: "Date Unknown"}"
+        errorTextView.setTextColor(requireContext().getColor(android.R.color.darker_gray))
+        errorTextView.isVisible = true
+
+        inputLayoutNote.hint = "Resolution Note (Read Only)"
+    }
+
+    private fun validateForm(): Boolean {
+        var isValid = true
+        errorTextView.isVisible = false
+        inputLayoutNote.error = null
+
+        if (radioGroup.checkedRadioButtonId == -1) {
+            errorTextView.text = "Please select the party at fault."
+            errorTextView.isVisible = true
+            isValid = false
+        }
+
+        if (editNote.text.toString().trim().isEmpty()) {
+            inputLayoutNote.error = "Internal resolution note is required."
+            isValid = false
+        }
+
+        return isValid
     }
 }

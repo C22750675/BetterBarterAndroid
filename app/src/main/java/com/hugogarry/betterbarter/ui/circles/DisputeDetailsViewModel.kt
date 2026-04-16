@@ -3,6 +3,7 @@ package com.hugogarry.betterbarter.ui.circles
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hugogarry.betterbarter.data.model.Dispute
+import com.hugogarry.betterbarter.data.model.DisputeSeverity
 import com.hugogarry.betterbarter.data.model.ResolveDisputeRequest
 import com.hugogarry.betterbarter.data.remote.ApiClient
 import com.hugogarry.betterbarter.data.repository.DisputeRepository
@@ -28,7 +29,7 @@ class DisputeDetailsViewModel(
         }
     }
 
-    fun resolveDispute(id: String, culpritId: String, severity: String, note: String) {
+    fun resolveDispute(id: String, culpritId: String, severity: DisputeSeverity, note: String) {
         viewModelScope.launch {
             _resolveResult.value = Resource.Loading()
             val request = ResolveDisputeRequest(culpritId, severity, note)
