@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-
 class ApplyTradeViewModel(
     private val itemRepository: ItemRepository = ItemRepository(ApiClient.apiService),
     private val tradeRepository: TradeRepository = TradeRepository(ApiClient.apiService)
@@ -48,7 +47,13 @@ class ApplyTradeViewModel(
         }
     }
 
-    fun submitApplication(tradeId: String, selectedItem: Item?, quantityText: String, message: String) {
+    fun submitApplication(
+        tradeId: String,
+        selectedItem: Item?,
+        quantityText: String,
+        message: String,
+        existingApplication: TradeApplication? = null
+    ) {
         if (selectedItem == null) {
             _applyState.value = Resource.Error("Please select an item to offer.")
             return
@@ -60,8 +65,16 @@ class ApplyTradeViewModel(
             return
         }
 
-        if (quantity > selectedItem.stock) {
-            _applyState.value = Resource.Error("You only have ${selectedItem.stock} of this item.")
+        // Calculate total available stock:
+        // If editing the same item, add the currently escrowed quantity back to the visible stock.
+        val maxStock = if (existingApplication != null && selectedItem.id == existingApplication.offeredItemId) {
+            selectedItem.stock + existingApplication.offeredItemQuantity
+        } else {
+            selectedItem.stock
+        }
+
+        if (quantity > maxStock) {
+            _applyState.value = Resource.Error("You only have $maxStock of this item available.")
             return
         }
 

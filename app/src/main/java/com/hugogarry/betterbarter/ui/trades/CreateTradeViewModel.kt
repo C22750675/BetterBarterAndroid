@@ -47,7 +47,7 @@ class CreateTradeViewModel(
     }
 
     fun createTrade(selectedItem: Item?, circleId: String, quantityText: String, description: String) {
-        if (!validate(selectedItem, quantityText)) return
+        if (!validate(selectedItem, quantityText, isEditMode = false)) return
 
         viewModelScope.launch {
             _actionState.value = Resource.Loading()
@@ -62,7 +62,7 @@ class CreateTradeViewModel(
     }
 
     fun updateTrade(tradeId: String, selectedItem: Item?, quantityText: String, description: String) {
-        if (!validate(selectedItem, quantityText)) return
+        if (!validate(selectedItem, quantityText, isEditMode = true)) return
 
         viewModelScope.launch {
             _actionState.value = Resource.Loading()
@@ -75,7 +75,7 @@ class CreateTradeViewModel(
         }
     }
 
-    private fun validate(selectedItem: Item?, quantityText: String): Boolean {
+    private fun validate(selectedItem: Item?, quantityText: String, isEditMode: Boolean): Boolean {
         if (selectedItem == null) {
             _actionState.value = Resource.Error("Please select an item.")
             return false
@@ -85,8 +85,18 @@ class CreateTradeViewModel(
             _actionState.value = Resource.Error("Enter a valid quantity.")
             return false
         }
-        if (q > selectedItem.stock) {
-            _actionState.value = Resource.Error("Insufficient stock.")
+
+        // Calculate total available stock:
+        // If editing the same item, add the currently escrowed quantity back to the visible stock.
+        val existingTradeData = _existingTrade.value.data
+        val maxStock = if (isEditMode && existingTradeData != null && selectedItem.id == existingTradeData.offeredItem?.id) {
+            selectedItem.stock + existingTradeData.offeredItemQuantity
+        } else {
+            selectedItem.stock
+        }
+
+        if (q > maxStock) {
+            _actionState.value = Resource.Error("You only have $maxStock of this item available.")
             return false
         }
         return true

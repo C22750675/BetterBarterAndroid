@@ -94,7 +94,8 @@ class ApplyTradeFragment : Fragment() {
                 tradeId = args.tradeId,
                 selectedItem = selectedItem,
                 quantityText = quantityEditText.text.toString(),
-                message = messageEditText.text.toString().trim()
+                message = messageEditText.text.toString().trim(),
+                existingApplication = args.existingApplication
             )
         }
 
