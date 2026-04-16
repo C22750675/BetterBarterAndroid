@@ -43,21 +43,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/textViewCreateTradeError"
-                style="@style/TextAppearance.Material3.BodyMedium"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:gravity="center"
-                android:textColor="?attr/colorError"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Please check your connection and try again."
-                tools:visibility="visible" />
-
             <!-- Form Card Container -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardForm"
@@ -65,7 +50,7 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
-                app:layout_constraintTop_toBottomOf="@id/textViewCreateTradeError"
+                app:layout_constraintTop_toTopOf="parent"
                 app:strokeColor="?attr/colorOutlineVariant"
                 app:strokeWidth="1dp">
 
@@ -137,17 +122,32 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <TextView
+                android:id="@+id/textViewCreateTradeError"
+                style="@style/TextAppearance.Material3.BodyMedium"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:textColor="?attr/colorError"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cardForm"
+                tools:text="Please check your connection and try again."
+                tools:visibility="visible" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonSubmitTrade"
                 style="@style/Widget.Material3.Button"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="8dp"
                 android:text="Submit Trade Proposal"
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 app:cornerRadius="16dp"
-                app:layout_constraintTop_toBottomOf="@id/cardForm" />
+                app:layout_constraintTop_toBottomOf="@id/textViewCreateTradeError" />
 
             <TextView
                 android:layout_width="match_parent"
