@@ -219,6 +219,8 @@ class TradeDetailsFragment : Fragment() {
         ratingSection.isVisible = (trade.status == TradeStatus.completed && !hasRated)
 
         // Button Logic
+        actionButton.isVisible = true // Reset visibility
+
         if (trade.proposerId == currentUserId) {
             // Check if trade is already accepted/active/completed
             if (trade.status == TradeStatus.accepted || trade.status == TradeStatus.completed) {
@@ -236,26 +238,42 @@ class TradeDetailsFragment : Fragment() {
                 }
             }
         } else {
-            actionButton.text = if (trade.myApplication != null) "Edit Trade Application" else "Apply for Trade"
-
-            // Disable apply button if trade is no longer pending
-            if (trade.status != TradeStatus.pending) {
-                actionButton.isVisible = false
-            } else {
-                actionButton.isVisible = true
-                actionButton.setOnClickListener {
-                    // Always check the latest membership status from the ViewModel state
-                    // This ensures that if the user joins while navigating, we pick it up.
-                    if (viewModel.uiState.value.isMember) {
-                        val action = TradeDetailsFragmentDirections
-                            .actionTradeDetailsFragmentToApplyTradeFragment(
-                                tradeId = trade.id,
-                                existingApplication = trade.myApplication
-                            )
+            // User is not the proposer
+            if (trade.status == TradeStatus.accepted || trade.status == TradeStatus.completed) {
+                // Display Go to Chat button if this user is the accepted recipient
+                if (trade.recipient?.id == currentUserId) {
+                    actionButton.isVisible = true
+                    actionButton.text = "Go to Chat"
+                    actionButton.setOnClickListener {
+                        val action = TradeDetailsFragmentDirections.actionTradeDetailsFragmentToChatFragment(trade.id)
                         findNavController().navigate(action)
-                    } else {
-                        // User is not a member of the circle this trade belongs to
-                        Toast.makeText(context, "Join this circle to propose trades!", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    // Trade is closed and this user is not the recipient
+                    actionButton.isVisible = false
+                }
+            } else {
+                actionButton.text = if (trade.myApplication != null) "Edit Trade Application" else "Apply for Trade"
+
+                // Disable apply button if trade is no longer pending
+                if (trade.status != TradeStatus.pending) {
+                    actionButton.isVisible = false
+                } else {
+                    actionButton.isVisible = true
+                    actionButton.setOnClickListener {
+                        // Always check the latest membership status from the ViewModel state
+                        // This ensures that if the user joins while navigating, we pick it up.
+                        if (viewModel.uiState.value.isMember) {
+                            val action = TradeDetailsFragmentDirections
+                                .actionTradeDetailsFragmentToApplyTradeFragment(
+                                    tradeId = trade.id,
+                                    existingApplication = trade.myApplication
+                                )
+                            findNavController().navigate(action)
+                        } else {
+                            // User is not a member of the circle this trade belongs to
+                            Toast.makeText(context, "Join this circle to propose trades!", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
