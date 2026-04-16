@@ -19,7 +19,6 @@
             android:id="@+id/toolbarChat"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:menu="@menu/menu_chat"
             app:title="Chat"
             app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge" />
 
@@ -129,6 +128,7 @@
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:hint="Type a message..."
+                android:importantForAutofill="no"
                 android:inputType="textCapSentences|textMultiLine"
                 android:maxLines="5"
                 android:minHeight="48dp"

@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.hugogarry.betterbarter.R
-import com.hugogarry.betterbarter.data.model.TradeStatus
 import com.hugogarry.betterbarter.util.Resource
 import com.hugogarry.betterbarter.util.SessionManager
 import kotlinx.coroutines.flow.collectLatest
@@ -53,17 +52,6 @@ class ChatFragment : Fragment() {
 
         val toolbar = view.findViewById<Toolbar>(R.id.toolbarChat)
         NavigationUI.setupWithNavController(toolbar, findNavController())
-
-        // Connect menu item directly to ViewModel action
-        toolbar.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.action_complete_trade -> {
-                    viewModel.completeTrade(args.tradeId)
-                    true
-                }
-                else -> false
-            }
-        }
 
         recyclerView = view.findViewById(R.id.recyclerViewMessages)
         messageInput = view.findViewById(R.id.editTextMessage)
@@ -103,7 +91,6 @@ class ChatFragment : Fragment() {
 
         observeMessages()
         observeTradeDetails(toolbar)
-        observeTradeCompletion()
     }
 
     private fun observeMessages() {
@@ -146,32 +133,11 @@ class ChatFragment : Fragment() {
                     tradeItemName.text = "${item?.name ?: "Unknown Item"} (${trade.offeredItemQuantity})"
                     tradeStatus.text = "Status: ${trade.status.name.uppercase()}"
 
-                    // Only show the "Complete Trade" menu item if trade is currently accepted
-                    val completeTradeMenuItem = toolbar.menu.findItem(R.id.action_complete_trade)
-                    completeTradeMenuItem?.isVisible = (trade.status == TradeStatus.accepted)
-
                     val itemUrl = item?.imageUrl?.let { "${baseUrl}api/uploads$it" }
                     tradeItemImage.load(itemUrl) {
                         placeholder(R.drawable.ic_launcher_background)
                         error(R.drawable.ic_launcher_background)
                     }
-                }
-            }
-        }
-    }
-
-    // Observer for trade completion action
-    private fun observeTradeCompletion() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.completeTradeState.collectLatest { state ->
-                when (state) {
-                    is Resource.Success -> {
-                        Toast.makeText(context, "Trade marked as completed", Toast.LENGTH_SHORT).show()
-                    }
-                    is Resource.Error -> {
-                        Toast.makeText(context, state.message ?: "Failed to complete trade", Toast.LENGTH_LONG).show()
-                    }
-                    else -> {}
                 }
             }
         }
