@@ -2,7 +2,6 @@ package com.hugogarry.betterbarter.ui.trades
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hugogarry.betterbarter.data.model.CreateRatingRequest
 import com.hugogarry.betterbarter.data.model.Trade
 import com.hugogarry.betterbarter.data.model.TradeStatus
 import com.hugogarry.betterbarter.data.model.UpdateTradeStatusRequest
@@ -45,9 +44,6 @@ class TradesViewModel(
         }
     }
 
-    /**
-     * ADDED: Logic to delete a trade proposal from the user's trade list.
-     */
     fun deleteTrade(tradeId: String) {
         viewModelScope.launch {
             _actionStatus.value = Resource.Loading()
@@ -61,23 +57,15 @@ class TradesViewModel(
         }
     }
 
-    fun submitRating(trade: Trade, score: Int, comment: String) {
-        viewModelScope.launch {
-            _actionStatus.value = Resource.Loading()
-            val request = CreateRatingRequest(score, comment)
-            val result = tradeRepository.rateTrade(trade.id, request)
-
-            if (result is Resource.Success) {
-                _actionStatus.value = Resource.Success("Review Submitted!")
-                fetchMyTrades()
-            } else {
-                _actionStatus.value = Resource.Error(result.message ?: "Error")
-            }
-        }
-    }
-
     // Reset status message after showing Toast
     fun clearStatus() {
         _actionStatus.value = Resource.Idle()
+    }
+
+    // Clear list error state to prevent queued Toasts on back navigation
+    fun clearError() {
+        if (_trades.value is Resource.Error) {
+            _trades.value = Resource.Idle()
+        }
     }
 }

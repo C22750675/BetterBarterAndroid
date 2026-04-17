@@ -143,6 +143,7 @@ class MapFragment : Fragment() {
                     }
                     is Resource.Error -> {
                         Toast.makeText(context, resource.message, Toast.LENGTH_SHORT).show()
+                        viewModel.clearError() // Tell the ViewModel to forget the error so it doesn't replay
                     }
                     is Resource.Loading -> { }
                     is Resource.Idle -> { }
@@ -193,7 +194,7 @@ class MapFragment : Fragment() {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
                     val userLocation = GeoPoint(location.latitude, location.longitude)
-                    val targetZoom = 15.0
+                    val targetZoom = 17.0
 
                     updateMyLocationMarker(userLocation)
                     mapView.controller.animateTo(userLocation, targetZoom, 1000L)

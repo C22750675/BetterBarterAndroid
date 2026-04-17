@@ -46,7 +46,15 @@ class ChatViewModel(
             if (result is Resource.Success) {
                 // Refresh messages or append locally
                 fetchMessages(tradeId)
+            } else if (result is Resource.Error) {
+                _messages.value = Resource.Error(result.message ?: "Failed to send message")
             }
+        }
+    }
+
+    fun clearError() {
+        if (_messages.value is Resource.Error) {
+            _messages.value = Resource.Idle()
         }
     }
 }

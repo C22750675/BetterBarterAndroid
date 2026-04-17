@@ -38,4 +38,14 @@ class MapViewModel(
             _circlesState.value = circleRepository.findNearbyCircles(latitude, longitude)
         }
     }
+
+    /**
+     * Clears the error state so it doesn't replay when returning to the fragment
+     * after a logout or configuration change.
+     */
+    fun clearError() {
+        if (_circlesState.value is Resource.Error) {
+            _circlesState.value = Resource.Idle()
+        }
+    }
 }

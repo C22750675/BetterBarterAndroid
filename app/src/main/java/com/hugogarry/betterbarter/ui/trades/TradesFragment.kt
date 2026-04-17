@@ -109,6 +109,7 @@ class TradesFragment : Fragment() {
                         emptyStateLayout.isVisible = true
                         recyclerView.isVisible = false
                         Toast.makeText(context, resource.message ?: "Failed to load trades", Toast.LENGTH_SHORT).show()
+                        viewModel.clearError() // Stop Toast replaying
                     }
                     is Resource.Loading, is Resource.Idle -> {
                         emptyStateLayout.isVisible = false

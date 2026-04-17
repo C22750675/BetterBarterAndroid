@@ -104,6 +104,7 @@ class ChatFragment : Fragment() {
                     }
                 } else if (resource is Resource.Error) {
                     Toast.makeText(context, resource.message, Toast.LENGTH_SHORT).show()
+                    viewModel.clearError() // Clear the error state
                 }
             }
         }
