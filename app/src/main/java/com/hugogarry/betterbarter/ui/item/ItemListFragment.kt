@@ -60,8 +60,7 @@ class ItemListFragment : Fragment() {
                 // Handle specific data updates within the when block
                 when (resource) {
                     is Resource.Success -> {
-                        // The list is already visible, just submit the data
-                        // to your adapter here.
+
                     }
 
                     is Resource.Error -> {

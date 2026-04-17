@@ -10,7 +10,7 @@ class AuthInterceptor : Interceptor {
         // Get the original request from the chain
         val originalRequest = chain.request()
 
-        // Get the token from our SessionManager
+        // Get the token from the SessionManager
         val token = SessionManager.getToken()
 
         // If the token exists, add the Authorization header
@@ -32,14 +32,10 @@ class AuthInterceptor : Interceptor {
         if (response.code == 401 && !isLoginRequest) {
             // This is a "session expired" error.
             // Notify the SessionManager.
-            // This needs to run on the main thread for the StateFlow
-            // (though SessionManager itself is a singleton object, so this is safe)
             SessionManager.notifySessionExpired()
         }
 
         // Return the response, even if it's a 401.
-        // The repository layer (e.g., Resource.Error) will still handle the
-        // individual failed request. This just handles the global navigation.
         return response
     }
 }
