@@ -1,7 +1,6 @@
 package com.hugogarry.betterbarter.ui.map
 
 import android.Manifest
-import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -40,8 +39,6 @@ class MapFragment : Fragment() {
 
     // User location overlays
     private var myLocationMarker: Marker? = null
-    private var pulsePolygon: Polygon? = null
-    private var pulseAnimator: ValueAnimator? = null
 
     private var circlePolygons = mutableListOf<Polygon>()
 
@@ -196,7 +193,7 @@ class MapFragment : Fragment() {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
                     val userLocation = GeoPoint(location.latitude, location.longitude)
-                    val targetZoom = 17.0
+                    val targetZoom = 15.0
 
                     updateMyLocationMarker(userLocation)
                     mapView.controller.animateTo(userLocation, targetZoom, 1000L)
@@ -222,18 +219,9 @@ class MapFragment : Fragment() {
                 icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_user_location_dot)
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
             }
-            pulsePolygon = Polygon(mapView).apply {
-                // Initialize points BEFORE adding to the map to prevent NullPointerException
-                points = Polygon.pointsAsCircle(position, 1.0)
-                fillColor = Color.argb(50, 200, 200, 100)
-                strokeWidth = 0f
-            }
-            mapView.overlays.add(pulsePolygon)
             mapView.overlays.add(myLocationMarker)
-        } else {
-            // Safely update the points if it already exists
-            pulsePolygon?.points = Polygon.pointsAsCircle(position, 1.0)
         }
+
         myLocationMarker?.position = position
         mapView.invalidate()
     }
@@ -248,7 +236,6 @@ class MapFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mapView.onResume()
-        pulseAnimator?.start()
     }
 
     override fun onPause() {
@@ -257,6 +244,5 @@ class MapFragment : Fragment() {
         viewModel.lastMapZoom = mapView.zoomLevelDouble
 
         mapView.onPause()
-        pulseAnimator?.cancel()
     }
 }
