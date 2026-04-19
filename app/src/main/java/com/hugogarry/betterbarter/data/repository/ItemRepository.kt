@@ -7,6 +7,8 @@ import com.hugogarry.betterbarter.data.remote.ApiService
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 
 class ItemRepository(private val apiService: ApiService) {
 
@@ -16,7 +18,8 @@ class ItemRepository(private val apiService: ApiService) {
             if (response.isSuccessful) {
                 Resource.Success(response.body() ?: emptyList())
             } else {
-                Resource.Error(response.message() ?: "Failed to fetch items")
+                val errorMsg = parseErrorMessage(response.errorBody()?.string()) ?: response.message() ?: "Failed to fetch items"
+                Resource.Error(errorMsg)
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -29,7 +32,8 @@ class ItemRepository(private val apiService: ApiService) {
             if (response.isSuccessful) {
                 Resource.Success(response.body() ?: emptyList())
             } else {
-                Resource.Error(response.message() ?: "Failed to fetch your items")
+                val errorMsg = parseErrorMessage(response.errorBody()?.string()) ?: response.message() ?: "Failed to fetch your items"
+                Resource.Error(errorMsg)
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -42,7 +46,9 @@ class ItemRepository(private val apiService: ApiService) {
             if (response.isSuccessful && response.body() != null) {
                 Resource.Success(response.body()!!)
             } else {
-                Resource.Error(response.message() ?: "Failed to create item")
+                // Parse the specific error body returned by the API
+                val errorMsg = parseErrorMessage(response.errorBody()?.string()) ?: response.message() ?: "Failed to create item"
+                Resource.Error(errorMsg)
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
@@ -55,10 +61,40 @@ class ItemRepository(private val apiService: ApiService) {
             if (response.isSuccessful) {
                 Resource.Success(response.body() ?: emptyList())
             } else {
-                Resource.Error(response.message() ?: "Failed to fetch categories")
+                val errorMsg = parseErrorMessage(response.errorBody()?.string()) ?: response.message() ?: "Failed to fetch categories"
+                Resource.Error(errorMsg)
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")
+        }
+    }
+
+    /**
+     * Parses the JSON error body from the backend to extract a readable message.
+     * Handles both single string messages and arrays of validation messages.
+     */
+    private fun parseErrorMessage(errorBody: String?): String? {
+        if (errorBody.isNullOrBlank()) return null
+        return try {
+            val jsonObject = JSONObject(errorBody)
+            if (jsonObject.has("message")) {
+                val messageObj = jsonObject.get("message")
+                if (messageObj is JSONArray) {
+                    // If it's an array of errors (like ClassValidator returns), join them into a list
+                    val messages = mutableListOf<String>()
+                    for (i in 0 until messageObj.length()) {
+                        messages.add(messageObj.getString(i))
+                    }
+                    messages.joinToString("\n")
+                } else {
+                    // If it's just a regular string message
+                    jsonObject.getString("message")
+                }
+            } else {
+                null
+            }
+        } catch (_: Exception) {
+            null // Fallback to default response.message() if parsing fails
         }
     }
 }
