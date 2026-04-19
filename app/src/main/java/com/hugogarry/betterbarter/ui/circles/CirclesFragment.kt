@@ -112,7 +112,19 @@ class CirclesFragment : Fragment() {
         // Nearby Circles
         nearbyCirclesAdapter = CirclesAdapter(showJoinButton = true)
         nearbyCirclesAdapter.onJoinClick = { circle ->
-            viewModel.joinCircle(circle)
+            @SuppressLint("MissingPermission")
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    if (location != null) {
+                        viewModel.joinCircle(circle, location.latitude, location.longitude)
+                    } else {
+                        Toast.makeText(context, "Location unavailable. Cannot join circle.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                Toast.makeText(context, "Location permission required to join.", Toast.LENGTH_SHORT).show()
+                checkLocationPermission()
+            }
         }
         // Allow clicking on a nearby circle to see its details before joining
         nearbyCirclesAdapter.onItemClick = { circle ->

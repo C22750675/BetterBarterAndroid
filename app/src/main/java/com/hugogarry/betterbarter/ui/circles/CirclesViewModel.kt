@@ -51,10 +51,10 @@ class CirclesViewModel(
         }
     }
 
-    fun joinCircle(circle: Circle) {
+    fun joinCircle(circle: Circle, lat: Double, lon: Double) {
         viewModelScope.launch {
             _joinCircleState.value = Resource.Loading()
-            val result = circleRepository.joinCircle(circle.id)
+            val result = circleRepository.joinCircle(circle.id, lat, lon)
 
             if (result is Resource.Success) {
                 _joinCircleState.value = Resource.Success("Successfully joined ${circle.name}!")

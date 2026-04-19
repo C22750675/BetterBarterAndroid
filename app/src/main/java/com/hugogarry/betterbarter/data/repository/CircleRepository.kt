@@ -2,6 +2,7 @@ package com.hugogarry.betterbarter.data.repository
 
 import com.hugogarry.betterbarter.data.model.Circle
 import com.hugogarry.betterbarter.data.model.CreateCircleRequest
+import com.hugogarry.betterbarter.data.model.JoinCircleRequest
 import com.hugogarry.betterbarter.data.remote.ApiService
 import com.hugogarry.betterbarter.util.Resource
 import kotlinx.coroutines.Dispatchers
@@ -66,13 +67,26 @@ class CircleRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun joinCircle(circleId: String): Resource<Unit> = withContext(Dispatchers.IO) {
+    suspend fun joinCircle(circleId: String, lat: Double, lon: Double): Resource<Unit> = withContext(Dispatchers.IO) {
         try {
-            val response = apiService.joinCircle(circleId)
+            val request = JoinCircleRequest(lat, lon)
+            val response = apiService.joinCircle(circleId, request)
             if (response.isSuccessful) {
                 Resource.Success(Unit)
             } else {
-                Resource.Error(response.message() ?: "Failed to join circle")
+                // Extract the detailed message from the NestJS JSON error body
+                val errorMessage = try {
+                    val errorString = response.errorBody()?.string()
+                    if (!errorString.isNullOrEmpty()) {
+                        org.json.JSONObject(errorString).getString("message")
+                    } else {
+                        response.message()
+                    }
+                } catch (_: Exception) {
+                    response.message()
+                }
+
+                Resource.Error(errorMessage ?: "Failed to join circle")
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "An error occurred")

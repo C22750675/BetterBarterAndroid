@@ -51,7 +51,10 @@ interface ApiService {
     ): Response<List<Circle>>
 
     @POST("circles/{id}/join")
-    suspend fun joinCircle(@Path("id") circleId: String): Response<Unit>
+    suspend fun joinCircle(
+        @Path("id") circleId: String,
+        @Body request: JoinCircleRequest
+    ): Response<Unit>
 
     // Trades
     @POST("trades")
